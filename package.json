@@ -1,0 +1,91 @@
+{
+  "name": "hyperact",
+  "version": "1.0.0",
+  "description": "Ultra-fast, minimal drag/resize library. The smallest and fastest interactable elements library.",
+  "type": "module",
+  "main": "dist/hyperact.cjs",
+  "module": "dist/hyperact.js",
+  "types": "dist/hyperact.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/hyperact.d.ts",
+      "import": "./dist/hyperact.js",
+      "require": "./dist/hyperact.cjs"
+    },
+    "./nano": {
+      "types": "./dist/hyperact-nano.d.ts",
+      "import": "./dist/hyperact-nano.js",
+      "require": "./dist/hyperact-nano.cjs"
+    },
+    "./drag": {
+      "types": "./dist/hyperact-drag.d.ts",
+      "import": "./dist/hyperact-drag.js",
+      "require": "./dist/hyperact-drag.cjs"
+    },
+    "./resize": {
+      "types": "./dist/hyperact-resize.d.ts",
+      "import": "./dist/hyperact-resize.js",
+      "require": "./dist/hyperact-resize.cjs"
+    },
+    "./react": {
+      "types": "./dist/hyperact-react.d.ts",
+      "import": "./dist/hyperact-react.js",
+      "require": "./dist/hyperact-react.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "demo": "vite",
+    "bench": "vitest bench",
+    "size": "pnpm build && ls -lah dist/"
+  },
+  "keywords": [
+    "drag",
+    "drop",
+    "resize",
+    "draggable",
+    "resizable",
+    "interact",
+    "touch",
+    "pointer",
+    "minimal",
+    "fast",
+    "tiny"
+  ],
+  "author": "salamaashoush@gmail.com",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.4",
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@eslint/js": "^9.30.1",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^20.11.5",
+    "@vitest/coverage-v8": "^1.2.1",
+    "eslint": "^9.30.1",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.5.3",
+    "tslib": "^2.6.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.35.1",
+    "vite": "^6.2.0",
+    "vitest": "^1.2.1"
+  }
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bounds Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            width: 600px;
+            height: 400px;
+            background: white;
+            border: 2px solid #333;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .draggable {
+            width: 100px;
+            height: 100px;
+            background: #3498db;
+            position: absolute;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        #debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        .measurement {
+            position: absolute;
+            pointer-events: none;
+            font-size: 11px;
+            background: rgba(255,255,0,0.8);
+            padding: 2px 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bounds Testing - Constraint Offset Issue</h1>
+    
+    <div class="container" id="parent">
+        <div class="draggable" id="box1">Box 1</div>
+        <div class="measurement" id="measure-top" style="top: 0; left: 50%;">Top: 0</div>
+        <div class="measurement" id="measure-left" style="left: 0; top: 50%;">Left: 0</div>
+        <div class="measurement" id="measure-right" style="right: 0; top: 50%;">Right: 0</div>
+        <div class="measurement" id="measure-bottom" style="bottom: 0; left: 50%;">Bottom: 0</div>
+    </div>
+    
+    <div id="debug">
+        <div>Parent: <span id="parent-info"></span></div>
+        <div>Element: <span id="element-info"></span></div>
+        <div>Transform: <span id="transform-info"></span></div>
+        <div>Bounds: <span id="bounds-info"></span></div>
+        <div>Position: <span id="position-info"></span></div>
+    </div>
+    
+    <script type="module">
+        import { draggable } from './src/drag.ts';
+        
+        const parent = document.getElementById('parent');
+        const box = document.getElementById('box1');
+        const debug = {
+            parent: document.getElementById('parent-info'),
+            element: document.getElementById('element-info'),
+            transform: document.getElementById('transform-info'),
+            bounds: document.getElementById('bounds-info'),
+            position: document.getElementById('position-info')
+        };
+        
+        // Update debug info
+        function updateDebug() {
+            const parentRect = parent.getBoundingClientRect();
+            const boxRect = box.getBoundingClientRect();
+            const style = window.getComputedStyle(box);
+            const transform = style.transform;
+            
+            debug.parent.textContent = `${parentRect.width}x${parentRect.height}`;
+            debug.element.textContent = `${boxRect.width}x${boxRect.height}`;
+            debug.transform.textContent = transform;
+            
+            // Calculate actual position relative to parent
+            const relativeLeft = boxRect.left - parentRect.left;
+            const relativeTop = boxRect.top - parentRect.top;
+            const relativeRight = parentRect.right - boxRect.right;
+            const relativeBottom = parentRect.bottom - boxRect.bottom;
+            
+            debug.position.textContent = `L:${relativeLeft.toFixed(1)} T:${relativeTop.toFixed(1)} R:${relativeRight.toFixed(1)} B:${relativeBottom.toFixed(1)}`;
+        }
+        
+        // Initialize draggable with parent bounds
+        const drag = draggable(box, {
+            bounds: 'parent',
+            onDragStart: (e) => {
+                console.log('Drag start', e);
+                updateDebug();
+            },
+            onDragMove: (e) => {
+                updateDebug();
+                
+                // Check if element is going out of bounds
+                const parentRect = parent.getBoundingClientRect();
+                const boxRect = box.getBoundingClientRect();
+                
+                if (boxRect.right > parentRect.right) {
+                    console.warn('Element exceeds right boundary by:', boxRect.right - parentRect.right);
+                }
+                if (boxRect.bottom > parentRect.bottom) {
+                    console.warn('Element exceeds bottom boundary by:', boxRect.bottom - parentRect.bottom);
+                }
+            },
+            onDragEnd: (e) => {
+                console.log('Drag end', e);
+                updateDebug();
+            }
+        });
+        
+        // Initial update
+        updateDebug();
+        
+        // Log initial state
+        console.log('Initial state:', {
+            parentRect: parent.getBoundingClientRect(),
+            boxRect: box.getBoundingClientRect(),
+            offsetParent: box.offsetParent,
+            offsetLeft: box.offsetLeft,
+            offsetTop: box.offsetTop
+        });
+    </script>
+</body>
+</html>
