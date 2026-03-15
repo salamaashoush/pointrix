@@ -27,31 +27,31 @@ Measured from the `dist/` output (minified with terser, gzipped):
 
 | Import path | Min | Gzip | What you get |
 |---|---|---|---|
-| `gripjs/nano` | 5.4 KB | 1.6 KB | Core pointer tracking, velocity, tap detection |
-| `gripjs/drag` | 11.9 KB | 3.3 KB | Draggable with axis, bounds, grid, momentum, modifiers |
-| `gripjs/resize` | 11.5 KB | 3.2 KB | Resizable with edges, aspect ratio, min/max, modifiers |
-| `gripjs/gesture` | 8.3 KB | 2.3 KB | Multi-touch pinch, rotate, pan |
-| `gripjs/dropzone` | 3.0 KB | 1.0 KB | Drop targets with overlap modes |
-| `gripjs/sortable` | 18.2 KB | 5.0 KB | Sortable lists with cross-container group support |
-| `gripjs/modifiers` | 8.3 KB | 2.6 KB | All modifiers (restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll) |
-| `gripjs` | 38.6 KB | 9.8 KB | Full bundle with everything |
+| `pointrix/nano` | 5.4 KB | 1.6 KB | Core pointer tracking, velocity, tap detection |
+| `pointrix/drag` | 11.9 KB | 3.3 KB | Draggable with axis, bounds, grid, momentum, modifiers |
+| `pointrix/resize` | 11.5 KB | 3.2 KB | Resizable with edges, aspect ratio, min/max, modifiers |
+| `pointrix/gesture` | 8.3 KB | 2.3 KB | Multi-touch pinch, rotate, pan |
+| `pointrix/dropzone` | 3.0 KB | 1.0 KB | Drop targets with overlap modes |
+| `pointrix/sortable` | 18.2 KB | 5.0 KB | Sortable lists with cross-container group support |
+| `pointrix/modifiers` | 8.3 KB | 2.6 KB | All modifiers (restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll) |
+| `pointrix` | 38.6 KB | 9.8 KB | Full bundle with everything |
 
 For comparison, interact.js ships approximately 140 KB minified.
 
 ## Installation
 
 ```bash
-npm install gripjs
+npm install pointrix
 # or
-pnpm add gripjs
+pnpm add pointrix
 # or
-yarn add gripjs
+yarn add pointrix
 ```
 
 ## Quick Start
 
 ```ts
-import { draggable } from 'gripjs/drag'
+import { draggable } from 'pointrix/drag'
 
 const drag = draggable('#my-element', {
   onDragMove: (e) => console.log(e.totalX, e.totalY),
@@ -149,7 +149,7 @@ if (drag.interacting) {
 ### Draggable
 
 ```ts
-import { draggable } from 'gripjs/drag'
+import { draggable } from 'pointrix/drag'
 ```
 
 #### Options
@@ -189,8 +189,8 @@ d.destroy()                    // Remove all listeners
 #### Example
 
 ```ts
-import { draggable } from 'gripjs/drag'
-import { snapGrid, inertia } from 'gripjs/modifiers'
+import { draggable } from 'pointrix/drag'
+import { snapGrid, inertia } from 'pointrix/modifiers'
 
 draggable('#card', {
   bounds: 'parent',
@@ -217,7 +217,7 @@ draggable('#swipeable', {
 ### Resizable
 
 ```ts
-import { resizable } from 'gripjs/resize'
+import { resizable } from 'pointrix/resize'
 ```
 
 #### Options
@@ -281,7 +281,7 @@ resizable('#box', {
 ### Gesturable
 
 ```ts
-import { gesturable } from 'gripjs/gesture'
+import { gesturable } from 'pointrix/gesture'
 ```
 
 Multi-touch gesture recognition (pinch-to-zoom, rotate). Activates when the required number of pointers are down.
@@ -303,7 +303,7 @@ Multi-touch gesture recognition (pinch-to-zoom, rotate). Activates when the requ
 #### Example
 
 ```ts
-import { gesturable } from 'gripjs/gesture'
+import { gesturable } from 'pointrix/gesture'
 
 gesturable('#canvas', {
   onGestureMove: (e) => {
@@ -318,7 +318,7 @@ gesturable('#canvas', {
 ### Dropzone
 
 ```ts
-import { dropzone } from 'gripjs/dropzone'
+import { dropzone } from 'pointrix/dropzone'
 ```
 
 Define drop targets that respond to `draggable` elements created with `droppable: true`.
@@ -348,8 +348,8 @@ Define drop targets that respond to `draggable` elements created with `droppable
 #### Example
 
 ```ts
-import { draggable } from 'gripjs/drag'
-import { dropzone } from 'gripjs/dropzone'
+import { draggable } from 'pointrix/drag'
+import { dropzone } from 'pointrix/dropzone'
 
 draggable('#item', { droppable: true })
 
@@ -365,7 +365,7 @@ dropzone('#bin', {
 ### Sortable
 
 ```ts
-import { sortable } from 'gripjs/sortable'
+import { sortable } from 'pointrix/sortable'
 ```
 
 Drag-to-reorder lists with animated item displacement. Supports cross-container transfers via the `group` option.
@@ -427,7 +427,7 @@ sortable('#done', { group: 'kanban' })
 import {
   restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll,
   rubberband, restrictSize, restrictEdges, snapSize, snapEdges,
-} from 'gripjs/modifiers'
+} from 'pointrix/modifiers'
 ```
 
 Modifiers are composable transforms applied to the position each frame. Pass them as an array to the `modifiers` option of `draggable` or `resizable`.
@@ -618,7 +618,7 @@ Modifiers run in array order. Each modifier receives the output of the previous 
 ### Interactable
 
 ```ts
-import { interactable } from 'gripjs'
+import { interactable } from 'pointrix'
 ```
 
 Convenience factory that creates drag, resize, and gesture instances on the same element. Hyperact coordinates them automatically (resize has priority over drag when pointer is near an edge).
@@ -643,7 +643,7 @@ Pass `true` for default options or an options object.
 ### interactAll()
 
 ```ts
-import { interactAll } from 'gripjs'
+import { interactAll } from 'pointrix'
 ```
 
 Create interaction instances for every element matching a CSS selector. Returns an object with an `instances` array and a single `destroy()` method to tear down all of them.
@@ -779,7 +779,7 @@ interface AriaMessages {
 Use `setMessages()` with a partial or full set of replacements. Any keys you omit will keep their current values.
 
 ```ts
-import { setMessages } from 'gripjs'
+import { setMessages } from 'pointrix'
 
 setMessages({
   instructions: '...',
@@ -794,7 +794,7 @@ setMessages({
 #### Full translation example (German)
 
 ```ts
-import { setMessages } from 'gripjs'
+import { setMessages } from 'pointrix'
 
 setMessages({
   instructions:
@@ -810,7 +810,7 @@ setMessages({
 You can also read the current messages at any time with `getMessages()`:
 
 ```ts
-import { getMessages } from 'gripjs'
+import { getMessages } from 'pointrix'
 
 const current = getMessages()
 console.log(current.instructions)
@@ -821,7 +821,7 @@ console.log(current.instructions)
 ## React Integration
 
 ```ts
-import { useDraggable, useResizable, useGesturable, useDropzone, useSortable, useInteractable } from 'gripjs/react'
+import { useDraggable, useResizable, useGesturable, useDropzone, useSortable, useInteractable } from 'pointrix/react'
 ```
 
 Each hook returns `{ ref, instance }`. Attach `ref` to your element; read or control the interaction through `instance.current`.
@@ -850,7 +850,7 @@ const { ref } = useDraggable({ axis }, [axis])
 Pre-built components that forward options as props:
 
 ```tsx
-import { DraggableComponent, ResizableComponent, InteractableComponent } from 'gripjs/react'
+import { DraggableComponent, ResizableComponent, InteractableComponent } from 'pointrix/react'
 
 <DraggableComponent bounds="parent" as="section" className="card">
   Content
@@ -863,20 +863,20 @@ The `as` prop controls the rendered element (default `div`).
 
 | Hook | Component | Import |
 |---|---|---|
-| `useGrip` | `GripComponent` | `gripjs/react` |
-| `useDraggable` | `DraggableComponent` | `gripjs/react` |
-| `useResizable` | `ResizableComponent` | `gripjs/react` |
-| `useGesturable` | `GesturableComponent` | `gripjs/react` |
-| `useDropzone` | -- | `gripjs/react` |
-| `useSortable` | -- | `gripjs/react` |
-| `useInteractable` | `InteractableComponent` | `gripjs/react` |
+| `useGrip` | `GripComponent` | `pointrix/react` |
+| `useDraggable` | `DraggableComponent` | `pointrix/react` |
+| `useResizable` | `ResizableComponent` | `pointrix/react` |
+| `useGesturable` | `GesturableComponent` | `pointrix/react` |
+| `useDropzone` | -- | `pointrix/react` |
+| `useSortable` | -- | `pointrix/react` |
+| `useInteractable` | `InteractableComponent` | `pointrix/react` |
 
 ---
 
 ## Vue 3 Integration
 
 ```ts
-import { useDraggable, vDraggable, GripPlugin } from 'gripjs/vue'
+import { useDraggable, vDraggable, GripPlugin } from 'pointrix/vue'
 ```
 
 ### Composables
@@ -885,7 +885,7 @@ Each composable returns `{ elRef, instance }`. Bind `elRef` with `ref=` in your 
 
 ```vue
 <script setup lang="ts">
-import { useDraggable } from 'gripjs/vue'
+import { useDraggable } from 'pointrix/vue'
 
 const { elRef } = useDraggable({
   bounds: 'parent',
@@ -922,7 +922,7 @@ Register all directives globally:
 
 ```ts
 import { createApp } from 'vue'
-import { GripPlugin } from 'gripjs/vue'
+import { GripPlugin } from 'pointrix/vue'
 
 createApp(App).use(GripPlugin).mount('#app')
 ```
@@ -949,19 +949,19 @@ Every module is available as a separate entry point. Your bundler will only incl
 
 ```ts
 // Only drag -- pulls in nano as a dependency (~3.3 KB gzip)
-import { draggable } from 'gripjs/drag'
+import { draggable } from 'pointrix/drag'
 
 // Only modifiers
-import { snapGrid, inertia } from 'gripjs/modifiers'
+import { snapGrid, inertia } from 'pointrix/modifiers'
 
 // Only React hooks
-import { useDraggable } from 'gripjs/react'
+import { useDraggable } from 'pointrix/react'
 
 // Only Vue composables
-import { useDraggable } from 'gripjs/vue'
+import { useDraggable } from 'pointrix/vue'
 
 // Full bundle if you need everything
-import { interactable, interactAll, draggable, resizable, gesturable, dropzone, sortable } from 'gripjs'
+import { interactable, interactAll, draggable, resizable, gesturable, dropzone, sortable } from 'pointrix'
 ```
 
 All entry points ship ESM (`.mjs`) and CJS (`.cjs`) with full TypeScript declarations.

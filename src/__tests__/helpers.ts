@@ -1,4 +1,4 @@
-// Test helpers for grip unit tests
+// Test helpers for pointrix unit tests
 
 import { vi } from 'vitest'
 

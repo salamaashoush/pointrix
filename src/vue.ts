@@ -1,4 +1,4 @@
-// Vue 3 integration for grip - composables, directives, and plugin
+// Vue 3 integration for pointrix - composables, directives, and plugin
 
 import { ref, shallowRef, onMounted, onBeforeUnmount, watch, unref, isRef, type App, type Ref, type ShallowRef, type ObjectDirective } from 'vue'
 import { grip, Grip, type GripOptions } from './nano'

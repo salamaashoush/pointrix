@@ -1,4 +1,4 @@
-// Full grip bundle with all features
+// Full pointrix bundle with all features
 
 export { grip, Grip } from './nano'
 export type { Point, PointerState, InteractionEvent, GripOptions } from './nano'

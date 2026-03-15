@@ -1,4 +1,4 @@
-// Optimized drag addon for grip-nano (~2KB minified)
+// Optimized drag addon for pointrix-nano (~2KB minified)
 
 import { Grip, InteractionEvent, GripOptions } from './nano'
 import type { Modifier, ModifierContext } from './types'

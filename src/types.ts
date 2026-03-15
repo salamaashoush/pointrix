@@ -1,4 +1,4 @@
-// Canonical type definitions for grip
+// Canonical type definitions for pointrix
 
 export interface Point {
   x: number

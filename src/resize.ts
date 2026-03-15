@@ -1,4 +1,4 @@
-// Optimized resize addon for grip-nano (~3KB minified)
+// Optimized resize addon for pointrix-nano (~3KB minified)
 
 import { Grip, InteractionEvent, GripOptions } from './nano'
 import { Modifier, ModifierContext, applyModifiers } from './types'

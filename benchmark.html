@@ -16,7 +16,7 @@
       --text-dim: #8888a0;
       --accent: #6c5ce7;
       --accent-glow: rgba(108, 92, 231, 0.3);
-      --gripjs: #00d2ff;
+      --pointrix: #00d2ff;
       --grip-glow: rgba(0, 210, 255, 0.2);
       --interact: #ff6b6b;
       --interact-glow: rgba(255, 107, 107, 0.2);
@@ -797,7 +797,7 @@
 
       const rows = [{
         name: `Create + Destroy ${N} instances`,
-        gripjs: hResult.opsPerSec,
+        pointrix: hResult.opsPerSec,
         interact: iResult.opsPerSec,
         unit: 'ops/sec'
       }]
@@ -891,13 +891,13 @@
 
         rows.push({
           name: `${count} elements - Creation`,
-          gripjs: hCreateTime,
+          pointrix: hCreateTime,
           interact: iCreateTime,
           unit: 'ms'
         })
         rows.push({
           name: `${count} elements - Drag cycle`,
-          gripjs: hDragTime,
+          pointrix: hDragTime,
           interact: iDragTime,
           unit: 'ms'
         })
@@ -986,13 +986,13 @@
       const rows = [
         {
           name: `${EVENT_COUNT} pointermove events`,
-          gripjs: 1000 / hTime * EVENT_COUNT,
+          pointrix: 1000 / hTime * EVENT_COUNT,
           interact: 1000 / iTime * EVENT_COUNT,
           unit: 'ops/sec'
         },
         {
           name: 'Total processing time',
-          gripjs: hTime,
+          pointrix: hTime,
           interact: iTime,
           unit: 'ms'
         }
@@ -1058,7 +1058,7 @@
 
       const rows = [{
         name: `${formatNum(COUNT)} modifier applications`,
-        gripjs: hResult.opsPerSec,
+        pointrix: hResult.opsPerSec,
         interact: iResult.opsPerSec,
         unit: 'ops/sec'
       }]
@@ -1139,19 +1139,19 @@
       const rows = [
         {
           name: `${N} instances - Total heap (KB)`,
-          gripjs: hTotal,
+          pointrix: hTotal,
           interact: iTotal,
           unit: 'ms' // use 'ms' so lower is better
         },
         {
           name: 'Per instance (bytes)',
-          gripjs: Math.max(0, hMemPerInstance),
+          pointrix: Math.max(0, hMemPerInstance),
           interact: Math.max(0, iMemPerInstance),
           unit: 'ms' // lower is better
         },
         {
           name: 'Heap reclaimed after destroy (KB)',
-          gripjs: Math.max(0, (hAfter - hAfterDestroy) / 1024),
+          pointrix: Math.max(0, (hAfter - hAfterDestroy) / 1024),
           interact: Math.max(0, (iAfter - iAfterDestroy) / 1024),
           unit: 'ops/sec' // higher is better
         }
@@ -1305,7 +1305,7 @@
 
         rows.push({
           name: `${count} elements - FPS`,
-          gripjs: fps,
+          pointrix: fps,
           interact: fps, // Baseline FPS (no library overhead for raw animation)
           unit: 'ops/sec'
         })

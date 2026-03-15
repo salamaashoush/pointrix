@@ -1,11 +1,11 @@
 {
-  "name": "gripjs",
+  "name": "pointrix",
   "version": "1.0.0",
   "description": "Ultra-fast, minimal drag/resize/gesture library. The smallest and fastest interactable elements library.",
   "type": "module",
-  "main": "dist/grip.cjs",
-  "module": "dist/grip.mjs",
-  "types": "dist/grip.d.mts",
+  "main": "dist/pointrix.cjs",
+  "module": "dist/pointrix.mjs",
+  "types": "dist/pointrix.d.mts",
   "sideEffects": false,
   "files": [
     "dist/**/*.mjs",
@@ -17,54 +17,54 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/grip.d.mts",
-      "import": "./dist/grip.mjs",
-      "require": "./dist/grip.cjs"
+      "types": "./dist/pointrix.d.mts",
+      "import": "./dist/pointrix.mjs",
+      "require": "./dist/pointrix.cjs"
     },
     "./nano": {
-      "types": "./dist/grip-nano.d.mts",
-      "import": "./dist/grip-nano.mjs",
-      "require": "./dist/grip-nano.cjs"
+      "types": "./dist/pointrix-nano.d.mts",
+      "import": "./dist/pointrix-nano.mjs",
+      "require": "./dist/pointrix-nano.cjs"
     },
     "./drag": {
-      "types": "./dist/grip-drag.d.mts",
-      "import": "./dist/grip-drag.mjs",
-      "require": "./dist/grip-drag.cjs"
+      "types": "./dist/pointrix-drag.d.mts",
+      "import": "./dist/pointrix-drag.mjs",
+      "require": "./dist/pointrix-drag.cjs"
     },
     "./resize": {
-      "types": "./dist/grip-resize.d.mts",
-      "import": "./dist/grip-resize.mjs",
-      "require": "./dist/grip-resize.cjs"
+      "types": "./dist/pointrix-resize.d.mts",
+      "import": "./dist/pointrix-resize.mjs",
+      "require": "./dist/pointrix-resize.cjs"
     },
     "./gesture": {
-      "types": "./dist/grip-gesture.d.mts",
-      "import": "./dist/grip-gesture.mjs",
-      "require": "./dist/grip-gesture.cjs"
+      "types": "./dist/pointrix-gesture.d.mts",
+      "import": "./dist/pointrix-gesture.mjs",
+      "require": "./dist/pointrix-gesture.cjs"
     },
     "./dropzone": {
-      "types": "./dist/grip-dropzone.d.mts",
-      "import": "./dist/grip-dropzone.mjs",
-      "require": "./dist/grip-dropzone.cjs"
+      "types": "./dist/pointrix-dropzone.d.mts",
+      "import": "./dist/pointrix-dropzone.mjs",
+      "require": "./dist/pointrix-dropzone.cjs"
     },
     "./sortable": {
-      "types": "./dist/grip-sortable.d.mts",
-      "import": "./dist/grip-sortable.mjs",
-      "require": "./dist/grip-sortable.cjs"
+      "types": "./dist/pointrix-sortable.d.mts",
+      "import": "./dist/pointrix-sortable.mjs",
+      "require": "./dist/pointrix-sortable.cjs"
     },
     "./modifiers": {
-      "types": "./dist/grip-modifiers.d.mts",
-      "import": "./dist/grip-modifiers.mjs",
-      "require": "./dist/grip-modifiers.cjs"
+      "types": "./dist/pointrix-modifiers.d.mts",
+      "import": "./dist/pointrix-modifiers.mjs",
+      "require": "./dist/pointrix-modifiers.cjs"
     },
     "./react": {
-      "types": "./dist/grip-react.d.mts",
-      "import": "./dist/grip-react.mjs",
-      "require": "./dist/grip-react.cjs"
+      "types": "./dist/pointrix-react.d.mts",
+      "import": "./dist/pointrix-react.mjs",
+      "require": "./dist/pointrix-react.cjs"
     },
     "./vue": {
-      "types": "./dist/grip-vue.d.mts",
-      "import": "./dist/grip-vue.mjs",
-      "require": "./dist/grip-vue.cjs"
+      "types": "./dist/pointrix-vue.d.mts",
+      "import": "./dist/pointrix-vue.mjs",
+      "require": "./dist/pointrix-vue.cjs"
     }
   },
   "scripts": {
@@ -79,7 +79,7 @@
     "typecheck": "tsc --noEmit",
     "demo": "vite",
     "bench": "vitest bench",
-    "size": "bun run build && gzip -k dist/grip.mjs && ls -lh dist/grip.mjs dist/grip.mjs.gz && rm dist/grip.mjs.gz",
+    "size": "bun run build && gzip -k dist/pointrix.mjs && ls -lh dist/pointrix.mjs dist/pointrix.mjs.gz && rm dist/pointrix.mjs.gz",
     "prepublishOnly": "bun run lint && bun run typecheck && bun run test && bun run build"
   },
   "keywords": [
@@ -106,11 +106,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/salamaashoush/grip"
+    "url": "https://github.com/salamaashoush/pointrix"
   },
-  "homepage": "https://github.com/salamaashoush/grip#readme",
+  "homepage": "https://github.com/salamaashoush/pointrix#readme",
   "bugs": {
-    "url": "https://github.com/salamaashoush/grip/issues"
+    "url": "https://github.com/salamaashoush/pointrix/issues"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
