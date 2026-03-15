@@ -4,8 +4,11 @@ import { Hyperact, InteractionEvent, HyperactOptions } from './nano'
 import type { Modifier, ModifierContext } from './types'
 import { applyModifiers } from './types'
 import { DropzoneManager } from './dropzone'
+import { setDraggableAttrs, setDraggingAttrs, clearDraggableAttrs, announce, getMessages } from './aria'
 
 export interface DragOptions extends HyperactOptions {
+  /** Enable ARIA attributes for accessibility (default: true) */
+  aria?: boolean
   axis?: 'x' | 'y' | 'xy' | 'start'
   startAxis?: 'x' | 'y'
   handle?: string | HTMLElement
@@ -65,6 +68,11 @@ export class Draggable extends Hyperact {
     if (options.styleCursor !== false) {
       element.style.cursor = options.cursorChecker ? options.cursorChecker('idle') : 'grab'
     }
+
+    // ARIA
+    if (options.aria !== false) {
+      setDraggableAttrs(element)
+    }
   }
 
   protected shouldHandleEvent(e: PointerEvent): boolean {
@@ -107,6 +115,12 @@ export class Draggable extends Hyperact {
 
   private handleDragStart(e: InteractionEvent) {
     const element = e.target
+
+    // ARIA
+    if (this.dragOptions.aria !== false) {
+      setDraggingAttrs(element, true)
+      announce(getMessages().dragPickedUp)
+    }
 
     // Reset axis detection state
     this.detectedAxis = null
@@ -279,6 +293,13 @@ export class Draggable extends Hyperact {
 
   private handleDragEnd(e: InteractionEvent) {
     const element = e.target
+
+    // ARIA
+    if (this.dragOptions.aria !== false) {
+      setDraggingAttrs(element, false)
+      announce(getMessages().dragDropped)
+    }
+
     if (this.dragOptions.styleCursor !== false) {
       element.style.cursor = this.dragOptions.cursorChecker ? this.dragOptions.cursorChecker('grab') : 'grab'
     }
@@ -415,6 +436,9 @@ export class Draggable extends Hyperact {
     this.element.style.cursor = ''
     this.element.style.willChange = ''
     this.momentum.active = false
+    if (this.dragOptions.aria !== false) {
+      clearDraggableAttrs(this.element)
+    }
   }
 }
 

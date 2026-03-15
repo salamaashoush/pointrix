@@ -2,8 +2,15 @@
 // Supports cross-container drag via the `group` option
 
 import { Draggable, DragEvent, DragOptions } from './drag'
+import {
+  setSortableItemAttrs, clearSortableItemAttrs,
+  setSortableContainerAttrs, clearSortableContainerAttrs,
+  setDraggingAttrs, announce, getMessages,
+} from './aria'
 
 export interface SortableOptions {
+  /** Enable ARIA attributes for accessibility (default: true) */
+  aria?: boolean
   /** CSS selector for draggable items within the container (default: direct children) */
   items?: string
   /** Axis of sorting: 'y' for vertical lists, 'x' for horizontal (default: 'y') */
@@ -123,10 +130,16 @@ export class Sortable {
       onSortEnd: options.onSortEnd ?? (() => {}),
       onAdd: options.onAdd ?? (() => {}),
       onRemove: options.onRemove ?? (() => {}),
+      aria: options.aria ?? true,
     }
 
     if (this.options.group) {
       registerGroup(this.options.group, this)
+    }
+
+    // ARIA container role
+    if (this.options.aria) {
+      setSortableContainerAttrs(container)
     }
 
     this.setup()
@@ -147,10 +160,17 @@ export class Sortable {
     this.teardown()
 
     const items = this.getItems()
+
+    // Set ARIA attributes on each item
+    if (this.options.aria) {
+      for (let i = 0; i < items.length; i++) {
+        setSortableItemAttrs(items[i], i, items.length)
+      }
+    }
+
     for (const item of items) {
-      // No axis constraint when group is set — items need to move freely
-      // between containers. For single-container, axis is applied.
       const dragOpts: DragOptions = {
+        aria: false, // Sortable manages its own ARIA, don't let Draggable add conflicting attrs
         axis: this.options.group ? undefined : this.options.axis,
         handle: this.options.handle || undefined,
         onDragStart: (e) => this.handleDragStart(item, e),
@@ -175,6 +195,13 @@ export class Sortable {
     item.classList.add(this.options.dragClass)
     item.style.zIndex = '9999'
     item.style.position = 'relative'
+
+    // ARIA
+    if (this.options.aria) {
+      setDraggingAttrs(item, true)
+      const label = item.textContent?.trim() || `Item ${this.dragIndex + 1}`
+      announce(getMessages().pickedUp(label, this.dragIndex + 1, items.length))
+    }
   }
 
   private handleDragMove(item: HTMLElement, e: DragEvent) {
@@ -241,6 +268,11 @@ export class Sortable {
       }
       this.options.onSort(sortEvent)
       this.emit('sort', sortEvent)
+
+      // ARIA announcement
+      if (this.options.aria) {
+        announce(getMessages().movedTo(newIndex + 1, this.itemStates.length))
+      }
     }
   }
 
@@ -343,6 +375,11 @@ export class Sortable {
     item.classList.remove(this.options.dragClass)
     item.style.zIndex = ''
 
+    // ARIA
+    if (this.options.aria) {
+      setDraggingAttrs(item, false)
+    }
+
     if (isCrossContainer && this.targetSortable) {
       // Cross-container drop
       const target = this.targetSortable
@@ -416,6 +453,17 @@ export class Sortable {
     for (const el of this.getItems()) {
       el.style.transform = ''
       el.style.transition = ''
+    }
+
+    // ARIA: announce final position and update all item attrs
+    if (this.options.aria) {
+      const label = item.textContent?.trim() || 'Item'
+      const finalItems = this.getItems()
+      const finalIndex = finalItems.indexOf(item)
+      announce(getMessages().dropped(label, finalIndex + 1, finalItems.length))
+      for (let i = 0; i < finalItems.length; i++) {
+        setSortableItemAttrs(finalItems[i], i, finalItems.length)
+      }
     }
 
     // Clean up state
@@ -530,6 +578,12 @@ export class Sortable {
     for (const el of items) {
       el.style.transform = ''
       el.style.transition = ''
+      if (this.options.aria) {
+        clearSortableItemAttrs(el)
+      }
+    }
+    if (this.options.aria) {
+      clearSortableContainerAttrs(this.container)
     }
     if (this.options.group) {
       unregisterGroup(this.options.group, this)

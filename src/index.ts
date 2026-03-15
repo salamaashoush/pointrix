@@ -23,6 +23,9 @@ export { applyModifiers } from './types'
 
 export * from './modifiers/index'
 
+export { setMessages, getMessages, announce } from './aria'
+export type { AriaMessages } from './aria'
+
 // Interactable factory that creates drag, resize, and gesture instances
 export interface InteractableOptions {
   drag?: boolean | DragOptions

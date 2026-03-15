@@ -1,6 +1,7 @@
 // Dropzone system for drag-and-drop interactions
 
 import type { DragEvent } from './drag'
+import { setDropzoneAttrs, setDropzoneActiveAttrs, clearDropzoneAttrs } from './aria'
 
 export interface DropEvent {
   target: HTMLElement
@@ -14,6 +15,8 @@ export interface DropzoneOptions {
   overlap?: 'pointer' | 'center' | number
   activeClass?: string
   hoverClass?: string
+  /** Enable ARIA attributes (default: true) */
+  aria?: boolean
   onActivate?: (event: DropEvent) => void
   onDeactivate?: (event: DropEvent) => void
   onDragEnter?: (event: DropEvent) => void
@@ -77,8 +80,11 @@ export class Dropzone {
 
   constructor(element: HTMLElement, options: DropzoneOptions = {}) {
     this.element = element
-    this.options = { overlap: 'pointer', ...options }
+    this.options = { overlap: 'pointer', aria: true, ...options }
     DropzoneManager.register(this)
+    if (this.options.aria !== false) {
+      setDropzoneAttrs(element)
+    }
   }
 
   get isOver(): boolean {
@@ -127,6 +133,9 @@ export class Dropzone {
     if (this.options.activeClass) {
       this.element.classList.add(this.options.activeClass)
     }
+    if (this.options.aria !== false) {
+      setDropzoneActiveAttrs(this.element, true)
+    }
 
     const activateEvent = this.createEvent(draggableEl, 0)
     this.options.onActivate?.(activateEvent)
@@ -136,7 +145,6 @@ export class Dropzone {
   deactivate(draggableEl: HTMLElement) {
     if (!this._isActive) return
 
-    // If still hovered, fire leave first
     if (this._isOver) {
       this.leave(draggableEl)
     }
@@ -145,6 +153,9 @@ export class Dropzone {
 
     if (this.options.activeClass) {
       this.element.classList.remove(this.options.activeClass)
+    }
+    if (this.options.aria !== false) {
+      setDropzoneActiveAttrs(this.element, false)
     }
 
     const deactivateEvent = this.createEvent(draggableEl, 0)
@@ -212,6 +223,10 @@ export class Dropzone {
     }
     if (this.options.hoverClass) {
       this.element.classList.remove(this.options.hoverClass)
+    }
+
+    if (this.options.aria !== false) {
+      clearDropzoneAttrs(this.element)
     }
 
     DropzoneManager.unregister(this)
