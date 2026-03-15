@@ -6,13 +6,15 @@ import { applyModifiers } from './types'
 import { DropzoneManager } from './dropzone'
 
 export interface DragOptions extends HyperactOptions {
-  axis?: 'x' | 'y' | 'xy'
+  axis?: 'x' | 'y' | 'xy' | 'start'
+  startAxis?: 'x' | 'y'
   handle?: string | HTMLElement
   bounds?: 'parent' | HTMLElement | { left?: number; top?: number; right?: number; bottom?: number }
   grid?: { x: number; y: number }
   momentum?: boolean | { friction?: number; minSpeed?: number }
   modifiers?: Modifier[]
   droppable?: boolean
+  cursorChecker?: (action: 'idle' | 'grab' | 'grabbing') => string
   onDragStart?: (event: DragEvent) => void
   onDragMove?: (event: DragEvent) => void
   onDragEnd?: (event: DragEvent) => void
@@ -34,6 +36,8 @@ export class Draggable extends Hyperact {
   private bounds: DOMRect | null = null
   private momentum: { vx: number; vy: number; active: boolean } = { vx: 0, vy: 0, active: false }
   private transformNormalized = false
+  private detectedAxis: 'x' | 'y' | null = null
+  private startAxisConfirmed = false
 
   constructor(element: HTMLElement, options: DragOptions = {}) {
     super(element, {
@@ -58,7 +62,9 @@ export class Draggable extends Hyperact {
     this.priority = 5
 
     // Set cursor
-    element.style.cursor = 'grab'
+    if (options.styleCursor !== false) {
+      element.style.cursor = options.cursorChecker ? options.cursorChecker('idle') : 'grab'
+    }
   }
 
   protected shouldHandleEvent(e: PointerEvent): boolean {
@@ -102,11 +108,17 @@ export class Draggable extends Hyperact {
   private handleDragStart(e: InteractionEvent) {
     const element = e.target
 
+    // Reset axis detection state
+    this.detectedAxis = null
+    this.startAxisConfirmed = false
+
     // Always re-read the current transform from the DOM to sync with
     // any external changes (e.g. Resizable modifying the transform)
     this.readCurrentTransform(element)
 
-    element.style.cursor = 'grabbing'
+    if (this.dragOptions.styleCursor !== false) {
+      element.style.cursor = this.dragOptions.cursorChecker ? this.dragOptions.cursorChecker('grabbing') : 'grabbing'
+    }
     element.style.willChange = 'transform'
 
     // Store start transform
@@ -172,9 +184,11 @@ export class Draggable extends Hyperact {
     }
 
     // Fire drag start event
+    const dragStartEvent = this.createDragEvent(e, 0, 0)
     if (this.dragOptions.onDragStart) {
-      this.dragOptions.onDragStart(this.createDragEvent(e, 0, 0))
+      this.dragOptions.onDragStart(dragStartEvent)
     }
+    this.emit('dragstart', dragStartEvent)
 
     if (this.dragOptions.droppable) {
       DropzoneManager.onDragStart(e.target)
@@ -186,9 +200,28 @@ export class Draggable extends Hyperact {
     let dx = pointer.total.x
     let dy = pointer.total.y
 
+    // Check startAxis constraint
+    if (this.dragOptions.startAxis && !this.startAxisConfirmed) {
+      const absX = Math.abs(dx)
+      const absY = Math.abs(dy)
+      if (this.dragOptions.startAxis === 'x' && absY > absX) return
+      if (this.dragOptions.startAxis === 'y' && absX > absY) return
+      this.startAxisConfirmed = true
+    }
+
+    // Auto-detect axis from initial movement direction
+    if (this.dragOptions.axis === 'start' && this.detectedAxis === null) {
+      const absX = Math.abs(dx)
+      const absY = Math.abs(dy)
+      if (absX > 0 || absY > 0) {
+        this.detectedAxis = absX > absY ? 'x' : 'y'
+      }
+    }
+
     // Apply axis constraints
-    if (this.dragOptions.axis === 'x') dy = 0
-    else if (this.dragOptions.axis === 'y') dx = 0
+    const effectiveAxis = this.dragOptions.axis === 'start' ? this.detectedAxis : this.dragOptions.axis
+    if (effectiveAxis === 'x') dy = 0
+    else if (effectiveAxis === 'y') dx = 0
 
     // Calculate new position
     let x = this.startTransform.x + dx
@@ -232,9 +265,11 @@ export class Draggable extends Hyperact {
     }
 
     // Fire drag move event
+    const dragMoveEvent = this.createDragEvent(e, dx, dy)
     if (this.dragOptions.onDragMove) {
-      this.dragOptions.onDragMove(this.createDragEvent(e, dx, dy))
+      this.dragOptions.onDragMove(dragMoveEvent)
     }
+    this.emit('dragmove', dragMoveEvent)
 
     if (this.dragOptions.droppable) {
       const pointer = e.pointers[0]
@@ -244,7 +279,9 @@ export class Draggable extends Hyperact {
 
   private handleDragEnd(e: InteractionEvent) {
     const element = e.target
-    element.style.cursor = 'grab'
+    if (this.dragOptions.styleCursor !== false) {
+      element.style.cursor = this.dragOptions.cursorChecker ? this.dragOptions.cursorChecker('grab') : 'grab'
+    }
 
     // Calculate final drag distance
     const dx = this.transform.x - this.startTransform.x
@@ -279,9 +316,11 @@ export class Draggable extends Hyperact {
     }
 
     // Fire drag end event
+    const dragEndEvent = this.createDragEvent(e, dx, dy)
     if (this.dragOptions.onDragEnd) {
-      this.dragOptions.onDragEnd(this.createDragEvent(e, dx, dy))
+      this.dragOptions.onDragEnd(dragEndEvent)
     }
+    this.emit('dragend', dragEndEvent)
   }
 
   private startMomentum() {

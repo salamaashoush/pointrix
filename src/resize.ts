@@ -16,8 +16,11 @@ export interface ResizeOptions extends HyperactOptions {
   maxWidth?: number
   maxHeight?: number
   aspectRatio?: number | 'preserve'
+  square?: boolean
+  invert?: 'none' | 'negate' | 'reposition'
   grid?: { width: number; height: number }
   modifiers?: Modifier[]
+  cursorChecker?: (edge: string | null) => string
   onResizeStart?: (event: ResizeEvent) => void
   onResizeMove?: (event: ResizeEvent) => void
   onResizeEnd?: (event: ResizeEvent) => void
@@ -77,7 +80,10 @@ export class Resizable extends Hyperact {
     })
     
     this.resizeOptions = defaultOptions
-    
+
+    // Square is a convenience alias for aspectRatio: 1
+    if (this.resizeOptions.square) this.resizeOptions.aspectRatio = 1
+
     // Set higher priority for resize interactions
     this.priority = 10
 
@@ -112,9 +118,11 @@ export class Resizable extends Hyperact {
   
   private updateCursor(e: PointerEvent) {
     if (this.activeEdge) return // Don't update while resizing
-    
+
     const edge = this.detectEdge(e)
-    this.element.style.cursor = this.getCursor(edge)
+    this.element.style.cursor = this.resizeOptions.cursorChecker
+      ? this.resizeOptions.cursorChecker(edge)
+      : this.getCursor(edge)
   }
   
   private detectEdge(e: PointerEvent): Edge {
@@ -210,9 +218,11 @@ export class Resizable extends Hyperact {
     this.element.style.willChange = 'width, height, transform'
     
     // Fire resize start event
+    const resizeStartEvent = this.createResizeEvent(e, 0, 0)
     if (this.resizeOptions.onResizeStart) {
-      this.resizeOptions.onResizeStart(this.createResizeEvent(e, 0, 0))
+      this.resizeOptions.onResizeStart(resizeStartEvent)
     }
+    this.emit('resizestart', resizeStartEvent)
   }
   
   private handleResizeMove(e: InteractionEvent) {
@@ -244,12 +254,27 @@ export class Resizable extends Hyperact {
       newY += deltaY
     }
     
+    // Apply invert mode
+    const invertMode = this.resizeOptions.invert || 'none'
+
+    if (invertMode === 'reposition') {
+      // When dragging past zero, flip edges and reposition
+      if (newWidth < 0) {
+        newX += newWidth
+        newWidth = -newWidth
+      }
+      if (newHeight < 0) {
+        newY += newHeight
+        newHeight = -newHeight
+      }
+    }
+
     // Apply constraints
     const minWidth = this.resizeOptions.minWidth || 50
     const minHeight = this.resizeOptions.minHeight || 50
     const maxWidth = this.resizeOptions.maxWidth || Infinity
     const maxHeight = this.resizeOptions.maxHeight || Infinity
-    
+
     // Maintain aspect ratio if needed
     if (this.aspectRatio) {
       if (this.activeEdge === 'left' || this.activeEdge === 'right') {
@@ -260,7 +285,7 @@ export class Resizable extends Hyperact {
         // For corners, prioritize the dimension with larger change
         const widthChange = Math.abs(newWidth - this.startSize.width)
         const heightChange = Math.abs(newHeight - this.startSize.height)
-        
+
         if (widthChange > heightChange) {
           newHeight = newWidth / this.aspectRatio
         } else {
@@ -268,14 +293,16 @@ export class Resizable extends Hyperact {
         }
       }
     }
-    
-    // Apply size constraints
-    if (newWidth < minWidth) {
-      if (this.activeEdge.includes('left')) {
-        newX += newWidth - minWidth
+
+    // Apply size constraints (skip min clamping for 'negate' mode)
+    if (invertMode !== 'negate') {
+      if (newWidth < minWidth) {
+        if (this.activeEdge.includes('left')) {
+          newX += newWidth - minWidth
+        }
+        newWidth = minWidth
+        if (this.aspectRatio) newHeight = newWidth / this.aspectRatio
       }
-      newWidth = minWidth
-      if (this.aspectRatio) newHeight = newWidth / this.aspectRatio
     }
     if (newWidth > maxWidth) {
       if (this.activeEdge.includes('left')) {
@@ -284,13 +311,15 @@ export class Resizable extends Hyperact {
       newWidth = maxWidth
       if (this.aspectRatio) newHeight = newWidth / this.aspectRatio
     }
-    
-    if (newHeight < minHeight) {
-      if (this.activeEdge.includes('top')) {
-        newY += newHeight - minHeight
+
+    if (invertMode !== 'negate') {
+      if (newHeight < minHeight) {
+        if (this.activeEdge.includes('top')) {
+          newY += newHeight - minHeight
+        }
+        newHeight = minHeight
+        if (this.aspectRatio) newWidth = newHeight * this.aspectRatio
       }
-      newHeight = minHeight
-      if (this.aspectRatio) newWidth = newHeight * this.aspectRatio
     }
     if (newHeight > maxHeight) {
       if (this.activeEdge.includes('top')) {
@@ -345,23 +374,27 @@ export class Resizable extends Hyperact {
     }
     
     // Fire resize move event
+    const deltaWidth = newWidth - this.startSize.width
+    const deltaHeight = newHeight - this.startSize.height
+    const resizeMoveEvent = this.createResizeEvent(e, deltaWidth, deltaHeight)
     if (this.resizeOptions.onResizeMove) {
-      const deltaWidth = newWidth - this.startSize.width
-      const deltaHeight = newHeight - this.startSize.height
-      this.resizeOptions.onResizeMove(this.createResizeEvent(e, deltaWidth, deltaHeight))
+      this.resizeOptions.onResizeMove(resizeMoveEvent)
     }
+    this.emit('resizemove', resizeMoveEvent)
   }
   
   private handleResizeEnd(e: InteractionEvent) {
     this.element.style.willChange = ''
     this.activeEdge = null
-    
+
     // Fire resize end event
+    const deltaWidth = this.currentSize.width - this.startSize.width
+    const deltaHeight = this.currentSize.height - this.startSize.height
+    const resizeEndEvent = this.createResizeEvent(e, deltaWidth, deltaHeight)
     if (this.resizeOptions.onResizeEnd) {
-      const deltaWidth = this.currentSize.width - this.startSize.width
-      const deltaHeight = this.currentSize.height - this.startSize.height
-      this.resizeOptions.onResizeEnd(this.createResizeEvent(e, deltaWidth, deltaHeight))
+      this.resizeOptions.onResizeEnd(resizeEndEvent)
     }
+    this.emit('resizeend', resizeEndEvent)
   }
   
   private createResizeEvent(e: InteractionEvent, deltaWidth: number, deltaHeight: number): ResizeEvent {

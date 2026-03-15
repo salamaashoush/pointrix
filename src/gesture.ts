@@ -100,23 +100,25 @@ export class Gesturable extends Hyperact {
       this.prevScale = 1
       this.prevAngle = 0
 
-      if (this.gestureOptions.onGestureStart) {
-        const baseEvent: InteractionEvent = {
-          target: this.element,
-          pointers: Array.from(this.pointers.values()),
-          isPrimary: false,
-          originalEvent: new PointerEvent('pointermove')
-        }
-        this.gestureOptions.onGestureStart(this.createGestureEvent(baseEvent, {
-          scale: 1,
-          rotation: 0,
-          distance: this.startDistance,
-          angle: this.startAngle,
-          center: this.computeCenter(p1, p2),
-          deltaScale: 0,
-          deltaAngle: 0
-        }))
+      const baseEvent: InteractionEvent = {
+        target: this.element,
+        pointers: Array.from(this.pointers.values()),
+        isPrimary: false,
+        originalEvent: new PointerEvent('pointermove')
       }
+      const gestureStartEvent = this.createGestureEvent(baseEvent, {
+        scale: 1,
+        rotation: 0,
+        distance: this.startDistance,
+        angle: this.startAngle,
+        center: this.computeCenter(p1, p2),
+        deltaScale: 0,
+        deltaAngle: 0
+      })
+      if (this.gestureOptions.onGestureStart) {
+        this.gestureOptions.onGestureStart(gestureStartEvent)
+      }
+      this.emit('gesturestart', gestureStartEvent)
       return
     }
 
@@ -142,23 +144,25 @@ export class Gesturable extends Hyperact {
       this.prevScale = scale
       this.prevAngle = rotation
 
-      if (this.gestureOptions.onGestureMove) {
-        const baseEvent: InteractionEvent = {
-          target: this.element,
-          pointers: Array.from(this.pointers.values()),
-          isPrimary: false,
-          originalEvent: new PointerEvent('pointermove')
-        }
-        this.gestureOptions.onGestureMove(this.createGestureEvent(baseEvent, {
-          scale,
-          rotation,
-          distance,
-          angle,
-          center,
-          deltaScale,
-          deltaAngle
-        }))
+      const baseEvent: InteractionEvent = {
+        target: this.element,
+        pointers: Array.from(this.pointers.values()),
+        isPrimary: false,
+        originalEvent: new PointerEvent('pointermove')
       }
+      const gestureMoveEvent = this.createGestureEvent(baseEvent, {
+        scale,
+        rotation,
+        distance,
+        angle,
+        center,
+        deltaScale,
+        deltaAngle
+      })
+      if (this.gestureOptions.onGestureMove) {
+        this.gestureOptions.onGestureMove(gestureMoveEvent)
+      }
+      this.emit('gesturemove', gestureMoveEvent)
     }
 
     // Let the base class handle pointer state updates (velocity, delta, previous)
@@ -169,30 +173,32 @@ export class Gesturable extends Hyperact {
     if (!this.gestureActive) return
     this.gestureActive = false
 
-    if (this.gestureOptions.onGestureEnd) {
-      const baseEvent: InteractionEvent = {
-        target: this.element,
-        pointers: Array.from(this.pointers.values()),
-        isPrimary: false,
-        originalEvent: new PointerEvent('pointerup')
-      }
-
-      const pair = this.getTwoPointers()
-      const distance = pair ? this.computeDistance(pair[0], pair[1]) : 0
-      const angle = pair ? this.computeAngle(pair[0], pair[1]) : 0
-      const center = pair ? this.computeCenter(pair[0], pair[1]) : { x: 0, y: 0 }
-      const scale = this.startDistance > 0 && distance > 0 ? distance / this.startDistance : this.prevScale
-
-      this.gestureOptions.onGestureEnd(this.createGestureEvent(baseEvent, {
-        scale,
-        rotation: this.prevAngle,
-        distance,
-        angle,
-        center,
-        deltaScale: 0,
-        deltaAngle: 0
-      }))
+    const baseEvent: InteractionEvent = {
+      target: this.element,
+      pointers: Array.from(this.pointers.values()),
+      isPrimary: false,
+      originalEvent: new PointerEvent('pointerup')
     }
+
+    const pair = this.getTwoPointers()
+    const distance = pair ? this.computeDistance(pair[0], pair[1]) : 0
+    const angle = pair ? this.computeAngle(pair[0], pair[1]) : 0
+    const center = pair ? this.computeCenter(pair[0], pair[1]) : { x: 0, y: 0 }
+    const scale = this.startDistance > 0 && distance > 0 ? distance / this.startDistance : this.prevScale
+
+    const gestureEndEvent = this.createGestureEvent(baseEvent, {
+      scale,
+      rotation: this.prevAngle,
+      distance,
+      angle,
+      center,
+      deltaScale: 0,
+      deltaAngle: 0
+    })
+    if (this.gestureOptions.onGestureEnd) {
+      this.gestureOptions.onGestureEnd(gestureEndEvent)
+    }
+    this.emit('gestureend', gestureEndEvent)
   }
 
   destroy() {

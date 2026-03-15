@@ -75,4 +75,15 @@ export function interactable(element: HTMLElement | string, options: Interactabl
   }
 }
 
+export function interactAll(selector: string, options: InteractableOptions = {}) {
+  const elements = document.querySelectorAll<HTMLElement>(selector)
+  const results = Array.from(elements).map(el => interactable(el, options))
+  return {
+    instances: results,
+    destroy() {
+      results.forEach(r => r.destroy())
+    }
+  }
+}
+
 export default interactable

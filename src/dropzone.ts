@@ -52,6 +52,25 @@ export class Dropzone {
   private _isOver = false
   private _isActive = false
   private _enabled = true
+  private listeners = new Map<string, Set<Function>>()
+
+  on(event: string, handler: Function): this {
+    if (!this.listeners.has(event)) this.listeners.set(event, new Set())
+    this.listeners.get(event)!.add(handler)
+    return this
+  }
+
+  off(event: string, handler: Function): this {
+    this.listeners.get(event)?.delete(handler)
+    return this
+  }
+
+  private emit(event: string, data: any): void {
+    const handlers = this.listeners.get(event)
+    if (handlers) {
+      for (const handler of handlers) handler(data)
+    }
+  }
 
   get enabled(): boolean { return this._enabled }
   set enabled(value: boolean) { this._enabled = value }
@@ -109,7 +128,9 @@ export class Dropzone {
       this.element.classList.add(this.options.activeClass)
     }
 
-    this.options.onActivate?.(this.createEvent(draggableEl, 0))
+    const activateEvent = this.createEvent(draggableEl, 0)
+    this.options.onActivate?.(activateEvent)
+    this.emit('activate', activateEvent)
   }
 
   deactivate(draggableEl: HTMLElement) {
@@ -126,7 +147,9 @@ export class Dropzone {
       this.element.classList.remove(this.options.activeClass)
     }
 
-    this.options.onDeactivate?.(this.createEvent(draggableEl, 0))
+    const deactivateEvent = this.createEvent(draggableEl, 0)
+    this.options.onDeactivate?.(deactivateEvent)
+    this.emit('deactivate', deactivateEvent)
   }
 
   enter(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent) {
@@ -137,7 +160,9 @@ export class Dropzone {
       this.element.classList.add(this.options.hoverClass)
     }
 
-    this.options.onDragEnter?.(this.createEvent(draggableEl, overlap, dragEvent))
+    const enterEvent = this.createEvent(draggableEl, overlap, dragEvent)
+    this.options.onDragEnter?.(enterEvent)
+    this.emit('dragenter', enterEvent)
   }
 
   leave(draggableEl: HTMLElement, dragEvent?: DragEvent) {
@@ -148,15 +173,21 @@ export class Dropzone {
       this.element.classList.remove(this.options.hoverClass)
     }
 
-    this.options.onDragLeave?.(this.createEvent(draggableEl, 0, dragEvent))
+    const leaveEvent = this.createEvent(draggableEl, 0, dragEvent)
+    this.options.onDragLeave?.(leaveEvent)
+    this.emit('dragleave', leaveEvent)
   }
 
   over(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent) {
-    this.options.onDragOver?.(this.createEvent(draggableEl, overlap, dragEvent))
+    const overEvent = this.createEvent(draggableEl, overlap, dragEvent)
+    this.options.onDragOver?.(overEvent)
+    this.emit('dragover', overEvent)
   }
 
   drop(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent) {
-    this.options.onDrop?.(this.createEvent(draggableEl, overlap, dragEvent))
+    const dropEvent = this.createEvent(draggableEl, overlap, dragEvent)
+    this.options.onDrop?.(dropEvent)
+    this.emit('drop', dropEvent)
   }
 
   private createEvent(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent): DropEvent {

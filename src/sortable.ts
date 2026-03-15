@@ -86,6 +86,25 @@ export class Sortable {
   private targetIndex = -1
   private placeholder: HTMLElement | null = null
   private _enabled = true
+  private listeners = new Map<string, Set<Function>>()
+
+  on(event: string, handler: Function): this {
+    if (!this.listeners.has(event)) this.listeners.set(event, new Set())
+    this.listeners.get(event)!.add(handler)
+    return this
+  }
+
+  off(event: string, handler: Function): this {
+    this.listeners.get(event)?.delete(handler)
+    return this
+  }
+
+  private emit(event: string, data: any): void {
+    const handlers = this.listeners.get(event)
+    if (handlers) {
+      for (const handler of handlers) handler(data)
+    }
+  }
 
   get enabled(): boolean { return this._enabled }
   set enabled(value: boolean) { this._enabled = value }
@@ -214,12 +233,14 @@ export class Sortable {
     if (newIndex !== this.currentIndex) {
       this.currentIndex = newIndex
       this.animateItems(item)
-      this.options.onSort({
+      const sortEvent = {
         item,
         oldIndex: this.dragIndex,
         newIndex,
         items: this.getItems(),
-      })
+      }
+      this.options.onSort(sortEvent)
+      this.emit('sort', sortEvent)
     }
   }
 
@@ -344,26 +365,34 @@ export class Sortable {
       const newIndex = target.getItems().indexOf(item)
 
       // Fire events
-      this.options.onRemove({
+      const removeEvent = {
         item,
         from: this,
         to: target,
         oldIndex,
         newIndex,
-      })
-      target.options.onAdd({
+      }
+      this.options.onRemove(removeEvent)
+      this.emit('remove', removeEvent)
+
+      const addEvent = {
         item,
         from: this,
         to: target,
         oldIndex,
         newIndex,
-      })
-      target.options.onSortEnd({
+      }
+      target.options.onAdd(addEvent)
+      target.emit('add', addEvent)
+
+      const sortEndEvent = {
         item,
         oldIndex: -1,
         newIndex,
         items: target.getItems(),
-      })
+      }
+      target.options.onSortEnd(sortEndEvent)
+      target.emit('sortend', sortEndEvent)
     } else {
       // Within-container reorder
       const newIndex = this.currentIndex
@@ -373,12 +402,14 @@ export class Sortable {
         this.reorderDOM(items, oldIndex, newIndex)
       }
 
-      this.options.onSortEnd({
+      const sortEndEvent = {
         item,
         oldIndex,
         newIndex,
         items: this.getItems(),
-      })
+      }
+      this.options.onSortEnd(sortEndEvent)
+      this.emit('sortend', sortEndEvent)
     }
 
     // Reset all transforms in this container
@@ -473,12 +504,14 @@ export class Sortable {
 
     this.reorderDOM(items, fromIndex, toIndex)
 
-    this.options.onSortEnd({
+    const sortEndEvent = {
       item: items[fromIndex],
       oldIndex: fromIndex,
       newIndex: toIndex,
       items: this.getItems(),
-    })
+    }
+    this.options.onSortEnd(sortEndEvent)
+    this.emit('sortend', sortEndEvent)
 
     this.setup()
   }

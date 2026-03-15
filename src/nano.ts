@@ -28,8 +28,17 @@ export interface HyperactOptions {
   onMove?: (event: InteractionEvent) => void
   onEnd?: (event: InteractionEvent) => void
   onTap?: (event: InteractionEvent) => void
+  onDoubleTap?: (event: InteractionEvent) => void
+  onHold?: (event: InteractionEvent) => void
   threshold?: number // Movement threshold before starting interaction
   preventScroll?: boolean
+  holdDelay?: number // Hold delay in ms before interaction starts
+  holdDuration?: number // Duration in ms before onHold fires (default 600)
+  mouseButtons?: number // Bitmask: 1=left, 2=right, 4=middle. 0=any
+  allowFrom?: string // CSS selector — only start if target matches
+  ignoreFrom?: string // CSS selector — don't start if target matches
+  touchAction?: string // CSS touch-action value (default 'none')
+  styleCursor?: boolean // Whether to set cursor styles (default true)
 }
 
 // Shared RAF scheduler for all instances
@@ -72,6 +81,29 @@ export class Hyperact {
   protected lastUpdate = 0
   protected priority: number = 0 // Higher priority wins
   private _enabled = true
+  private holdTimer: ReturnType<typeof setTimeout> | null = null
+  private holdEventTimer: ReturnType<typeof setTimeout> | null = null
+  private lastTapTime = 0
+  private lastTapTarget: EventTarget | null = null
+  private listeners = new Map<string, Set<Function>>()
+
+  on(event: string, handler: Function): this {
+    if (!this.listeners.has(event)) this.listeners.set(event, new Set())
+    this.listeners.get(event)!.add(handler)
+    return this
+  }
+
+  off(event: string, handler: Function): this {
+    this.listeners.get(event)?.delete(handler)
+    return this
+  }
+
+  protected emit(event: string, data: any): void {
+    const handlers = this.listeners.get(event)
+    if (handlers) {
+      for (const handler of handlers) handler(data)
+    }
+  }
 
   get enabled(): boolean { return this._enabled }
   set enabled(value: boolean) {
@@ -91,6 +123,10 @@ export class Hyperact {
     }
   }
   
+  get interacting(): boolean {
+    return this.isActive
+  }
+
   // Static registry for coordinating multiple instances on same element
   private static elementInstances = new WeakMap<HTMLElement, Hyperact[]>()
   private static activeInstance = new WeakMap<HTMLElement, Hyperact | null>()
@@ -101,16 +137,17 @@ export class Hyperact {
     this.options = {
       threshold: 3,
       preventScroll: true,
+      styleCursor: true,
       ...options
     }
-    
+
     // Register this instance
     this.registerInstance()
-    
+
     // Optimize element for interactions (only if first instance)
     const instances = Hyperact.elementInstances.get(element) || []
     if (instances.length === 1) {
-      element.style.touchAction = 'none'
+      element.style.touchAction = this.options.touchAction ?? 'none'
       element.style.userSelect = 'none'
       element.style.webkitUserSelect = 'none'
     }
@@ -153,6 +190,14 @@ export class Hyperact {
   protected shouldHandleEvent(_e: PointerEvent): boolean {
     return true
   }
+
+  private checkEventFilters(e: PointerEvent): boolean {
+    const target = e.target as Element
+    if (!target) return true
+    if (this.options.ignoreFrom && target.closest(this.options.ignoreFrom)) return false
+    if (this.options.allowFrom && !target.closest(this.options.allowFrom)) return false
+    return true
+  }
   
   // Static method to handle pointer events for all instances on an element
   private static handleElementPointerDown(element: HTMLElement, e: PointerEvent) {
@@ -170,8 +215,8 @@ export class Hyperact {
     let highestPriority = -1
     
     for (const instance of instances) {
-      const shouldHandle = instance.shouldHandleEvent(e)
-      
+      const shouldHandle = instance.checkEventFilters(e) && instance.shouldHandleEvent(e)
+
       if (shouldHandle && instance.enabled && instance.priority > highestPriority) {
         handlingInstance = instance
         highestPriority = instance.priority
@@ -191,9 +236,12 @@ export class Hyperact {
   }
   
   private handlePointerDown(e: PointerEvent) {
+    // Mouse button filter
+    if (this.options.mouseButtons && !(e.buttons & this.options.mouseButtons)) return
+
     // Prevent default to avoid scrolling
     if (this.options.preventScroll) e.preventDefault()
-    
+
     const point = { x: e.clientX, y: e.clientY }
     const pointer: PointerState = {
       id: e.pointerId,
@@ -205,18 +253,39 @@ export class Hyperact {
       velocity: { x: 0, y: 0 },
       timestamp: e.timeStamp
     }
-    
+
     this.pointers.set(e.pointerId, pointer)
-    
+
     // Add global listeners
     if (this.pointers.size === 1) {
       document.addEventListener('pointermove', this.onPointerMove, { passive: false })
       document.addEventListener('pointerup', this.onPointerUp)
       document.addEventListener('pointercancel', this.onPointerUp)
     }
-    
-    // Start tracking if threshold is 0
-    if (this.options.threshold === 0) {
+
+    // Hold event timer (fires onHold if pointer stays still)
+    if (this.options.onHold) {
+      if (this.holdEventTimer) clearTimeout(this.holdEventTimer)
+      this.holdEventTimer = setTimeout(() => {
+        this.holdEventTimer = null
+        if (this.pointers.size > 0 && !this.isActive) {
+          this.options.onHold!(this.createEvent(e))
+        }
+      }, this.options.holdDuration ?? 600)
+    }
+
+    // Hold delay: wait before starting the interaction
+    const holdDelay = this.options.holdDelay ?? 0
+    if (holdDelay > 0) {
+      if (this.holdTimer) clearTimeout(this.holdTimer)
+      this.holdTimer = setTimeout(() => {
+        this.holdTimer = null
+        if (!this.isActive && this.pointers.size > 0) {
+          this.start(e)
+        }
+      }, holdDelay)
+    } else if (this.options.threshold === 0) {
+      // Start tracking if threshold is 0 and no hold delay
       this.start(e)
     }
   }
@@ -237,8 +306,18 @@ export class Hyperact {
         const dx = pointer.current.x - pointer.start.x
         const dy = pointer.current.y - pointer.start.y
         const distance = Math.sqrt(dx * dx + dy * dy)
-        
+
         if (distance >= (this.options.threshold || 3)) {
+          // Threshold exceeded — clear hold timer and start normally
+          if (this.holdTimer) {
+            clearTimeout(this.holdTimer)
+            this.holdTimer = null
+          }
+          // Clear hold event timer on movement
+          if (this.holdEventTimer) {
+            clearTimeout(this.holdEventTimer)
+            this.holdEventTimer = null
+          }
           this.start(e)
         }
       }
@@ -255,9 +334,19 @@ export class Hyperact {
   private onPointerUp(e: PointerEvent) {
     const pointer = this.pointers.get(e.pointerId)
     if (!pointer) return
-    
+
     this.pointers.delete(e.pointerId)
-    
+
+    // Clear hold timers
+    if (this.holdTimer) {
+      clearTimeout(this.holdTimer)
+      this.holdTimer = null
+    }
+    if (this.holdEventTimer) {
+      clearTimeout(this.holdEventTimer)
+      this.holdEventTimer = null
+    }
+
     // Remove global listeners when no pointers
     if (this.pointers.size === 0) {
       document.removeEventListener('pointermove', this.onPointerMove)
@@ -266,8 +355,23 @@ export class Hyperact {
 
       if (this.isActive) {
         this.end(e)
-      } else if (this.options.onTap) {
-        this.options.onTap(this.createEvent(e))
+      } else {
+        const interactionEvent = this.createEvent(e)
+
+        // Fire tap
+        if (this.options.onTap) {
+          this.options.onTap(interactionEvent)
+        }
+        this.emit('tap', interactionEvent)
+
+        // Check for double tap
+        const now = e.timeStamp
+        if (this.options.onDoubleTap && now - this.lastTapTime < 300 && this.lastTapTarget === e.target) {
+          this.options.onDoubleTap(interactionEvent)
+        }
+
+        this.lastTapTime = now
+        this.lastTapTarget = e.target
       }
     }
   }
@@ -275,10 +379,12 @@ export class Hyperact {
   private start(e: PointerEvent) {
     this.isActive = true
     instances.add(this)
-    
+
+    const event = this.createEvent(e)
     if (this.options.onStart) {
-      this.options.onStart(this.createEvent(e))
+      this.options.onStart(event)
     }
+    this.emit('start', event)
   }
   
   private end(e: PointerEvent) {
@@ -291,9 +397,11 @@ export class Hyperact {
       Hyperact.activeInstance.set(this.element, null)
     }
     
+    const event = this.createEvent(e)
     if (this.options.onEnd) {
-      this.options.onEnd(this.createEvent(e))
+      this.options.onEnd(event)
     }
+    this.emit('end', event)
   }
   
   update() {
@@ -339,10 +447,14 @@ export class Hyperact {
       }
     })
     
-    if (hasChanges && this.options.onMove) {
+    if (hasChanges) {
       // Create a dummy event for the callback
       const e = new PointerEvent('pointermove')
-      this.options.onMove(this.createEvent(e))
+      const event = this.createEvent(e)
+      if (this.options.onMove) {
+        this.options.onMove(event)
+      }
+      this.emit('move', event)
     }
     
     // Mark as dirty if still has velocity (for continued updates)
@@ -374,6 +486,16 @@ export class Hyperact {
   }
   
   destroy() {
+    // Clear hold timers
+    if (this.holdTimer) {
+      clearTimeout(this.holdTimer)
+      this.holdTimer = null
+    }
+    if (this.holdEventTimer) {
+      clearTimeout(this.holdEventTimer)
+      this.holdEventTimer = null
+    }
+
     // Unregister this instance
     this.unregisterInstance()
     
