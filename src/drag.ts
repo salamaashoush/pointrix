@@ -294,18 +294,36 @@ export class Draggable extends Hyperact {
       element.style.willChange = ''
     }
 
-    // Call modifier onEnd hooks
+    // Call modifier onEnd hooks and apply final position
     if (this.dragOptions.modifiers?.length) {
       const pointer = e.pointers[0]
+      let pos = { ...this.transform }
       const ctx: ModifierContext = {
-        position: { ...this.transform },
+        position: pos,
         velocity: pointer?.velocity ?? { x: 0, y: 0 },
         element: e.target,
         startPosition: { ...this.startTransform },
         delta: { x: dx, y: dy },
       }
       for (const mod of this.dragOptions.modifiers) {
-        mod.onEnd?.(ctx)
+        const result = mod.onEnd?.(ctx)
+        if (result) {
+          pos = result.position
+          ctx.position = pos
+        }
+      }
+      // Apply the final position (e.g., rubberband snap-back)
+      if (pos.x !== this.transform.x || pos.y !== this.transform.y) {
+        this.transform = pos
+        // Animate the snap-back with a CSS transition
+        element.style.transition = 'transform 300ms cubic-bezier(0.25, 1, 0.5, 1)'
+        this.applyTransform(element)
+        // Remove transition after animation completes
+        const cleanup = () => {
+          element.style.transition = ''
+          element.removeEventListener('transitionend', cleanup)
+        }
+        element.addEventListener('transitionend', cleanup)
       }
     }
 
