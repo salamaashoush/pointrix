@@ -18,6 +18,8 @@ Ultra-fast, zero-dependency drag/resize/gesture library for modern browsers. A h
 - **Batch creation** -- `interactAll()` to create instances for many elements at once
 - **Advanced filtering** -- `allowFrom` / `ignoreFrom` selectors, mouse button filtering, hold delay
 - **Tap and gesture detection** -- built-in tap, double-tap, and hold callbacks
+- **ARIA accessibility** -- automatic ARIA attributes for draggable, sortable, and dropzone elements with live screen reader announcements
+- **i18n / Localization** -- all screen reader strings are customizable via `setMessages()` for any language
 
 ## Bundle Sizes
 
@@ -673,6 +675,145 @@ You can also check whether an interaction is in progress:
 
 ```ts
 drag.interacting // true while a drag is active
+```
+
+---
+
+## Accessibility (ARIA)
+
+Hyperact automatically applies ARIA attributes and provides live screen reader announcements for draggable, sortable, and dropzone interactions. A visually hidden live region (`aria-live="assertive"`) and a shared instructions element are created lazily in the DOM when needed.
+
+All ARIA behavior is enabled by default. No configuration is required for basic accessibility support.
+
+### Draggable ARIA
+
+When a `draggable` is created, the following attributes are set on the element:
+
+| Attribute | Value | Purpose |
+|---|---|---|
+| `tabindex` | `0` | Makes the element keyboard-focusable (only set if not already present) |
+| `role` | `button` | Identifies the element as an interactive control (only set if not already present) |
+| `aria-roledescription` | `draggable` | Tells screen readers this is a draggable element |
+| `aria-describedby` | `hyperact-instructions` | Points to a visually hidden element containing keyboard instructions |
+| `aria-grabbed` | `true` / `false` | Toggled when a drag starts and ends |
+
+Screen readers will announce the element as a "draggable button" and read the keyboard instructions on focus. When a drag starts, the live region announces "Picked up"; when it ends, "Dropped".
+
+### Sortable ARIA
+
+Sortable containers and their items receive additional attributes to convey list semantics and position:
+
+**Container:**
+
+| Attribute | Value | Purpose |
+|---|---|---|
+| `role` | `listbox` | Identifies the container as an ordered list (only set if not already present) |
+
+**Items:**
+
+| Attribute | Value | Purpose |
+|---|---|---|
+| `tabindex` | `0` | Keyboard-focusable |
+| `role` | `option` | Identifies each item as a list option (only set if not already present) |
+| `aria-roledescription` | `sortable` | Tells screen readers this is a sortable item |
+| `aria-describedby` | `hyperact-instructions` | Keyboard instructions |
+| `aria-posinset` | `1`, `2`, ... | Current position in the list (1-based) |
+| `aria-setsize` | total count | Total number of items in the list |
+
+During a sort operation, the live region announces position changes:
+
+- **Pick up:** "Picked up [label], position 3 of 10"
+- **Move:** "Moved to position 5 of 10"
+- **Drop:** "Dropped [label] in position 5 of 10"
+
+### Dropzone ARIA
+
+Dropzone elements receive `aria-dropeffect` to communicate their state to assistive technology:
+
+| State | `aria-dropeffect` value |
+|---|---|
+| Default (initialized) | `move` |
+| Active (compatible drag in progress) | `move` |
+| Inactive (no compatible drag) | `none` |
+
+The attribute is toggled automatically when a compatible draggable starts or ends.
+
+### Opting Out
+
+Pass `aria: false` to any factory function to disable all ARIA attribute management for that instance:
+
+```ts
+draggable('#el', { aria: false })
+```
+
+### i18n / Localization
+
+All screen reader announcement strings can be customized using `setMessages()`. This allows full translation of every ARIA string Hyperact produces.
+
+#### The `AriaMessages` interface
+
+```ts
+interface AriaMessages {
+  instructions: string
+  pickedUp: (label: string, position: number, total: number) => string
+  movedTo: (position: number, total: number) => string
+  dropped: (label: string, position: number, total: number) => string
+  dragPickedUp: string
+  dragDropped: string
+}
+```
+
+#### Default values
+
+| Key | Default |
+|---|---|
+| `instructions` | `'Press Space or Enter to pick up. Use arrow keys to move. Press Space or Enter to drop. Press Escape to cancel.'` |
+| `pickedUp` | `` (label, pos, total) => `Picked up ${label}, position ${pos} of ${total}` `` |
+| `movedTo` | `` (pos, total) => `Moved to position ${pos} of ${total}` `` |
+| `dropped` | `` (label, pos, total) => `Dropped ${label} in position ${pos} of ${total}` `` |
+| `dragPickedUp` | `'Picked up'` |
+| `dragDropped` | `'Dropped'` |
+
+#### Overriding messages
+
+Use `setMessages()` with a partial or full set of replacements. Any keys you omit will keep their current values.
+
+```ts
+import { setMessages } from 'hyperact'
+
+setMessages({
+  instructions: '...',
+  pickedUp: (label, pos, total) => `...`,
+  movedTo: (pos, total) => `...`,
+  dropped: (label, pos, total) => `...`,
+  dragPickedUp: '...',
+  dragDropped: '...',
+})
+```
+
+#### Full translation example (German)
+
+```ts
+import { setMessages } from 'hyperact'
+
+setMessages({
+  instructions:
+    'Leertaste oder Eingabetaste drücken zum Aufnehmen. Pfeiltasten zum Verschieben. Leertaste oder Eingabetaste zum Ablegen. Escape zum Abbrechen.',
+  pickedUp: (label, pos, total) => `${label} aufgenommen, Position ${pos} von ${total}`,
+  movedTo: (pos, total) => `Verschoben auf Position ${pos} von ${total}`,
+  dropped: (label, pos, total) => `${label} abgelegt auf Position ${pos} von ${total}`,
+  dragPickedUp: 'Aufgenommen',
+  dragDropped: 'Abgelegt',
+})
+```
+
+You can also read the current messages at any time with `getMessages()`:
+
+```ts
+import { getMessages } from 'hyperact'
+
+const current = getMessages()
+console.log(current.instructions)
 ```
 
 ---
