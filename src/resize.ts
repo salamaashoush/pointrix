@@ -48,9 +48,31 @@ export class Resizable extends Hyperact {
   private currentSize = { width: 0, height: 0 }
   private currentPos = { x: 0, y: 0 }
   private activeEdge: Edge = null
+  private edgeFlags = { top: false, right: false, bottom: false, left: false }
   private aspectRatio: number | null = null
   private boundUpdateCursor: (e: PointerEvent) => void
   private transformNormalized = false
+  private modifierContext: ModifierContext = {
+    position: { x: 0, y: 0 },
+    velocity: { x: 0, y: 0 },
+    element: null as unknown as HTMLElement,
+    startPosition: { x: 0, y: 0 },
+    delta: { x: 0, y: 0 },
+    edges: { top: false, right: false, bottom: false, left: false },
+    size: { width: 0, height: 0 },
+    startSize: { width: 0, height: 0 },
+  }
+  private cachedResizeEvent: ResizeEvent = {
+    target: null as unknown as HTMLElement,
+    originalEvent: null as unknown as PointerEvent,
+    pointers: [],
+    isPrimary: true,
+    width: 0,
+    height: 0,
+    deltaWidth: 0,
+    deltaHeight: 0,
+    edges: { top: false, right: false, bottom: false, left: false },
+  }
   
   constructor(element: HTMLElement, options: ResizeOptions = {}) {
     // Default options
@@ -184,7 +206,13 @@ export class Resizable extends Hyperact {
     // Detect which edge is being dragged
     this.activeEdge = this.detectEdge(e.originalEvent)
     if (!this.activeEdge) return
-    
+
+    // Cache edge boolean flags
+    this.edgeFlags.top = this.activeEdge.includes('top')
+    this.edgeFlags.right = this.activeEdge.includes('right')
+    this.edgeFlags.bottom = this.activeEdge.includes('bottom')
+    this.edgeFlags.left = this.activeEdge.includes('left')
+
     // Store initial state
     this.startSize = {
       width: parseFloat(style.width) || rect.width,
@@ -239,17 +267,17 @@ export class Resizable extends Hyperact {
     let newY = this.startPos.y
     
     // Handle each edge/corner
-    if (this.activeEdge.includes('right')) {
+    if (this.edgeFlags.right) {
       newWidth += deltaX
     }
-    if (this.activeEdge.includes('left')) {
+    if (this.edgeFlags.left) {
       newWidth -= deltaX
       newX += deltaX
     }
-    if (this.activeEdge.includes('bottom')) {
+    if (this.edgeFlags.bottom) {
       newHeight += deltaY
     }
-    if (this.activeEdge.includes('top')) {
+    if (this.edgeFlags.top) {
       newHeight -= deltaY
       newY += deltaY
     }
@@ -303,14 +331,14 @@ export class Resizable extends Hyperact {
 
     // Apply size constraints
     if (newWidth < effectiveMinW) {
-      if (this.activeEdge.includes('left')) {
+      if (this.edgeFlags.left) {
         newX += newWidth - effectiveMinW
       }
       newWidth = effectiveMinW
       if (this.aspectRatio) newHeight = newWidth / this.aspectRatio
     }
     if (newWidth > maxWidth) {
-      if (this.activeEdge.includes('left')) {
+      if (this.edgeFlags.left) {
         newX += newWidth - maxWidth
       }
       newWidth = maxWidth
@@ -318,14 +346,14 @@ export class Resizable extends Hyperact {
     }
 
     if (newHeight < effectiveMinH) {
-      if (this.activeEdge.includes('top')) {
+      if (this.edgeFlags.top) {
         newY += newHeight - effectiveMinH
       }
       newHeight = effectiveMinH
       if (this.aspectRatio) newWidth = newHeight * this.aspectRatio
     }
     if (newHeight > maxHeight) {
-      if (this.activeEdge.includes('top')) {
+      if (this.edgeFlags.top) {
         newY += newHeight - maxHeight
       }
       newHeight = maxHeight
@@ -340,22 +368,25 @@ export class Resizable extends Hyperact {
     
     // Apply modifiers if configured
     if (this.resizeOptions.modifiers?.length) {
-      const modifierContext: ModifierContext = {
-        position: { x: newX, y: newY },
-        velocity: { x: pointer.velocity?.x ?? 0, y: pointer.velocity?.y ?? 0 },
-        element: this.element,
-        startPosition: { ...this.startPos },
-        delta: { x: deltaX, y: deltaY },
-        edges: {
-          top: this.activeEdge?.includes('top') || false,
-          right: this.activeEdge?.includes('right') || false,
-          bottom: this.activeEdge?.includes('bottom') || false,
-          left: this.activeEdge?.includes('left') || false
-        },
-        size: { width: newWidth, height: newHeight },
-        startSize: { ...this.startSize }
-      }
-      const result = applyModifiers(this.resizeOptions.modifiers, modifierContext)
+      const ctx = this.modifierContext
+      ctx.position.x = newX
+      ctx.position.y = newY
+      ctx.velocity.x = pointer.velocity?.x ?? 0
+      ctx.velocity.y = pointer.velocity?.y ?? 0
+      ctx.element = this.element
+      ctx.startPosition.x = this.startPos.x
+      ctx.startPosition.y = this.startPos.y
+      ctx.delta.x = deltaX
+      ctx.delta.y = deltaY
+      ctx.edges!.top = this.edgeFlags.top
+      ctx.edges!.right = this.edgeFlags.right
+      ctx.edges!.bottom = this.edgeFlags.bottom
+      ctx.edges!.left = this.edgeFlags.left
+      ctx.size!.width = newWidth
+      ctx.size!.height = newHeight
+      ctx.startSize!.width = this.startSize.width
+      ctx.startSize!.height = this.startSize.height
+      const result = applyModifiers(this.resizeOptions.modifiers, ctx)
       newX = result.position.x
       newY = result.position.y
       if (result.size) {
@@ -401,19 +432,20 @@ export class Resizable extends Hyperact {
   }
   
   private createResizeEvent(e: InteractionEvent, deltaWidth: number, deltaHeight: number): ResizeEvent {
-    return {
-      ...e,
-      width: this.currentSize.width,
-      height: this.currentSize.height,
-      deltaWidth,
-      deltaHeight,
-      edges: {
-        top: this.activeEdge?.includes('top') || false,
-        right: this.activeEdge?.includes('right') || false,
-        bottom: this.activeEdge?.includes('bottom') || false,
-        left: this.activeEdge?.includes('left') || false
-      }
-    }
+    const evt = this.cachedResizeEvent
+    evt.target = e.target
+    evt.originalEvent = e.originalEvent
+    evt.pointers = e.pointers
+    evt.isPrimary = e.isPrimary
+    evt.width = this.currentSize.width
+    evt.height = this.currentSize.height
+    evt.deltaWidth = deltaWidth
+    evt.deltaHeight = deltaHeight
+    evt.edges.top = this.edgeFlags.top
+    evt.edges.right = this.edgeFlags.right
+    evt.edges.bottom = this.edgeFlags.bottom
+    evt.edges.left = this.edgeFlags.left
+    return evt
   }
   
   setSize(width: number, height: number) {

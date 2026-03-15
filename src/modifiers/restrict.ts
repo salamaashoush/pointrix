@@ -27,9 +27,9 @@ export class RestrictModifier implements Modifier {
 
     if (this.options.endOnly) {
       return {
-        position: { ...context.position },
-        velocity: { ...context.velocity },
-        size: context.size ? { ...context.size } : undefined,
+        position: context.position,
+        velocity: context.velocity,
+        size: context.size,
       }
     }
 
@@ -54,23 +54,24 @@ export class RestrictModifier implements Modifier {
 
     if (!bounds) {
       return {
-        position: { ...context.position },
-        velocity: { ...context.velocity },
-        size: context.size ? { ...context.size } : undefined,
+        position: context.position,
+        velocity: context.velocity,
+        size: context.size,
       }
     }
 
-    const pos = { ...context.position }
+    let x = context.position.x
+    let y = context.position.y
 
-    if (bounds.left !== undefined) pos.x = Math.max(pos.x, bounds.left)
-    if (bounds.top !== undefined) pos.y = Math.max(pos.y, bounds.top)
-    if (bounds.right !== undefined) pos.x = Math.min(pos.x, bounds.right)
-    if (bounds.bottom !== undefined) pos.y = Math.min(pos.y, bounds.bottom)
+    if (bounds.left !== undefined) x = Math.max(x, bounds.left)
+    if (bounds.top !== undefined) y = Math.max(y, bounds.top)
+    if (bounds.right !== undefined) x = Math.min(x, bounds.right)
+    if (bounds.bottom !== undefined) y = Math.min(y, bounds.bottom)
 
     return {
-      position: pos,
-      velocity: { ...context.velocity },
-      size: context.size ? { ...context.size } : undefined,
+      position: { x, y },
+      velocity: context.velocity,
+      size: context.size,
     }
   }
 

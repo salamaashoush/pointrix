@@ -38,9 +38,9 @@ export class InertiaModifier implements Modifier {
   modify(context: ModifierContext): ModifierResult {
     if (!this.state || !this.state.active) {
       return {
-        position: { ...context.position },
-        velocity: { ...context.velocity },
-        size: context.size ? { ...context.size } : undefined,
+        position: context.position,
+        velocity: context.velocity,
+        size: context.size,
       }
     }
 
@@ -65,7 +65,7 @@ export class InertiaModifier implements Modifier {
     return {
       position: { x: px, y: py },
       velocity: { x: vx, y: vy },
-      size: context.size ? { ...context.size } : undefined,
+      size: context.size,
     }
   }
 
@@ -97,16 +97,16 @@ export class InertiaModifier implements Modifier {
         y: context.position.y + v0.y / lambda,
       },
       velocity: { x: 0, y: 0 },
-      size: context.size ? { ...context.size } : undefined,
+      size: context.size,
     }
   }
 
   private computeSmoothEnd(context: ModifierContext): ModifierResult {
     // Smooth deceleration to the current position (no inertia travel)
     return {
-      position: { ...context.position },
+      position: context.position,
       velocity: { x: 0, y: 0 },
-      size: context.size ? { ...context.size } : undefined,
+      size: context.size,
     }
   }
 

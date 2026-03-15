@@ -58,12 +58,13 @@ export class MagneticSnapModifier implements Modifier {
   }
 
   modify(context: ModifierContext): ModifierResult {
-    const { position, element } = context
-    
-    const elementBounds = element.getBoundingClientRect()
+    const { position } = context
+    const elWidth = context.size?.width ?? 0
+    const elHeight = context.size?.height ?? 0
+
     const elementCenter = {
-      x: position.x + elementBounds.width / 2,
-      y: position.y + elementBounds.height / 2
+      x: position.x + elWidth / 2,
+      y: position.y + elHeight / 2
     }
 
     let closestTarget: MagneticTarget | null = null
@@ -117,7 +118,7 @@ export class MagneticSnapModifier implements Modifier {
       return {
         position: snappedPosition,
         velocity: context.velocity,
-        size: context.size ? { ...context.size } : undefined
+        size: context.size,
       }
     } else {
       if (this.currentTarget) {
@@ -131,7 +132,7 @@ export class MagneticSnapModifier implements Modifier {
     return {
       position: context.position,
       velocity: context.velocity,
-      size: context.size ? { ...context.size } : undefined
+      size: context.size,
     }
   }
 

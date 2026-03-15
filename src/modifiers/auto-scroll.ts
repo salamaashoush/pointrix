@@ -11,6 +11,8 @@ export class AutoScrollModifier implements Modifier {
   public name = 'auto-scroll'
   private options: Required<AutoScrollOptions>
   private animationFrame: number | null = null
+  private cachedContainer: HTMLElement | Window | null = null
+  private cachedContainerRect: { left: number; top: number; right: number; bottom: number } | null = null
 
   constructor(options?: AutoScrollOptions) {
     this.options = {
@@ -21,13 +23,25 @@ export class AutoScrollModifier implements Modifier {
     }
   }
 
-  onStart(): void {
+  onStart(context: ModifierContext): void {
     this.animationFrame = null
+    this.cachedContainer = this.resolveContainer(context.element)
+    // Cache the container rect for the window case (stable dimensions)
+    if (this.cachedContainer === window || this.cachedContainer instanceof Window) {
+      this.cachedContainerRect = {
+        left: 0,
+        top: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight,
+      }
+    } else {
+      this.cachedContainerRect = null
+    }
   }
 
   modify(context: ModifierContext): ModifierResult {
-    const container = this.resolveContainer(context.element)
-    const containerRect = this.getContainerRect(container)
+    const container = this.cachedContainer ?? this.resolveContainer(context.element)
+    const containerRect = this.cachedContainerRect ?? this.getContainerRect(container)
     const { margin, speed, acceleration } = this.options
 
     const pointerX = context.position.x + context.delta.x
@@ -69,9 +83,9 @@ export class AutoScrollModifier implements Modifier {
     }
 
     return {
-      position: { ...context.position },
-      velocity: { ...context.velocity },
-      size: context.size ? { ...context.size } : undefined,
+      position: context.position,
+      velocity: context.velocity,
+      size: context.size,
     }
   }
 
@@ -80,6 +94,8 @@ export class AutoScrollModifier implements Modifier {
       cancelAnimationFrame(this.animationFrame)
       this.animationFrame = null
     }
+    this.cachedContainer = null
+    this.cachedContainerRect = null
   }
 
   private resolveContainer(element: HTMLElement): HTMLElement | Window {

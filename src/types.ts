@@ -46,21 +46,36 @@ export interface Modifier {
 
 // Apply a chain of modifiers sequentially
 export function applyModifiers(modifiers: Modifier[], context: ModifierContext): ModifierResult {
-  let result: ModifierResult = {
-    position: { ...context.position },
-    velocity: { ...context.velocity },
-    size: context.size ? { ...context.size } : undefined
-  }
+  let px = context.position.x
+  let py = context.position.y
+  let vx = context.velocity.x
+  let vy = context.velocity.y
+  let sw = context.size?.width
+  let sh = context.size?.height
 
   for (const mod of modifiers) {
-    const ctx: ModifierContext = {
-      ...context,
-      position: result.position,
-      velocity: result.velocity,
-      size: result.size ?? context.size
+    context.position.x = px
+    context.position.y = py
+    context.velocity.x = vx
+    context.velocity.y = vy
+    if (context.size && sw !== undefined && sh !== undefined) {
+      context.size.width = sw
+      context.size.height = sh
     }
-    result = mod.modify(ctx)
+    const result = mod.modify(context)
+    px = result.position.x
+    py = result.position.y
+    vx = result.velocity.x
+    vy = result.velocity.y
+    if (result.size) {
+      sw = result.size.width
+      sh = result.size.height
+    }
   }
 
-  return result
+  return {
+    position: { x: px, y: py },
+    velocity: { x: vx, y: vy },
+    size: sw !== undefined && sh !== undefined ? { width: sw, height: sh } : undefined,
+  }
 }

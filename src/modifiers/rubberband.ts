@@ -54,8 +54,8 @@ export class RubberbandModifier implements Modifier {
 
     return {
       position: pos,
-      velocity: { ...context.velocity },
-      size: context.size ? { ...context.size } : undefined,
+      velocity: context.velocity,
+      size: context.size,
     }
   }
 
@@ -75,8 +75,8 @@ export class RubberbandModifier implements Modifier {
 
     return {
       position: pos,
-      velocity: { ...context.velocity },
-      size: context.size ? { ...context.size } : undefined,
+      velocity: context.velocity,
+      size: context.size,
     }
   }
 

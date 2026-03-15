@@ -16,8 +16,8 @@ export class RestrictEdgesModifier implements Modifier {
   }
 
   modify(context: ModifierContext): ModifierResult {
-    const pos = { ...context.position }
-    const size = context.size ? { ...context.size } : undefined
+    const pos = context.position
+    const size = context.size
     const edges = context.edges
     const { outer, inner } = this.options
 
@@ -80,7 +80,7 @@ export class RestrictEdgesModifier implements Modifier {
 
     return {
       position: pos,
-      velocity: { ...context.velocity },
+      velocity: context.velocity,
       size,
     }
   }

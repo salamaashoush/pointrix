@@ -62,9 +62,13 @@ export class SnapTargetsModifier implements Modifier {
   private parentOffset: Point | null = null
   private _snappedTarget: SnapTarget | null = null
   private _snappedIndex = -1
+  private resolvedPivots: Array<{ x: number; y: number }> = []
 
   constructor(options: SnapTargetsOptions) {
     this.options = options
+    this.resolvedPivots = options.relativePoints?.length
+      ? options.relativePoints.map(resolvePivot)
+      : [{ x: 0, y: 0 }]
   }
 
   /** The target the element is currently snapped to, or null */
@@ -102,10 +106,8 @@ export class SnapTargetsModifier implements Modifier {
   }
 
   modify(context: ModifierContext): ModifierResult {
-    const { targets, range: globalRange = 50, relativePoints } = this.options
-    const resolvedPoints = relativePoints?.length
-      ? relativePoints.map(resolvePivot)
-      : [{ x: 0, y: 0 }]
+    const { targets, range: globalRange = 50 } = this.options
+    const resolvedPoints = this.resolvedPivots
     const isParentMode = this.options.coordinateMode === 'parent'
 
     let bestDistance = Infinity
@@ -161,17 +163,17 @@ export class SnapTargetsModifier implements Modifier {
           x: context.position.x + bestOffset.x,
           y: context.position.y + bestOffset.y,
         },
-        velocity: { ...context.velocity },
-        size: context.size ? { ...context.size } : undefined,
+        velocity: context.velocity,
+        size: context.size,
       }
     }
 
     this._snappedTarget = null
     this._snappedIndex = -1
     return {
-      position: { ...context.position },
-      velocity: { ...context.velocity },
-      size: context.size ? { ...context.size } : undefined,
+      position: context.position,
+      velocity: context.velocity,
+      size: context.size,
     }
   }
 }

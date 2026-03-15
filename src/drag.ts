@@ -41,6 +41,27 @@ export class Draggable extends Hyperact {
   private transformNormalized = false
   private detectedAxis: 'x' | 'y' | null = null
   private startAxisConfirmed = false
+  private cachedSize = { width: 0, height: 0 }
+  private modifierContext: ModifierContext = {
+    position: { x: 0, y: 0 },
+    velocity: { x: 0, y: 0 },
+    element: null as unknown as HTMLElement,
+    startPosition: { x: 0, y: 0 },
+    delta: { x: 0, y: 0 },
+    size: { width: 0, height: 0 },
+  }
+  private cachedDragEvent: DragEvent = {
+    target: null as unknown as HTMLElement,
+    originalEvent: null as unknown as PointerEvent,
+    pointers: [],
+    isPrimary: true,
+    dx: 0,
+    dy: 0,
+    totalX: 0,
+    totalY: 0,
+    velocityX: 0,
+    velocityY: 0,
+  }
 
   constructor(element: HTMLElement, options: DragOptions = {}) {
     super(element, {
@@ -181,17 +202,25 @@ export class Draggable extends Hyperact {
     // Stop momentum if active
     this.momentum.active = false
 
+    // Cache element size at drag start
+    const startRect = e.target.getBoundingClientRect()
+    this.cachedSize.width = startRect.width
+    this.cachedSize.height = startRect.height
+
     // Call modifier onStart hooks
     if (this.dragOptions.modifiers?.length) {
-      const startRect = e.target.getBoundingClientRect()
-      const ctx: ModifierContext = {
-        position: { ...this.startTransform },
-        velocity: { x: 0, y: 0 },
-        element: e.target,
-        startPosition: { ...this.startTransform },
-        delta: { x: 0, y: 0 },
-        size: { width: startRect.width, height: startRect.height },
-      }
+      const ctx = this.modifierContext
+      ctx.position.x = this.startTransform.x
+      ctx.position.y = this.startTransform.y
+      ctx.velocity.x = 0
+      ctx.velocity.y = 0
+      ctx.element = e.target
+      ctx.startPosition.x = this.startTransform.x
+      ctx.startPosition.y = this.startTransform.y
+      ctx.delta.x = 0
+      ctx.delta.y = 0
+      ctx.size!.width = this.cachedSize.width
+      ctx.size!.height = this.cachedSize.height
       for (const mod of this.dragOptions.modifiers) {
         mod.onStart?.(ctx)
       }
@@ -255,15 +284,19 @@ export class Draggable extends Hyperact {
 
     // Apply modifiers (run after inline bounds/grid logic)
     if (this.dragOptions.modifiers?.length) {
-      const rect = e.target.getBoundingClientRect()
-      const result = applyModifiers(this.dragOptions.modifiers, {
-        position: { x, y },
-        velocity: pointer.velocity,
-        element: e.target,
-        startPosition: { ...this.startTransform },
-        delta: { x: pointer.delta.x, y: pointer.delta.y },
-        size: { width: rect.width, height: rect.height },
-      })
+      const ctx = this.modifierContext
+      ctx.position.x = x
+      ctx.position.y = y
+      ctx.velocity.x = pointer.velocity.x
+      ctx.velocity.y = pointer.velocity.y
+      ctx.element = e.target
+      ctx.startPosition.x = this.startTransform.x
+      ctx.startPosition.y = this.startTransform.y
+      ctx.delta.x = pointer.delta.x
+      ctx.delta.y = pointer.delta.y
+      ctx.size!.width = this.cachedSize.width
+      ctx.size!.height = this.cachedSize.height
+      const result = applyModifiers(this.dragOptions.modifiers, ctx)
       x = result.position.x
       y = result.position.y
     }
@@ -286,8 +319,7 @@ export class Draggable extends Hyperact {
     this.emit('dragmove', dragMoveEvent)
 
     if (this.dragOptions.droppable) {
-      const pointer = e.pointers[0]
-      DropzoneManager.onDragMove(e.target, pointer.current, this.createDragEvent(e, dx, dy))
+      DropzoneManager.onDragMove(e.target, pointer.current, dragMoveEvent)
     }
   }
 
@@ -411,15 +443,18 @@ export class Draggable extends Hyperact {
 
   private createDragEvent(e: InteractionEvent, dx: number, dy: number): DragEvent {
     const pointer = e.pointers[0]
-    return {
-      ...e,
-      dx: pointer?.delta.x || 0,
-      dy: pointer?.delta.y || 0,
-      totalX: dx,
-      totalY: dy,
-      velocityX: pointer?.velocity.x || 0,
-      velocityY: pointer?.velocity.y || 0,
-    }
+    const evt = this.cachedDragEvent
+    evt.target = e.target
+    evt.originalEvent = e.originalEvent
+    evt.pointers = e.pointers
+    evt.isPrimary = e.isPrimary
+    evt.dx = pointer?.delta.x || 0
+    evt.dy = pointer?.delta.y || 0
+    evt.totalX = dx
+    evt.totalY = dy
+    evt.velocityX = pointer?.velocity.x || 0
+    evt.velocityY = pointer?.velocity.y || 0
+    return evt
   }
 
   setPosition(x: number, y: number) {

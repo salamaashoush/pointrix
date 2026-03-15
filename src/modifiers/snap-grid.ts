@@ -32,8 +32,8 @@ export class SnapGridModifier implements Modifier {
 
     return {
       position: { x: snappedX, y: snappedY },
-      velocity: { ...context.velocity },
-      size: context.size ? { ...context.size } : undefined,
+      velocity: context.velocity,
+      size: context.size,
     }
   }
 }

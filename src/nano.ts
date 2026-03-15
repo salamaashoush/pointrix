@@ -46,6 +46,15 @@ let rafId: number | null = null
 let instances: Set<Hyperact> = new Set()
 let dirtyInstances: Set<Hyperact> = new Set()
 
+// Cached sentinel event to avoid allocating a new PointerEvent every frame (lazily initialized)
+let SENTINEL_MOVE_EVENT: PointerEvent | null = null
+function getSentinelEvent(): PointerEvent {
+  if (!SENTINEL_MOVE_EVENT && typeof PointerEvent !== 'undefined') {
+    SENTINEL_MOVE_EVENT = new PointerEvent('pointermove')
+  }
+  return SENTINEL_MOVE_EVENT!
+}
+
 function scheduleUpdate() {
   if (rafId !== null) return
   
@@ -53,19 +62,20 @@ function scheduleUpdate() {
     rafId = null
     
     // Only update instances that have changes
-    dirtyInstances.forEach(instance => instance.update())
+    for (const instance of dirtyInstances) instance.update()
     dirtyInstances.clear()
-    
+
     // Only schedule next frame if there are active instances with ongoing changes
     if (instances.size > 0) {
       // Check if any instances still have velocity or pending updates
       let hasActiveInstances = false
-      instances.forEach(instance => {
+      for (const instance of instances) {
         if (instance.hasActivePointers()) {
           hasActiveInstances = true
+          break
         }
-      })
-      
+      }
+
       if (hasActiveInstances) {
         scheduleUpdate()
       }
@@ -77,6 +87,7 @@ export class Hyperact {
   protected element: HTMLElement
   protected options: HyperactOptions
   protected pointers = new Map<number, PointerState>()
+  private pointersCache: PointerState[] = []
   protected isActive = false
   protected lastUpdate = 0
   protected priority: number = 0 // Higher priority wins
@@ -111,6 +122,7 @@ export class Hyperact {
     if (!value && this.isActive) {
       // Force end the current interaction
       this.pointers.clear()
+      this.pointersCache = []
       this.isActive = false
       instances.delete(this)
       dirtyInstances.delete(this)
@@ -145,20 +157,20 @@ export class Hyperact {
     this.registerInstance()
 
     // Optimize element for interactions (only if first instance)
-    const instances = Hyperact.elementInstances.get(element) || []
-    if (instances.length === 1) {
+    const elementInstances = Hyperact.elementInstances.get(element)
+    if (elementInstances && elementInstances.length === 1) {
       element.style.touchAction = this.options.touchAction ?? 'none'
       element.style.userSelect = 'none'
       element.style.webkitUserSelect = 'none'
     }
-    
+
     // Bind event handlers
     this.onPointerDown = this.onPointerDown.bind(this)
     this.onPointerMove = this.onPointerMove.bind(this)
     this.onPointerUp = this.onPointerUp.bind(this)
-    
+
     // Add listeners (only if first instance)
-    if (instances.length === 1) {
+    if (elementInstances && elementInstances.length === 1) {
       const listener = (e: PointerEvent) => Hyperact.handleElementPointerDown(element, e)
       Hyperact.elementListeners.set(element, listener)
       element.addEventListener('pointerdown', listener)
@@ -166,13 +178,17 @@ export class Hyperact {
   }
   
   private registerInstance() {
-    const instances = Hyperact.elementInstances.get(this.element) || []
-    instances.push(this)
-    Hyperact.elementInstances.set(this.element, instances)
+    const existing = Hyperact.elementInstances.get(this.element)
+    if (existing) {
+      existing.push(this)
+    } else {
+      Hyperact.elementInstances.set(this.element, [this])
+    }
   }
   
   private unregisterInstance() {
-    const instances = Hyperact.elementInstances.get(this.element) || []
+    const instances = Hyperact.elementInstances.get(this.element)
+    if (!instances) return
     const index = instances.indexOf(this)
     if (index >= 0) {
       instances.splice(index, 1)
@@ -201,7 +217,8 @@ export class Hyperact {
   
   // Static method to handle pointer events for all instances on an element
   private static handleElementPointerDown(element: HTMLElement, e: PointerEvent) {
-    const instances = Hyperact.elementInstances.get(element) || []
+    const instances = Hyperact.elementInstances.get(element)
+    if (!instances) return
     const activeInstance = Hyperact.activeInstance.get(element)
     
     // If there's already an active instance, let it continue
@@ -255,6 +272,7 @@ export class Hyperact {
     }
 
     this.pointers.set(e.pointerId, pointer)
+    this.pointersCache = Array.from(this.pointers.values())
 
     // Add global listeners
     if (this.pointers.size === 1) {
@@ -299,7 +317,8 @@ export class Hyperact {
     
     // Only update if position actually changed
     if (pointer.current.x !== newX || pointer.current.y !== newY) {
-      pointer.current = { x: newX, y: newY }
+      pointer.current.x = newX
+      pointer.current.y = newY
       
       // Check threshold
       if (!this.isActive) {
@@ -336,6 +355,7 @@ export class Hyperact {
     if (!pointer) return
 
     this.pointers.delete(e.pointerId)
+    this.pointersCache = Array.from(this.pointers.values())
 
     // Clear hold timers
     if (this.holdTimer) {
@@ -422,23 +442,21 @@ export class Hyperact {
       if (dx !== 0 || dy !== 0) {
         hasChanges = true
         
-        pointer.delta = { x: dx, y: dy }
-        pointer.total = {
-          x: pointer.current.x - pointer.start.x,
-          y: pointer.current.y - pointer.start.y
-        }
-        
+        pointer.delta.x = dx
+        pointer.delta.y = dy
+        pointer.total.x = pointer.current.x - pointer.start.x
+        pointer.total.y = pointer.current.y - pointer.start.y
+
         // Calculate velocity with smoothing
         if (dt > 0) {
           const vx = dx / dt * 1000
           const vy = dy / dt * 1000
-          pointer.velocity = {
-            x: pointer.velocity.x * 0.7 + vx * 0.3,
-            y: pointer.velocity.y * 0.7 + vy * 0.3
-          }
+          pointer.velocity.x = pointer.velocity.x * 0.7 + vx * 0.3
+          pointer.velocity.y = pointer.velocity.y * 0.7 + vy * 0.3
         }
-        
-        pointer.previous = { ...pointer.current }
+
+        pointer.previous.x = pointer.current.x
+        pointer.previous.y = pointer.current.y
       }
       
       // Check if pointer still has velocity (for inertia)
@@ -448,8 +466,8 @@ export class Hyperact {
     })
     
     if (hasChanges) {
-      // Create a dummy event for the callback
-      const e = new PointerEvent('pointermove')
+      // Use cached sentinel event to avoid allocation per frame
+      const e = getSentinelEvent()
       const event = this.createEvent(e)
       if (this.options.onMove) {
         this.options.onMove(event)
@@ -479,7 +497,7 @@ export class Hyperact {
   private createEvent(originalEvent: PointerEvent): InteractionEvent {
     return {
       target: this.element,
-      pointers: Array.from(this.pointers.values()),
+      pointers: this.pointersCache,
       isPrimary: originalEvent.isPrimary,
       originalEvent
     }
@@ -500,8 +518,8 @@ export class Hyperact {
     this.unregisterInstance()
     
     // Only remove listeners if this is the last instance
-    const elementInstances = Hyperact.elementInstances.get(this.element) || []
-    if (elementInstances.length === 0) {
+    const elementInstances = Hyperact.elementInstances.get(this.element)
+    if (!elementInstances || elementInstances.length === 0) {
       // Remove the static event listener
       const listener = Hyperact.elementListeners.get(this.element)
       if (listener) {
@@ -525,8 +543,9 @@ export class Hyperact {
     
     // Remove from RAF instances
     instances.delete(this)
-    
+
     this.pointers.clear()
+    this.pointersCache = []
   }
 }
 

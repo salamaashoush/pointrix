@@ -15,25 +15,23 @@ export class SnapSizeModifier implements Modifier {
   }
 
   modify(context: ModifierContext): ModifierResult {
-    const size = context.size ? { ...context.size } : undefined
-
-    if (size) {
+    if (context.size) {
       const { width: gridW, height: gridH, offset } = this.options
       const offsetW = offset?.width ?? 0
       const offsetH = offset?.height ?? 0
 
       if (gridW && gridW > 0) {
-        size.width = Math.round((size.width - offsetW) / gridW) * gridW + offsetW
+        context.size.width = Math.round((context.size.width - offsetW) / gridW) * gridW + offsetW
       }
       if (gridH && gridH > 0) {
-        size.height = Math.round((size.height - offsetH) / gridH) * gridH + offsetH
+        context.size.height = Math.round((context.size.height - offsetH) / gridH) * gridH + offsetH
       }
     }
 
     return {
-      position: { ...context.position },
-      velocity: { ...context.velocity },
-      size,
+      position: context.position,
+      velocity: context.velocity,
+      size: context.size,
     }
   }
 }

@@ -22,8 +22,8 @@ export class SnapEdgesModifier implements Modifier {
   }
 
   modify(context: ModifierContext): ModifierResult {
-    const pos = { ...context.position }
-    const size = context.size ? { ...context.size } : undefined
+    const pos = context.position
+    const size = context.size
     const edges = context.edges
     const defaultRange = this.options.range ?? 20
 
@@ -64,7 +64,7 @@ export class SnapEdgesModifier implements Modifier {
 
     return {
       position: pos,
-      velocity: { ...context.velocity },
+      velocity: context.velocity,
       size,
     }
   }
