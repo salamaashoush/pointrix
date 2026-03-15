@@ -7,13 +7,17 @@ Ultra-fast, zero-dependency drag/resize/gesture library for modern browsers. A h
 - **Tiny footprint** -- core is 1.6 KB gzipped; full bundle under 10 KB gzipped
 - **Zero runtime dependencies** -- nothing to audit, nothing to break
 - **Modular architecture** -- import only drag, resize, gesture, dropzone, or sortable
-- **Modifier pipeline** -- composable restrict, snap, inertia, magnetic snap, and auto-scroll modifiers
+- **Modifier pipeline** -- composable restrict, snap, inertia, magnetic snap, rubberband, and auto-scroll modifiers
 - **Unified pointer events** -- mouse, touch, and pen handled identically
 - **RAF-batched updates** -- single shared `requestAnimationFrame` loop across all instances
 - **GPU-accelerated** -- uses `translate3d` for all transforms
 - **Framework integrations** -- first-class React hooks/components and Vue 3 composables/directives
 - **TypeScript-first** -- strict types for every option, event, and return value
 - **Tree-shakeable** -- ES module sub-path exports; bundlers drop what you don't use
+- **Event listener API** -- chainable `.on()` / `.off()` for all interaction events
+- **Batch creation** -- `interactAll()` to create instances for many elements at once
+- **Advanced filtering** -- `allowFrom` / `ignoreFrom` selectors, mouse button filtering, hold delay
+- **Tap and gesture detection** -- built-in tap, double-tap, and hold callbacks
 
 ## Bundle Sizes
 
@@ -61,6 +65,85 @@ Every factory function accepts an `HTMLElement` or a CSS selector string. Every 
 
 ## API Reference
 
+### Core Options (HyperactOptions)
+
+All interaction types (draggable, resizable, gesturable) inherit these base options:
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `threshold` | `number` | `3` | Pixels of movement before interaction starts |
+| `preventScroll` | `boolean` | `true` | Prevent touch scrolling while interacting |
+| `holdDelay` | `number` | `0` | Hold delay in ms -- pointer must be held this long before the interaction starts |
+| `mouseButtons` | `number` | `0` (any) | Bitmask of allowed mouse buttons: `1` = left, `2` = right, `4` = middle |
+| `allowFrom` | `string` | -- | CSS selector -- only start if the pointer target matches |
+| `ignoreFrom` | `string` | -- | CSS selector -- never start if the pointer target matches |
+| `touchAction` | `string` | `'none'` | CSS `touch-action` value applied to the element |
+| `styleCursor` | `boolean` | `true` | Whether to set cursor styles automatically |
+| `enabled` | `boolean` | `true` | Enable or disable the instance (also available as a property) |
+| `onTap` | `(event) => void` | -- | Called on tap (pointer down + up without exceeding threshold) |
+| `onDoubleTap` | `(event) => void` | -- | Called on double-tap (two taps within 300 ms on the same target) |
+| `onHold` | `(event) => void` | -- | Called when the pointer is held still for `holdDuration` ms without starting an interaction |
+| `holdDuration` | `number` | `600` | Time in ms before `onHold` fires |
+
+---
+
+### Event Listener API
+
+Every instance (Hyperact, Draggable, Resizable, Gesturable) exposes chainable `.on()` and `.off()` methods for subscribing to events imperatively. This is an alternative to passing callbacks in the options object.
+
+```ts
+const drag = draggable('#el')
+
+drag.on('dragstart', (e) => console.log('started'))
+drag.on('dragmove', (e) => console.log(e.totalX, e.totalY))
+drag.off('dragmove', handler)
+```
+
+You can also read whether an interaction is currently in progress with the `.interacting` property:
+
+```ts
+if (drag.interacting) {
+  console.log('drag is active')
+}
+```
+
+#### Events by class
+
+**Hyperact (nano)**
+
+| Event | Description |
+|---|---|
+| `start` | Interaction started (threshold exceeded or hold delay elapsed) |
+| `move` | Pointer moved during an active interaction |
+| `end` | Interaction ended |
+| `tap` | Pointer released without exceeding threshold |
+
+**Draggable**
+
+| Event | Description |
+|---|---|
+| `dragstart` | Drag started |
+| `dragmove` | Pointer moved during drag |
+| `dragend` | Drag ended |
+
+**Resizable**
+
+| Event | Description |
+|---|---|
+| `resizestart` | Resize started |
+| `resizemove` | Size changed during resize |
+| `resizeend` | Resize ended |
+
+**Gesturable**
+
+| Event | Description |
+|---|---|
+| `gesturestart` | Gesture started |
+| `gesturemove` | Gesture updated |
+| `gestureend` | Gesture ended |
+
+---
+
 ### Draggable
 
 ```ts
@@ -71,13 +154,15 @@ import { draggable } from 'hyperact/drag'
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `axis` | `'x' \| 'y' \| 'xy'` | `'xy'` | Constrain movement to one axis |
+| `axis` | `'x' \| 'y' \| 'xy' \| 'start'` | `'xy'` | Constrain movement to one axis. `'start'` auto-detects the axis from the initial movement direction |
+| `startAxis` | `'x' \| 'y'` | -- | Only start the drag if the initial movement direction matches this axis |
 | `handle` | `string \| HTMLElement` | -- | Only start drag when pointer is inside this element/selector |
 | `bounds` | `'parent' \| HTMLElement \| {left?, top?, right?, bottom?}` | -- | Restrict movement within a region |
 | `grid` | `{x: number, y: number}` | -- | Snap position to a grid |
 | `momentum` | `boolean \| {friction?: number, minSpeed?: number}` | `false` | Physics-based momentum after release |
-| `droppable` | `boolean` | `false` | Integrate with `Dropzone` system |
+| `droppable` | `boolean` | `false` | Integrate with the `Dropzone` system |
 | `modifiers` | `Modifier[]` | -- | Modifier chain applied each frame |
+| `cursorChecker` | `(action: 'idle' \| 'grab' \| 'grabbing') => string` | -- | Custom function to determine the cursor for each drag state |
 | `threshold` | `number` | `3` | Pixels of movement before drag starts |
 | `preventScroll` | `boolean` | `true` | Prevent touch scrolling while dragging |
 
@@ -116,6 +201,15 @@ draggable('#card', {
 })
 ```
 
+#### Example -- axis auto-detection
+
+```ts
+draggable('#swipeable', {
+  axis: 'start', // locks to x or y based on initial swipe direction
+  onDragEnd: (e) => console.log(e.totalX, e.totalY),
+})
+```
+
 ---
 
 ### Resizable
@@ -135,8 +229,11 @@ import { resizable } from 'hyperact/resize'
 | `maxWidth` | `number` | `Infinity` | Maximum width in px |
 | `maxHeight` | `number` | `Infinity` | Maximum height in px |
 | `aspectRatio` | `number \| 'preserve'` | -- | Lock aspect ratio (number or preserve current) |
+| `square` | `boolean` | `false` | Shorthand for `aspectRatio: 1` |
+| `invert` | `'none' \| 'negate' \| 'reposition'` | `'none'` | How to handle resizing past the opposite edge. `'negate'` allows negative sizes; `'reposition'` flips the element |
 | `grid` | `{width: number, height: number}` | -- | Snap size to a grid |
 | `modifiers` | `Modifier[]` | -- | Modifier chain |
+| `cursorChecker` | `(edge: string \| null) => string` | -- | Custom function to determine the cursor for each edge |
 
 #### Events
 
@@ -164,6 +261,16 @@ resizable('#panel', {
   minWidth: 200,
   aspectRatio: 16 / 9,
   onResizeMove: (e) => console.log(`${e.width}x${e.height}`),
+})
+```
+
+#### Example -- invert mode
+
+```ts
+resizable('#box', {
+  invert: 'reposition', // allows dragging past opposite edge
+  square: true,         // maintain 1:1 aspect ratio
+  onResizeMove: (e) => console.log(e.width, e.height),
 })
 ```
 
@@ -315,7 +422,10 @@ sortable('#done', { group: 'kanban' })
 ### Modifiers
 
 ```ts
-import { restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll } from 'hyperact/modifiers'
+import {
+  restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll,
+  rubberband, restrictSize, restrictEdges, snapSize, snapEdges,
+} from 'hyperact/modifiers'
 ```
 
 Modifiers are composable transforms applied to the position each frame. Pass them as an array to the `modifiers` option of `draggable` or `resizable`.
@@ -393,6 +503,99 @@ Scroll a container when the pointer approaches its edges.
 | `margin` | `number` | `50` | Edge proximity threshold (px) |
 | `acceleration` | `number` | `5` | Acceleration multiplier |
 
+#### `rubberband(options)`
+
+Allow the element to be dragged past bounds with elastic resistance, then snap back on release.
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `bounds` | `'parent' \| {left?, top?, right?, bottom?}` | -- | Bounding region |
+| `resistance` | `number` | `0.15` | Resistance factor 0-1. Lower = more resistance |
+| `maxOvershoot` | `number` | `100` | Maximum overshoot in pixels |
+
+```ts
+draggable('#el', {
+  modifiers: [
+    rubberband({ bounds: 'parent', resistance: 0.2 }),
+  ],
+})
+```
+
+#### `restrictSize(options)`
+
+Clamp the element's size during a resize interaction.
+
+| Option | Type | Description |
+|---|---|---|
+| `min` | `{width?: number, height?: number}` | Minimum size |
+| `max` | `{width?: number, height?: number}` | Maximum size |
+
+```ts
+resizable('#panel', {
+  modifiers: [
+    restrictSize({ min: { width: 100, height: 100 }, max: { width: 800, height: 600 } }),
+  ],
+})
+```
+
+#### `restrictEdges(options)`
+
+Restrict individual edge positions during a resize interaction.
+
+| Option | Type | Description |
+|---|---|---|
+| `outer` | `{left?, top?, right?, bottom?}` | Edges cannot go beyond these values (outward limit) |
+| `inner` | `{left?, top?, right?, bottom?}` | Edges cannot pass these values toward the center (inward limit) |
+
+```ts
+resizable('#panel', {
+  modifiers: [
+    restrictEdges({
+      outer: { left: 0, top: 0, right: 800, bottom: 600 },
+      inner: { left: 100, top: 100 },
+    }),
+  ],
+})
+```
+
+#### `snapSize(options)`
+
+Snap the element's width and height to a grid during resize.
+
+| Option | Type | Description |
+|---|---|---|
+| `width` | `number` | Grid cell width for snapping |
+| `height` | `number` | Grid cell height for snapping |
+| `offset` | `{width?: number, height?: number}` | Grid origin offset |
+
+```ts
+resizable('#panel', {
+  modifiers: [
+    snapSize({ width: 50, height: 50 }),
+  ],
+})
+```
+
+#### `snapEdges(options)`
+
+Snap individual edges to target positions during resize.
+
+| Option | Type | Description |
+|---|---|---|
+| `targets` | `SnapEdgeTarget[]` | Array of `{left?, top?, right?, bottom?, range?}` |
+| `range` | `number` (default `20`) | Default snap distance |
+
+```ts
+resizable('#panel', {
+  modifiers: [
+    snapEdges({
+      targets: [{ left: 0, top: 0, right: 800, bottom: 600 }],
+      range: 30,
+    }),
+  ],
+})
+```
+
 #### Composing modifiers
 
 ```ts
@@ -432,6 +635,45 @@ ia.destroy()
 ```
 
 Pass `true` for default options or an options object.
+
+---
+
+### interactAll()
+
+```ts
+import { interactAll } from 'hyperact'
+```
+
+Create interaction instances for every element matching a CSS selector. Returns an object with an `instances` array and a single `destroy()` method to tear down all of them.
+
+```ts
+const result = interactAll('.card', { drag: true, resize: true })
+
+result.instances   // Array of interactable results
+result.destroy()   // Destroys all instances at once
+```
+
+---
+
+### Enabling and Disabling
+
+Every instance has an `enabled` property. Setting it to `false` cancels any active interaction and ignores future pointer events. Setting it back to `true` re-enables the instance.
+
+```ts
+const drag = draggable('#el', { onDragMove: (e) => console.log(e.totalX) })
+
+// Disable
+drag.enabled = false
+
+// Re-enable
+drag.enabled = true
+```
+
+You can also check whether an interaction is in progress:
+
+```ts
+drag.interacting // true while a drag is active
+```
 
 ---
 
@@ -578,7 +820,7 @@ import { useDraggable } from 'hyperact/react'
 import { useDraggable } from 'hyperact/vue'
 
 // Full bundle if you need everything
-import { interactable, draggable, resizable, gesturable, dropzone, sortable } from 'hyperact'
+import { interactable, interactAll, draggable, resizable, gesturable, dropzone, sortable } from 'hyperact'
 ```
 
 All entry points ship ESM (`.mjs`) and CJS (`.cjs`) with full TypeScript declarations.

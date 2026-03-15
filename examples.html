@@ -596,6 +596,232 @@
     }
 
 
+    /* ─── Section 8: New Features ─── */
+    .hold-delay-box {
+      width: 120px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--amber), #d97706);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      transition: background .3s;
+    }
+    .hold-delay-box.waiting {
+      background: linear-gradient(135deg, var(--rose), #dc2626);
+    }
+    .hold-delay-box.ready {
+      background: linear-gradient(135deg, var(--green), #059669);
+    }
+
+    .allow-ignore-card {
+      width: 220px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .allow-ignore-card .card-header {
+      padding: 10px 14px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: grab;
+    }
+    .allow-ignore-card .card-body {
+      padding: 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .allow-ignore-card .card-body button {
+      margin-top: 8px;
+      padding: 6px 14px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .allow-ignore-card .card-body button:hover {
+      background: var(--accent-hover);
+    }
+
+    .axis-auto-box {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--blue), #2563eb);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+      box-shadow: var(--shadow-lg);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-top: -50px;
+      margin-left: -50px;
+    }
+
+    .rubberband-area {
+      width: 100%;
+      height: 300px;
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .rubberband-box {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--purple), #7c3aed);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+      box-shadow: var(--shadow-lg);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-top: -50px;
+      margin-left: -50px;
+    }
+
+    .invert-compare {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .invert-panel {
+      flex: 1;
+      min-width: 250px;
+    }
+    .invert-panel h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .invert-container {
+      height: 200px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      position: relative;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .invert-box {
+      width: 120px;
+      height: 80px;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .invert-box::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--accent);
+      border-bottom: 2px solid var(--accent);
+      opacity: 0.5;
+    }
+
+    .event-log-area {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .event-log-left {
+      flex-shrink: 0;
+    }
+    .event-log-box {
+      width: 120px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--green), #059669);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+    }
+    .event-log-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .event-log-btns button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+    }
+    .event-log-btns .btn-add { background: var(--green) }
+    .event-log-btns .btn-add:hover { background: #059669 }
+    .event-log-btns .btn-remove { background: var(--rose) }
+    .event-log-btns .btn-remove:hover { background: #dc2626 }
+    .event-console {
+      flex: 1;
+      height: 180px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      border-radius: 10px;
+      padding: 12px;
+      overflow-y: auto;
+      min-width: 0;
+    }
+    .event-console .log-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .event-console .log-event { color: #89b4fa }
+    .event-console .log-time { color: #6c7086 }
+    .event-console .log-data { color: #a6e3a1 }
+    .event-console .log-info { color: #f9e2af }
+
     /* Responsive */
     @media (max-width: 900px) {
       #sidebar { display: none }
@@ -649,6 +875,15 @@
     <div class="nav-group">
       <div class="nav-group-label">Performance</div>
       <a href="#stress-test"><span class="nav-num">7.1</span> Stress Test</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">New Features</div>
+      <a href="#hold-delay"><span class="nav-num">8.1</span> Hold Delay</a>
+      <a href="#allow-ignore"><span class="nav-num">8.2</span> Allow/Ignore From</a>
+      <a href="#axis-autodetect"><span class="nav-num">8.3</span> Axis Auto-detect</a>
+      <a href="#rubberband-demo"><span class="nav-num">8.4</span> Rubberband</a>
+      <a href="#resize-invert"><span class="nav-num">8.5</span> Resize Invert</a>
+      <a href="#event-listeners"><span class="nav-num">8.6</span> Event Listeners</a>
     </div>
   </nav>
 </aside>
@@ -1311,11 +1546,226 @@ for (let i = 0; i &lt; count; i++) {
       </details>
     </div>
   </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 8: NEW FEATURES               -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="hold-delay">
+    <div class="section-header">
+      <h2>8. New Features</h2>
+      <p>Hold delay, allow/ignore filters, axis auto-detection, rubberband physics, resize invert, and event listeners.</p>
+    </div>
+
+    <!-- 8.1 Hold Delay -->
+    <div class="demo">
+      <div class="demo-title">Hold Delay <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area" style="height:200px">
+        <div id="hold-delay-el" class="hold-delay-box">Hold 500ms</div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">status:</span><span class="value" id="hold-delay-status">idle</span></span>
+        <span><span class="label">x:</span><span class="value" id="hold-delay-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="hold-delay-y">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable } from 'hyperact'
+
+draggable('#hold-delay-el', {
+  holdDelay: 500,
+  onDragStart() {
+    // Drag starts only after holding 500ms
+  },
+  onDragMove(e) {
+    console.log(e.totalX, e.totalY)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 8.2 Allow/Ignore From -->
+  <div class="section" id="allow-ignore">
+    <div class="demo">
+      <div class="demo-title">Allow / Ignore From <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area" style="height:220px">
+        <div id="allow-ignore-el" class="allow-ignore-card">
+          <div class="card-header">Drag from this header</div>
+          <div class="card-body">
+            <p>The card drags from the header only. Clicking the button does not start a drag.</p>
+            <button id="allow-ignore-btn">Click me!</button>
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="allow-ignore-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="allow-ignore-y">0</span></span>
+        <span><span class="label">button clicks:</span><span class="value" id="allow-ignore-clicks">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable } from 'hyperact'
+
+draggable('#card', {
+  allowFrom: '.card-header',
+  ignoreFrom: 'button',
+  onDragMove(e) {
+    console.log(e.totalX, e.totalY)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 8.3 Axis Auto-detect -->
+  <div class="section" id="axis-autodetect">
+    <div class="demo">
+      <div class="demo-title">Axis Auto-detect <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area" style="height:260px;position:relative">
+        <div id="axis-auto-el" class="axis-auto-box">Move me!<br>Axis locks<br>on start</div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">detected axis:</span><span class="value" id="axis-auto-detected">-</span></span>
+        <span><span class="label">x:</span><span class="value" id="axis-auto-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="axis-auto-y">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable } from 'hyperact'
+
+draggable('#el', {
+  axis: 'start',
+  onDragStart() {
+    // First movement direction locks the axis
+  },
+  onDragMove(e) {
+    console.log(e.totalX, e.totalY)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 8.4 Rubberband -->
+  <div class="section" id="rubberband-demo">
+    <div class="demo">
+      <div class="demo-title">Rubberband <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area" style="padding:0">
+        <div class="rubberband-area" id="rubberband-area">
+          <div id="rubberband-el" class="rubberband-box">Rubber<br>band</div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="rubberband-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="rubberband-y">0</span></span>
+        <span><span class="label">in bounds:</span><span class="value" id="rubberband-bounds">yes</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable } from 'hyperact'
+import { rubberband } from 'hyperact/modifiers/rubberband'
+
+draggable('#el', {
+  modifiers: [
+    rubberband({
+      bounds: 'parent',
+      resistance: 0.15,
+      maxOvershoot: 80
+    })
+  ]
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 8.5 Resize Invert -->
+  <div class="section" id="resize-invert">
+    <div class="demo">
+      <div class="demo-title">Resize Invert <span class="badge badge-resize">resize</span></div>
+      <div class="demo-area">
+        <div class="invert-compare">
+          <div class="invert-panel">
+            <h4>Normal (invert: none)</h4>
+            <div class="invert-container" id="invert-normal-container">
+              <div id="invert-normal-el" class="invert-box">Normal</div>
+            </div>
+          </div>
+          <div class="invert-panel">
+            <h4>Invert: reposition</h4>
+            <div class="invert-container" id="invert-reposition-container">
+              <div id="invert-reposition-el" class="invert-box">Reposition</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">normal:</span><span class="value" id="invert-normal-size">200 x 150</span></span>
+        <span><span class="label">reposition:</span><span class="value" id="invert-reposition-size">200 x 150</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { resizable } from 'hyperact'
+
+// Normal resize stops at min size
+resizable('#normal', {
+  minWidth: 20,
+  minHeight: 20
+})
+
+// Reposition: drag past zero to flip
+resizable('#reposition', {
+  invert: 'reposition',
+  minWidth: 20,
+  minHeight: 20
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 8.6 Event Listeners -->
+  <div class="section" id="event-listeners">
+    <div class="demo">
+      <div class="demo-title">Event Listeners (.on / .off) <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area">
+        <div class="event-log-area">
+          <div class="event-log-left">
+            <div id="event-log-el" class="event-log-box">Drag me</div>
+            <div class="event-log-btns">
+              <button class="btn-add" id="event-add-btn">Add listener</button>
+              <button class="btn-remove" id="event-remove-btn">Remove listener</button>
+            </div>
+          </div>
+          <div class="event-console" id="event-console">
+            <div class="log-line"><span class="log-info">Drag the box. Use buttons to add/remove a move listener.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">listeners:</span><span class="value" id="event-listener-count">1</span></span>
+        <span><span class="label">events logged:</span><span class="value" id="event-log-count">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable } from 'hyperact'
+
+const d = draggable('#el')
+
+// Add listener with .on()
+const handler = (e) =&gt; console.log('move', e.totalX)
+d.on('dragmove', handler)
+
+// Remove listener with .off()
+d.off('dragmove', handler)</pre>
+      </details>
+    </div>
+  </div>
+
 </main>
 
 <script type="module">
 import { draggable, resizable, gesturable, dropzone, DropzoneManager, interactable } from './src/index.ts'
 import { snapTargets } from './src/modifiers/snap-targets.ts'
+import { rubberband } from './src/modifiers/rubberband.ts'
 import { sortable } from './src/sortable.ts'
 
 // ─── Helper: update a stat value ───
@@ -1807,6 +2257,213 @@ resizable('#grid-resize-el', {
       fpsRAF = null
     }
   }
+}
+
+// ═══════════════════════════════════════
+//  8.1  Hold Delay
+// ═══════════════════════════════════════
+{
+  const el = $('#hold-delay-el')
+  let holdTimeout = null
+
+  el.addEventListener('pointerdown', () => {
+    el.classList.add('waiting')
+    el.textContent = 'Hold...'
+    setText('#hold-delay-status', 'waiting...')
+
+    holdTimeout = setTimeout(() => {
+      el.classList.remove('waiting')
+      el.classList.add('ready')
+      el.textContent = 'Ready! Drag'
+      setText('#hold-delay-status', 'ready')
+    }, 500)
+  })
+
+  el.addEventListener('pointerup', () => {
+    if (holdTimeout) {
+      clearTimeout(holdTimeout)
+      holdTimeout = null
+    }
+    el.classList.remove('waiting', 'ready')
+    el.textContent = 'Hold 500ms'
+    setText('#hold-delay-status', 'idle')
+  })
+
+  draggable('#hold-delay-el', {
+    holdDelay: 500,
+    onDragStart() {
+      setText('#hold-delay-status', 'dragging')
+    },
+    onDragMove(e) {
+      setText('#hold-delay-x', Math.round(e.totalX))
+      setText('#hold-delay-y', Math.round(e.totalY))
+    },
+    onDragEnd() {
+      el.classList.remove('waiting', 'ready')
+      el.textContent = 'Hold 500ms'
+      setText('#hold-delay-status', 'idle')
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  8.2  Allow / Ignore From
+// ═══════════════════════════════════════
+{
+  let clicks = 0
+
+  draggable('#allow-ignore-el', {
+    allowFrom: '.card-header',
+    ignoreFrom: 'button',
+    onDragMove(e) {
+      setText('#allow-ignore-x', Math.round(e.totalX))
+      setText('#allow-ignore-y', Math.round(e.totalY))
+    }
+  })
+
+  $('#allow-ignore-btn').addEventListener('click', () => {
+    clicks++
+    setText('#allow-ignore-clicks', clicks)
+  })
+}
+
+// ═══════════════════════════════════════
+//  8.3  Axis Auto-detect
+// ═══════════════════════════════════════
+{
+  draggable('#axis-auto-el', {
+    axis: 'start',
+    onDragStart() {
+      setText('#axis-auto-detected', '-')
+    },
+    onDragMove(e) {
+      const axisLabel = e.totalX !== 0 && e.totalY === 0 ? 'x'
+        : e.totalX === 0 && e.totalY !== 0 ? 'y'
+        : e.totalX !== 0 ? 'x (locked)' : '-'
+      // Detect based on which values are changing
+      if (Math.abs(e.totalX) > 0 || Math.abs(e.totalY) > 0) {
+        if (Math.abs(e.totalY) === 0) setText('#axis-auto-detected', 'x')
+        else if (Math.abs(e.totalX) === 0) setText('#axis-auto-detected', 'y')
+      }
+      setText('#axis-auto-x', Math.round(e.totalX))
+      setText('#axis-auto-y', Math.round(e.totalY))
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  8.4  Rubberband
+// ═══════════════════════════════════════
+{
+  const area = $('#rubberband-area')
+  const areaRect = area.getBoundingClientRect
+
+  draggable('#rubberband-el', {
+    modifiers: [
+      rubberband({
+        bounds: 'parent',
+        resistance: 0.15,
+        maxOvershoot: 80
+      })
+    ],
+    onDragMove(e) {
+      setText('#rubberband-x', Math.round(e.totalX))
+      setText('#rubberband-y', Math.round(e.totalY))
+      // Check if element is within bounds
+      const el = e.target
+      const parent = el.parentElement
+      const elRect = el.getBoundingClientRect()
+      const parentRect = parent.getBoundingClientRect()
+      const inBounds = elRect.left >= parentRect.left &&
+        elRect.right <= parentRect.right &&
+        elRect.top >= parentRect.top &&
+        elRect.bottom <= parentRect.bottom
+      setText('#rubberband-bounds', inBounds ? 'yes' : 'no (elastic)')
+    },
+    onDragEnd() {
+      setText('#rubberband-bounds', 'yes')
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  8.5  Resize Invert
+// ═══════════════════════════════════════
+{
+  resizable('#invert-normal-el', {
+    minWidth: 20,
+    minHeight: 20,
+    onResizeMove(e) {
+      setText('#invert-normal-size', `${Math.round(e.width)} x ${Math.round(e.height)}`)
+    }
+  })
+
+  resizable('#invert-reposition-el', {
+    invert: 'reposition',
+    minWidth: 20,
+    minHeight: 20,
+    onResizeMove(e) {
+      setText('#invert-reposition-size', `${Math.round(e.width)} x ${Math.round(e.height)}`)
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  8.6  Event Listeners
+// ═══════════════════════════════════════
+{
+  const consoleEl = $('#event-console')
+  let logCount = 0
+  let listenerCount = 1
+  let moveHandlerActive = false
+
+  const d = draggable('#event-log-el')
+
+  function logEvent(type, data) {
+    logCount++
+    setText('#event-log-count', logCount)
+    const time = new Date().toLocaleTimeString('en-US', { hour12: false })
+    const line = document.createElement('div')
+    line.className = 'log-line'
+    line.innerHTML = `<span class="log-time">${time}</span> <span class="log-event">${type}</span> <span class="log-data">${data}</span>`
+    consoleEl.appendChild(line)
+    consoleEl.scrollTop = consoleEl.scrollHeight
+  }
+
+  // Default start/end listeners
+  d.on('dragstart', () => logEvent('dragstart', 'interaction began'))
+  d.on('dragend', () => logEvent('dragend', 'interaction ended'))
+
+  // The togglable move listener
+  function moveHandler(e) {
+    logEvent('dragmove', `x=${Math.round(e.totalX)} y=${Math.round(e.totalY)}`)
+  }
+
+  // Add listener button
+  $('#event-add-btn').addEventListener('click', () => {
+    if (!moveHandlerActive) {
+      d.on('dragmove', moveHandler)
+      moveHandlerActive = true
+      listenerCount++
+      setText('#event-listener-count', listenerCount)
+      logEvent('system', 'move listener added')
+    } else {
+      logEvent('system', 'move listener already active')
+    }
+  })
+
+  // Remove listener button
+  $('#event-remove-btn').addEventListener('click', () => {
+    if (moveHandlerActive) {
+      d.off('dragmove', moveHandler)
+      moveHandlerActive = false
+      listenerCount--
+      setText('#event-listener-count', listenerCount)
+      logEvent('system', 'move listener removed')
+    } else {
+      logEvent('system', 'no move listener to remove')
+    }
+  })
 }
 
 // ═══════════════════════════════════════
