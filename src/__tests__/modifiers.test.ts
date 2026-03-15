@@ -29,18 +29,22 @@ describe('restrict modifier', () => {
   })
 
   it('clamps position to parent bounds', () => {
-    const el = createMockElement()
+    // Element 100x100 at (50,50) inside parent 400x400 at (0,0)
+    const el = createMockElement({ x: 50, y: 50, width: 100, height: 100, top: 50, left: 50, right: 150, bottom: 150 })
     const parent = el.parentElement!
     vi.spyOn(parent, 'getBoundingClientRect').mockReturnValue({
-      x: 10, y: 10, width: 200, height: 200,
-      top: 10, left: 10, right: 210, bottom: 210,
+      x: 0, y: 0, width: 400, height: 400,
+      top: 0, left: 0, right: 400, bottom: 400,
       toJSON() { return this },
     } as DOMRect)
 
     const mod = restrict({ bounds: 'parent' })
-    const result = mod.modify(makeContext({ element: el, position: { x: 300, y: 5 } }))
-    expect(result.position.x).toBe(210)
-    expect(result.position.y).toBe(10)
+    // startPosition=0 means element base is at (50,50).
+    // Transform bounds: left = 0-50 = -50, right = 400-50-100 = 250
+    // Position 300 should clamp to 250
+    const result = mod.modify(makeContext({ element: el, position: { x: 300, y: -100 }, startPosition: { x: 0, y: 0 } }))
+    expect(result.position.x).toBe(250)
+    expect(result.position.y).toBe(-50)
 
     el.remove()
   })

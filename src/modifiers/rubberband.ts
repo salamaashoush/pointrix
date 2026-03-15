@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult } from '../types'
+import type { Modifier, ModifierContext, ModifierResult, Point } from '../types'
 
 export interface RubberbandOptions {
   bounds: { left?: number; top?: number; right?: number; bottom?: number } | 'parent'
@@ -11,13 +11,24 @@ export interface RubberbandOptions {
 export class RubberbandModifier implements Modifier {
   public name = 'rubberband'
   private options: RubberbandOptions
+  private transformBounds: { left?: number; top?: number; right?: number; bottom?: number } | null = null
 
   constructor(options: RubberbandOptions) {
     this.options = options
   }
 
+  onStart(context: ModifierContext): void {
+    // Convert page-space bounds to transform-space at drag start.
+    // Transform-space bound = page bound - element's base position
+    // Base position = element rect position - current transform
+    this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition)
+  }
+
   modify(context: ModifierContext): ModifierResult {
-    const bounds = this.resolveBounds(context.element)
+    if (!this.transformBounds) {
+      this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition)
+    }
+    const bounds = this.transformBounds
     const resistance = this.options.resistance ?? 0.15
     const maxOvershoot = this.options.maxOvershoot ?? 100
     const pos = { ...context.position }
@@ -49,7 +60,10 @@ export class RubberbandModifier implements Modifier {
   }
 
   onEnd(context: ModifierContext): ModifierResult {
-    const bounds = this.resolveBounds(context.element)
+    if (!this.transformBounds) {
+      this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition)
+    }
+    const bounds = this.transformBounds
     const pos = { ...context.position }
 
     if (bounds) {
@@ -66,24 +80,42 @@ export class RubberbandModifier implements Modifier {
     }
   }
 
-  private resolveBounds(
-    element: HTMLElement
+  private resolveTransformBounds(
+    element: HTMLElement,
+    startTransform: Point
   ): { left?: number; top?: number; right?: number; bottom?: number } | null {
     const { bounds } = this.options
+
+    let pageBounds: { left?: number; top?: number; right?: number; bottom?: number }
 
     if (bounds === 'parent') {
       const parent = element.parentElement
       if (!parent) return null
       const parentRect = parent.getBoundingClientRect()
-      return {
+      pageBounds = {
         left: parentRect.left,
         top: parentRect.top,
         right: parentRect.right,
         bottom: parentRect.bottom,
       }
+    } else {
+      pageBounds = bounds
     }
 
-    return bounds
+    // Convert page bounds to transform space:
+    // element's base position (without transform) = rect - transform
+    const rect = element.getBoundingClientRect()
+    const baseX = rect.left - startTransform.x
+    const baseY = rect.top - startTransform.y
+    const elW = rect.width
+    const elH = rect.height
+
+    return {
+      left: pageBounds.left !== undefined ? pageBounds.left - baseX : undefined,
+      top: pageBounds.top !== undefined ? pageBounds.top - baseY : undefined,
+      right: pageBounds.right !== undefined ? pageBounds.right - baseX - elW : undefined,
+      bottom: pageBounds.bottom !== undefined ? pageBounds.bottom - baseY - elH : undefined,
+    }
   }
 }
 

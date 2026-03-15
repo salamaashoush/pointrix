@@ -258,9 +258,12 @@ export class Resizable extends Hyperact {
     const invertMode = this.resizeOptions.invert || 'none'
 
     if (invertMode === 'reposition') {
-      // When dragging past zero, flip edges and reposition
+      // When width/height goes negative, the element has been dragged past zero.
+      // Flip: make dimensions positive and adjust position so the opposite
+      // corner stays anchored. This makes the element "turn inside out"
+      // naturally — the edge you're dragging becomes the opposite edge.
       if (newWidth < 0) {
-        newX += newWidth
+        newX += newWidth // shift left by the (negative) width
         newWidth = -newWidth
       }
       if (newHeight < 0) {
@@ -269,11 +272,16 @@ export class Resizable extends Hyperact {
       }
     }
 
-    // Apply constraints
-    const minWidth = this.resizeOptions.minWidth || 50
-    const minHeight = this.resizeOptions.minHeight || 50
+    // Constraints
+    const minWidth = invertMode === 'negate' ? -Infinity : (this.resizeOptions.minWidth || 0)
+    const minHeight = invertMode === 'negate' ? -Infinity : (this.resizeOptions.minHeight || 0)
     const maxWidth = this.resizeOptions.maxWidth || Infinity
     const maxHeight = this.resizeOptions.maxHeight || Infinity
+
+    // For reposition mode, use a very small min (1px) instead of the default 50
+    // so the flip feels smooth — the user can drag through zero without a "dead zone"
+    const effectiveMinW = invertMode === 'reposition' ? 1 : (minWidth || 50)
+    const effectiveMinH = invertMode === 'reposition' ? 1 : (minHeight || 50)
 
     // Maintain aspect ratio if needed
     if (this.aspectRatio) {
@@ -282,7 +290,6 @@ export class Resizable extends Hyperact {
       } else if (this.activeEdge === 'top' || this.activeEdge === 'bottom') {
         newWidth = newHeight * this.aspectRatio
       } else {
-        // For corners, prioritize the dimension with larger change
         const widthChange = Math.abs(newWidth - this.startSize.width)
         const heightChange = Math.abs(newHeight - this.startSize.height)
 
@@ -294,15 +301,13 @@ export class Resizable extends Hyperact {
       }
     }
 
-    // Apply size constraints (skip min clamping for 'negate' mode)
-    if (invertMode !== 'negate') {
-      if (newWidth < minWidth) {
-        if (this.activeEdge.includes('left')) {
-          newX += newWidth - minWidth
-        }
-        newWidth = minWidth
-        if (this.aspectRatio) newHeight = newWidth / this.aspectRatio
+    // Apply size constraints
+    if (newWidth < effectiveMinW) {
+      if (this.activeEdge.includes('left')) {
+        newX += newWidth - effectiveMinW
       }
+      newWidth = effectiveMinW
+      if (this.aspectRatio) newHeight = newWidth / this.aspectRatio
     }
     if (newWidth > maxWidth) {
       if (this.activeEdge.includes('left')) {
@@ -312,14 +317,12 @@ export class Resizable extends Hyperact {
       if (this.aspectRatio) newHeight = newWidth / this.aspectRatio
     }
 
-    if (invertMode !== 'negate') {
-      if (newHeight < minHeight) {
-        if (this.activeEdge.includes('top')) {
-          newY += newHeight - minHeight
-        }
-        newHeight = minHeight
-        if (this.aspectRatio) newWidth = newHeight * this.aspectRatio
+    if (newHeight < effectiveMinH) {
+      if (this.activeEdge.includes('top')) {
+        newY += newHeight - effectiveMinH
       }
+      newHeight = effectiveMinH
+      if (this.aspectRatio) newWidth = newHeight * this.aspectRatio
     }
     if (newHeight > maxHeight) {
       if (this.activeEdge.includes('top')) {

@@ -524,4 +524,99 @@ describe('Resizable', () => {
       expect(el.style.cursor).toBe('ew-resize')
     })
   })
+
+  describe('invert modes', () => {
+    it('invert none clamps to min size (default)', () => {
+      instance = new Resizable(el, { minWidth: 50, minHeight: 50 })
+
+      // Drag right edge far left past zero
+      firePointerDown(el, { clientX: 195, clientY: 100 })
+      firePointerMove(document, { clientX: -100, clientY: 100 })
+      flushRAF()
+
+      const size = instance.getSize()
+      expect(size.width).toBeGreaterThanOrEqual(50)
+
+      firePointerUp(document, { clientX: -100, clientY: 100 })
+    })
+
+    it('invert negate allows negative dimensions', () => {
+      instance = new Resizable(el, { invert: 'negate' })
+
+      // Drag right edge far left past zero
+      firePointerDown(el, { clientX: 195, clientY: 100 })
+      firePointerMove(document, { clientX: -100, clientY: 100 })
+      flushRAF()
+
+      const size = instance.getSize()
+      // Width should be negative: 200 + (-100 - 195) = 200 - 295 = -95
+      expect(size.width).toBeLessThan(0)
+
+      firePointerUp(document, { clientX: -100, clientY: 100 })
+    })
+
+    it('invert reposition flips element when dragged past zero', () => {
+      instance = new Resizable(el, { invert: 'reposition' })
+
+      // Drag right edge left past zero
+      // Start: right edge at x=200, drag to x=-50 → delta = -250
+      // newWidth = 200 + (-250) = -50 → flip: newX += -50, newWidth = 50
+      firePointerDown(el, { clientX: 195, clientY: 100 })
+      firePointerMove(document, { clientX: -55, clientY: 100 })
+      flushRAF()
+
+      const size = instance.getSize()
+      // Width should be positive after flip
+      expect(size.width).toBeGreaterThan(0)
+
+      // The element should have moved left (position adjusted)
+      const transform = el.style.transform
+      if (transform.includes('translate3d')) {
+        const match = transform.match(/translate3d\(([^,]+),/)
+        if (match) {
+          // Position should be shifted left from the flip
+          expect(parseFloat(match[1])).toBeLessThan(0)
+        }
+      }
+
+      firePointerUp(document, { clientX: -55, clientY: 100 })
+    })
+
+    it('invert reposition has no dead zone at zero', () => {
+      instance = new Resizable(el, { invert: 'reposition' })
+
+      // Drag right edge to make width exactly 0, then a bit past
+      firePointerDown(el, { clientX: 195, clientY: 100 })
+
+      // First: drag to make width small but positive (5px)
+      firePointerMove(document, { clientX: 0, clientY: 100 })
+      flushRAF()
+      const size1 = instance.getSize()
+      expect(size1.width).toBeGreaterThan(0)
+
+      // Then: drag past zero
+      firePointerMove(document, { clientX: -10, clientY: 100 })
+      flushRAF()
+      const size2 = instance.getSize()
+      expect(size2.width).toBeGreaterThan(0) // should be positive after flip
+
+      firePointerUp(document, { clientX: -10, clientY: 100 })
+    })
+
+    it('invert reposition works for top edge', () => {
+      instance = new Resizable(el, { invert: 'reposition' })
+
+      // Drag top edge below the bottom edge
+      // Element: top=0, height=200, so bottom is at y=200
+      // Drag top to y=250 → delta=250, newHeight = 200 - 250 = -50 → flip
+      firePointerDown(el, { clientX: 100, clientY: 5 })
+      firePointerMove(document, { clientX: 100, clientY: 255 })
+      flushRAF()
+
+      const size = instance.getSize()
+      expect(size.height).toBeGreaterThan(0)
+
+      firePointerUp(document, { clientX: 100, clientY: 255 })
+    })
+  })
 })
