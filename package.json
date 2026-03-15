@@ -1,91 +1,141 @@
 {
   "name": "hyperact",
   "version": "1.0.0",
-  "description": "Ultra-fast, minimal drag/resize library. The smallest and fastest interactable elements library.",
+  "description": "Ultra-fast, minimal drag/resize/gesture library. The smallest and fastest interactable elements library.",
   "type": "module",
   "main": "dist/hyperact.cjs",
-  "module": "dist/hyperact.js",
-  "types": "dist/hyperact.d.ts",
+  "module": "dist/hyperact.mjs",
+  "types": "dist/hyperact.d.mts",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
-      "types": "./dist/hyperact.d.ts",
-      "import": "./dist/hyperact.js",
+      "types": "./dist/hyperact.d.mts",
+      "import": "./dist/hyperact.mjs",
       "require": "./dist/hyperact.cjs"
     },
     "./nano": {
-      "types": "./dist/hyperact-nano.d.ts",
-      "import": "./dist/hyperact-nano.js",
+      "types": "./dist/hyperact-nano.d.mts",
+      "import": "./dist/hyperact-nano.mjs",
       "require": "./dist/hyperact-nano.cjs"
     },
     "./drag": {
-      "types": "./dist/hyperact-drag.d.ts",
-      "import": "./dist/hyperact-drag.js",
+      "types": "./dist/hyperact-drag.d.mts",
+      "import": "./dist/hyperact-drag.mjs",
       "require": "./dist/hyperact-drag.cjs"
     },
     "./resize": {
-      "types": "./dist/hyperact-resize.d.ts",
-      "import": "./dist/hyperact-resize.js",
+      "types": "./dist/hyperact-resize.d.mts",
+      "import": "./dist/hyperact-resize.mjs",
       "require": "./dist/hyperact-resize.cjs"
     },
+    "./gesture": {
+      "types": "./dist/hyperact-gesture.d.mts",
+      "import": "./dist/hyperact-gesture.mjs",
+      "require": "./dist/hyperact-gesture.cjs"
+    },
+    "./dropzone": {
+      "types": "./dist/hyperact-dropzone.d.mts",
+      "import": "./dist/hyperact-dropzone.mjs",
+      "require": "./dist/hyperact-dropzone.cjs"
+    },
+    "./sortable": {
+      "types": "./dist/hyperact-sortable.d.mts",
+      "import": "./dist/hyperact-sortable.mjs",
+      "require": "./dist/hyperact-sortable.cjs"
+    },
+    "./modifiers": {
+      "types": "./dist/hyperact-modifiers.d.mts",
+      "import": "./dist/hyperact-modifiers.mjs",
+      "require": "./dist/hyperact-modifiers.cjs"
+    },
     "./react": {
-      "types": "./dist/hyperact-react.d.ts",
-      "import": "./dist/hyperact-react.js",
+      "types": "./dist/hyperact-react.d.mts",
+      "import": "./dist/hyperact-react.mjs",
       "require": "./dist/hyperact-react.cjs"
+    },
+    "./vue": {
+      "types": "./dist/hyperact-vue.d.mts",
+      "import": "./dist/hyperact-vue.mjs",
+      "require": "./dist/hyperact-vue.cjs"
     }
   },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
-    "lint": "eslint . --ext .ts",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "lint": "oxlint src/",
+    "format": "oxlint src/ --fix",
     "typecheck": "tsc --noEmit",
     "demo": "vite",
     "bench": "vitest bench",
-    "size": "pnpm build && ls -lah dist/"
+    "size": "bun run build && gzip -k dist/hyperact.mjs && ls -lh dist/hyperact.mjs dist/hyperact.mjs.gz && rm dist/hyperact.mjs.gz",
+    "prepublishOnly": "bun run lint && bun run typecheck && bun run test && bun run build"
   },
   "keywords": [
     "drag",
     "drop",
     "resize",
+    "gesture",
+    "pinch",
+    "rotate",
+    "sortable",
     "draggable",
     "resizable",
+    "gesturable",
+    "dropzone",
     "interact",
     "touch",
     "pointer",
     "minimal",
     "fast",
-    "tiny"
+    "tiny",
+    "zero-dependency"
   ],
   "author": "salamaashoush@gmail.com",
   "license": "MIT",
-  "packageManager": "pnpm@10.12.4",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/salamaashoush/hyperact"
+  },
+  "homepage": "https://github.com/salamaashoush/hyperact#readme",
+  "bugs": {
+    "url": "https://github.com/salamaashoush/hyperact/issues"
+  },
   "peerDependencies": {
-    "react": ">=16.8.0"
+    "react": ">=16.8.0",
+    "vue": ">=3.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
+    },
+    "vue": {
+      "optional": true
     }
   },
   "devDependencies": {
-    "@types/react": "^18.0.0",
-    "@eslint/js": "^9.30.1",
-    "@types/jsdom": "^21.1.7",
-    "@types/node": "^20.11.5",
-    "@vitest/coverage-v8": "^1.2.1",
-    "eslint": "^9.30.1",
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "interactjs": "^1.10.27",
     "jsdom": "^26.1.0",
-    "prettier": "^3.5.3",
-    "tslib": "^2.6.2",
-    "tsup": "^8.5.0",
-    "typescript": "^5.3.3",
-    "typescript-eslint": "^8.35.1",
+    "oxlint": "^1.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsdown": "^0.21.0",
+    "typescript": "^5.8.0",
     "vite": "^6.2.0",
-    "vitest": "^1.2.1"
+    "vitest": "^3.0.0",
+    "vue": "^3.5.0"
   }
 }

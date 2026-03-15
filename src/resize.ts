@@ -1,6 +1,7 @@
 // Optimized resize addon for hyperact-nano (~3KB minified)
 
 import { Hyperact, InteractionEvent, HyperactOptions } from './nano'
+import { Modifier, ModifierContext, applyModifiers } from './types'
 
 export interface ResizeOptions extends HyperactOptions {
   edges?: {
@@ -16,6 +17,7 @@ export interface ResizeOptions extends HyperactOptions {
   maxHeight?: number
   aspectRatio?: number | 'preserve'
   grid?: { width: number; height: number }
+  modifiers?: Modifier[]
   onResizeStart?: (event: ResizeEvent) => void
   onResizeMove?: (event: ResizeEvent) => void
   onResizeEnd?: (event: ResizeEvent) => void
@@ -44,6 +46,8 @@ export class Resizable extends Hyperact {
   private currentPos = { x: 0, y: 0 }
   private activeEdge: Edge = null
   private aspectRatio: number | null = null
+  private boundUpdateCursor: (e: PointerEvent) => void
+  private transformNormalized = false
   
   constructor(element: HTMLElement, options: ResizeOptions = {}) {
     // Default options
@@ -76,32 +80,25 @@ export class Resizable extends Hyperact {
     
     // Set higher priority for resize interactions
     this.priority = 10
-    console.log(`[Resizable] Created with priority ${this.priority} on element:`, element.id || element.className)
-    
-    // Parse and normalize initial transform
-    this.normalizeInitialTransform(element)
-    
+
     // Set resize cursor on hover
-    element.addEventListener('pointermove', this.updateCursor.bind(this))
+    this.boundUpdateCursor = this.updateCursor.bind(this)
+    element.addEventListener('pointermove', this.boundUpdateCursor)
     element.style.position = 'relative'
   }
   
   private normalizeInitialTransform(element: HTMLElement) {
     const style = window.getComputedStyle(element)
     const matrix = style.transform
-    console.log(`[Resizable] Reading initial transform:`, { matrix, elementId: element.id })
-    
+
     if (matrix && matrix !== 'none') {
       const values = matrix.match(/matrix.*\((.+)\)/)
       if (values) {
         const parts = values[1].split(', ')
         const initialX = parseFloat(parts[4]) || 0
         const initialY = parseFloat(parts[5]) || 0
-        console.log(`[Resizable] Parsed initial transform:`, { x: initialX, y: initialY })
-        
         // Normalize by applying as inline style to preserve the transform
         element.style.transform = `translate3d(${initialX}px, ${initialY}px, 0)`
-        console.log(`[Resizable] Normalized transform applied`)
       }
     }
   }
@@ -110,14 +107,6 @@ export class Resizable extends Hyperact {
   protected shouldHandleEvent(e: PointerEvent): boolean {
     const edge = this.detectEdge(e)
     const shouldHandle = edge !== null
-    console.log(`[Resizable] shouldHandleEvent:`, {
-      edge,
-      shouldHandle,
-      clientX: e.clientX,
-      clientY: e.clientY,
-      elementRect: this.element.getBoundingClientRect(),
-      handleSize: this.resizeOptions.handleSize
-    })
     return shouldHandle
   }
   
@@ -175,9 +164,15 @@ export class Resizable extends Hyperact {
   }
   
   private handleResizeStart(e: InteractionEvent) {
+    // Defer transform parsing to first interaction (avoids getComputedStyle in constructor)
+    if (!this.transformNormalized) {
+      this.normalizeInitialTransform(this.element)
+      this.transformNormalized = true
+    }
+
     const rect = this.element.getBoundingClientRect()
     const style = window.getComputedStyle(this.element)
-    
+
     // Detect which edge is being dragged
     this.activeEdge = this.detectEdge(e.originalEvent)
     if (!this.activeEdge) return
@@ -191,29 +186,19 @@ export class Resizable extends Hyperact {
     
     // Use the normalized transform values (already parsed and applied during construction)
     const transform = style.transform
-    console.log(`[Resizable] handleResizeStart reading normalized transform:`, { transform, elementId: this.element.id })
     if (transform && transform !== 'none') {
       const values = transform.match(/matrix.*\((.+)\)/)
       if (values) {
         const parts = values[1].split(', ')
         this.startPos.x = parseFloat(parts[4]) || 0
         this.startPos.y = parseFloat(parts[5]) || 0
-        console.log(`[Resizable] handleResizeStart using normalized transform:`, this.startPos)
       }
     } else {
       this.startPos.x = 0
       this.startPos.y = 0
-      console.log(`[Resizable] handleResizeStart no transform, using zero:`, this.startPos)
     }
     this.currentPos = { ...this.startPos }
-    
-    console.log('[Resizable] handleResizeStart:', {
-      activeEdge: this.activeEdge,
-      startSize: this.startSize,
-      startPos: this.startPos,
-      elementRect: rect
-    })
-    
+
     // Calculate aspect ratio if needed
     if (this.resizeOptions.aspectRatio === 'preserve') {
       this.aspectRatio = this.startSize.width / this.startSize.height
@@ -321,24 +306,42 @@ export class Resizable extends Hyperact {
       newHeight = Math.round(newHeight / this.resizeOptions.grid.height) * this.resizeOptions.grid.height
     }
     
+    // Apply modifiers if configured
+    if (this.resizeOptions.modifiers?.length) {
+      const modifierContext: ModifierContext = {
+        position: { x: newX, y: newY },
+        velocity: { x: pointer.velocity?.x ?? 0, y: pointer.velocity?.y ?? 0 },
+        element: this.element,
+        startPosition: { ...this.startPos },
+        delta: { x: deltaX, y: deltaY },
+        edges: {
+          top: this.activeEdge?.includes('top') || false,
+          right: this.activeEdge?.includes('right') || false,
+          bottom: this.activeEdge?.includes('bottom') || false,
+          left: this.activeEdge?.includes('left') || false
+        },
+        size: { width: newWidth, height: newHeight },
+        startSize: { ...this.startSize }
+      }
+      const result = applyModifiers(this.resizeOptions.modifiers, modifierContext)
+      newX = result.position.x
+      newY = result.position.y
+      if (result.size) {
+        newWidth = result.size.width
+        newHeight = result.size.height
+      }
+    }
+
     // Update size and position
     this.currentSize = { width: newWidth, height: newHeight }
     this.currentPos = { x: newX, y: newY }
-    
+
     // Apply changes
     this.element.style.width = `${newWidth}px`
     this.element.style.height = `${newHeight}px`
-    
+
     if (newX !== this.startPos.x || newY !== this.startPos.y) {
       this.element.style.transform = `translate3d(${newX}px, ${newY}px, 0)`
-      console.log('[Resizable] Applied transform:', {
-        newX, newY,
-        startPos: this.startPos,
-        startSize: this.startSize,
-        currentSize: this.currentSize,
-        deltaX,
-        deltaY
-      })
     }
     
     // Fire resize move event
@@ -389,7 +392,7 @@ export class Resizable extends Hyperact {
   
   destroy() {
     super.destroy()
-    this.element.removeEventListener('pointermove', this.updateCursor)
+    this.element.removeEventListener('pointermove', this.boundUpdateCursor)
     this.element.style.cursor = ''
     this.element.style.willChange = ''
   }

@@ -116,7 +116,8 @@ export class MagneticSnapModifier implements Modifier {
 
       return {
         position: snappedPosition,
-        velocity: context.velocity
+        velocity: context.velocity,
+        size: context.size ? { ...context.size } : undefined
       }
     } else {
       if (this.currentTarget) {
@@ -129,7 +130,8 @@ export class MagneticSnapModifier implements Modifier {
 
     return {
       position: context.position,
-      velocity: context.velocity
+      velocity: context.velocity,
+      size: context.size ? { ...context.size } : undefined
     }
   }
 

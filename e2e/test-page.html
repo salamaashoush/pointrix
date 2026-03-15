@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hyperact E2E Test Page</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: sans-serif; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div id="drag-basic" style="width:100px;height:100px;background:blue;position:absolute;left:50px;top:50px;"></div>
+  <div id="drag-x-only" style="width:100px;height:100px;background:green;position:absolute;left:200px;top:50px;"></div>
+  <div id="bounds-parent" style="width:400px;height:400px;border:2px solid black;position:absolute;left:50px;top:200px;">
+    <div id="drag-bounded" style="width:80px;height:80px;background:red;position:absolute;left:0;top:0;"></div>
+  </div>
+  <div id="resize-basic" style="width:200px;height:200px;background:purple;position:absolute;left:500px;top:300px;"></div>
+  <div id="resize-aspect" style="width:200px;height:100px;background:teal;position:absolute;left:500px;top:550px;"></div>
+  <div id="drag-grid" style="width:100px;height:100px;background:orange;position:absolute;left:500px;top:50px;"></div>
+  <div id="drag-momentum" style="width:100px;height:100px;background:darkslategray;position:absolute;left:350px;top:50px;color:white;display:flex;align-items:center;justify-content:center;">Momentum</div>
+  <div id="both-element" style="width:150px;height:150px;background:mediumpurple;position:absolute;left:750px;top:50px;"></div>
+
+  <!-- Container for multiple draggables -->
+  <div id="multi-container" style="width:600px;height:300px;border:1px solid gray;position:absolute;left:50px;top:650px;">
+  </div>
+
+  <script type="module">
+    import { draggable, resizable, interactable } from '../src/index.ts'
+
+    draggable('#drag-basic')
+    draggable('#drag-x-only', { axis: 'x' })
+    draggable('#drag-bounded', { bounds: 'parent' })
+    resizable('#resize-basic', { minWidth: 100, minHeight: 100, maxWidth: 400, maxHeight: 400 })
+    resizable('#resize-aspect', { aspectRatio: 2 })
+    draggable('#drag-grid', { grid: { x: 50, y: 50 } })
+    draggable('#drag-momentum', { momentum: true })
+    interactable('#both-element', { drag: true, resize: true })
+
+    // Create multiple draggable elements
+    const container = document.getElementById('multi-container')
+    for (let i = 0; i < 20; i++) {
+      const el = document.createElement('div')
+      el.className = 'multi-drag'
+      el.dataset.index = String(i)
+      el.style.cssText = `width:40px;height:40px;background:hsl(${i * 18},70%,50%);position:absolute;left:${(i % 10) * 55}px;top:${Math.floor(i / 10) * 55}px;`
+      container.appendChild(el)
+      draggable(el)
+    }
+
+    // Signal that the page is ready
+    window.__hyperactReady = true
+    document.dispatchEvent(new Event('hyperact-ready'))
+  </script>
+</body>
+</html>

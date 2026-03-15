@@ -27,6 +27,7 @@ export interface HyperactOptions {
   onStart?: (event: InteractionEvent) => void
   onMove?: (event: InteractionEvent) => void
   onEnd?: (event: InteractionEvent) => void
+  onTap?: (event: InteractionEvent) => void
   threshold?: number // Movement threshold before starting interaction
   preventScroll?: boolean
 }
@@ -70,6 +71,25 @@ export class Hyperact {
   protected isActive = false
   protected lastUpdate = 0
   protected priority: number = 0 // Higher priority wins
+  private _enabled = true
+
+  get enabled(): boolean { return this._enabled }
+  set enabled(value: boolean) {
+    this._enabled = value
+    if (!value && this.isActive) {
+      // Force end the current interaction
+      this.pointers.clear()
+      this.isActive = false
+      instances.delete(this)
+      dirtyInstances.delete(this)
+      if (Hyperact.activeInstance.get(this.element) === this) {
+        Hyperact.activeInstance.set(this.element, null)
+      }
+      document.removeEventListener('pointermove', this.onPointerMove)
+      document.removeEventListener('pointerup', this.onPointerUp)
+      document.removeEventListener('pointercancel', this.onPointerUp)
+    }
+  }
   
   // Static registry for coordinating multiple instances on same element
   private static elementInstances = new WeakMap<HTMLElement, Hyperact[]>()
@@ -130,7 +150,7 @@ export class Hyperact {
   }
   
   // Virtual method for subclasses to decide if they should handle an event
-  protected shouldHandleEvent(e: PointerEvent): boolean {
+  protected shouldHandleEvent(_e: PointerEvent): boolean {
     return true
   }
   
@@ -152,7 +172,7 @@ export class Hyperact {
     for (const instance of instances) {
       const shouldHandle = instance.shouldHandleEvent(e)
       
-      if (shouldHandle && instance.priority > highestPriority) {
+      if (shouldHandle && instance.enabled && instance.priority > highestPriority) {
         handlingInstance = instance
         highestPriority = instance.priority
       }
@@ -243,9 +263,11 @@ export class Hyperact {
       document.removeEventListener('pointermove', this.onPointerMove)
       document.removeEventListener('pointerup', this.onPointerUp)
       document.removeEventListener('pointercancel', this.onPointerUp)
-      
+
       if (this.isActive) {
         this.end(e)
+      } else if (this.options.onTap) {
+        this.options.onTap(this.createEvent(e))
       }
     }
   }

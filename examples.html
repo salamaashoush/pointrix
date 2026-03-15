@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hyperact - Interactive Examples Showcase</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+
+    :root {
+      --sidebar-w: 280px;
+      --bg: #f8f9fb;
+      --surface: #ffffff;
+      --surface-alt: #f1f3f6;
+      --border: #e2e5ea;
+      --text: #1a1d23;
+      --text-muted: #6b7280;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-bg: #eef2ff;
+      --green: #10b981;
+      --green-bg: #d1fae5;
+      --amber: #f59e0b;
+      --amber-bg: #fef3c7;
+      --rose: #f43f5e;
+      --rose-bg: #ffe4e6;
+      --blue: #3b82f6;
+      --blue-bg: #dbeafe;
+      --purple: #8b5cf6;
+      --purple-bg: #ede9fe;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.04);
+    }
+
+    html { scroll-behavior: smooth }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ─── Sidebar ─── */
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: #111827;
+      color: #e5e7eb;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+    #sidebar .logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid #1f2937;
+    }
+    #sidebar .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    #sidebar .logo h1 span { color: var(--accent) }
+    #sidebar .logo p {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    #sidebar nav { flex: 1; padding: 16px 0 }
+    #sidebar nav .nav-group {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+    #sidebar nav .nav-group-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #6b7280;
+      padding: 8px 12px 4px;
+    }
+    #sidebar nav a {
+      display: block;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #d1d5db;
+      text-decoration: none;
+      font-size: 13px;
+      transition: all .15s;
+    }
+    #sidebar nav a:hover { background: #1f2937; color: #fff }
+    #sidebar nav a.active { background: var(--accent); color: #fff }
+    #sidebar nav a .nav-num {
+      display: inline-block;
+      width: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-right: 4px;
+    }
+    #sidebar nav a:hover .nav-num,
+    #sidebar nav a.active .nav-num { color: inherit }
+
+    /* ─── Main content ─── */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 40px 48px 80px;
+      max-width: 1100px;
+    }
+    .page-header {
+      margin-bottom: 48px;
+    }
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 600px;
+    }
+
+    /* ─── Section ─── */
+    .section {
+      margin-bottom: 64px;
+      scroll-margin-top: 24px;
+    }
+    .section-header {
+      margin-bottom: 24px;
+    }
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ─── Demo card ─── */
+    .demo {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .demo-title {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .demo-title .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-drag { background: var(--blue-bg); color: var(--blue) }
+    .badge-resize { background: var(--green-bg); color: var(--green) }
+    .badge-gesture { background: var(--purple-bg); color: var(--purple) }
+    .badge-drop { background: var(--amber-bg); color: var(--amber) }
+    .badge-combo { background: var(--rose-bg); color: var(--rose) }
+
+    .demo-area {
+      padding: 24px;
+      position: relative;
+      min-height: 200px;
+    }
+    .demo-info {
+      padding: 12px 20px;
+      background: var(--surface-alt);
+      border-top: 1px solid var(--border);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .demo-info span { white-space: nowrap }
+    .demo-info .label { color: var(--text-muted); margin-right: 4px }
+    .demo-info .value { color: var(--text); font-weight: 600 }
+
+    .demo-code {
+      border-top: 1px solid var(--border);
+    }
+    .demo-code summary {
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      background: var(--surface-alt);
+    }
+    .demo-code summary:hover { color: var(--text) }
+    .demo-code pre {
+      margin: 0;
+      padding: 16px 20px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    /* ─── Shared element styles ─── */
+    .drag-box {
+      width: 120px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .drag-box.x-only {
+      background: linear-gradient(135deg, var(--blue), #2563eb);
+    }
+    .drag-box.y-only {
+      background: linear-gradient(135deg, var(--green), #059669);
+    }
+
+    .handle-box {
+      width: 180px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .handle-box .handle-bar {
+      padding: 8px 12px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: grab;
+    }
+    .handle-box .handle-body {
+      padding: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .bounded-container {
+      width: 100%;
+      height: 260px;
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      position: relative;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 19px, var(--surface-alt) 19px, var(--surface-alt) 20px
+      ),
+      repeating-linear-gradient(
+        90deg, transparent, transparent 19px, var(--surface-alt) 19px, var(--surface-alt) 20px
+      );
+    }
+
+    .grid-overlay {
+      width: 100%;
+      height: 260px;
+      position: relative;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .grid-overlay .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .momentum-area {
+      width: 100%;
+      height: 260px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .snap-area {
+      width: 100%;
+      height: 300px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .snap-target {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--rose);
+      transform: translate(-50%, -50%);
+      opacity: 0.4;
+      transition: opacity .15s, transform .15s;
+      pointer-events: none;
+    }
+    .snap-target.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.5);
+    }
+
+    .resize-box {
+      width: 200px;
+      height: 150px;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .resize-box::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 12px;
+      height: 12px;
+      border-right: 2px solid var(--accent);
+      border-bottom: 2px solid var(--accent);
+      opacity: 0.5;
+    }
+
+    .gesture-area {
+      width: 100%;
+      height: 320px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gesture-target {
+      width: 160px;
+      height: 160px;
+      background: linear-gradient(135deg, var(--purple), #7c3aed);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Dropzone styles */
+    .dnd-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .dnd-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 140px;
+    }
+    .dnd-card {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      box-shadow: var(--shadow);
+      cursor: grab;
+      width: 130px;
+      text-align: center;
+      position: relative;
+    }
+    .dnd-card.dragging {
+      z-index: 100;
+      box-shadow: 0 12px 30px rgba(0,0,0,.3);
+      opacity: 0.9;
+    }
+    .dnd-card.red { background: var(--rose) }
+    .dnd-card.blue { background: var(--blue) }
+    .dnd-card.green { background: var(--green) }
+    .dnd-card.purple { background: var(--purple) }
+    .dnd-card.amber { background: var(--amber) }
+
+    .drop-zone {
+      width: 180px;
+      min-height: 200px;
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all .2s;
+    }
+    .drop-zone .zone-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .drop-zone .zone-count {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .drop-zone.dz-active {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+    .drop-zone.dz-hover {
+      border-color: var(--green);
+      background: var(--green-bg);
+      transform: scale(1.02);
+    }
+
+    /* Combined: drag + resize */
+    .combined-box {
+      width: 200px;
+      height: 140px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .combined-box::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 14px;
+      height: 14px;
+      border-right: 2px solid rgba(255,255,255,.5);
+      border-bottom: 2px solid rgba(255,255,255,.5);
+    }
+
+    /* Kanban */
+    .kanban {
+      display: flex;
+      gap: 16px;
+    }
+    .kanban-col {
+      width: 200px;
+      min-height: 280px;
+      background: var(--surface-alt);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .kanban-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .kanban-col .cards { display: flex; flex-direction: column; gap: 8px; min-height: 60px }
+    .kanban-card {
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      cursor: grab;
+    }
+    .kanban-col.dz-active { outline: 2px solid var(--accent); outline-offset: -2px }
+    .kanban-col.dz-hover { background: var(--accent-bg) }
+    .kanban-dragging {
+      z-index: 100;
+      opacity: 0.9;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .sortable-dragging { opacity: 0.85; box-shadow: 0 8px 25px rgba(0,0,0,.3); z-index: 9999; }
+
+    /* Stress test */
+    .stress-controls {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .stress-controls label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .stress-controls input[type=range] {
+      width: 200px;
+      accent-color: var(--accent);
+    }
+    .stress-controls button {
+      padding: 8px 18px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .stress-controls button:hover { background: var(--accent-hover) }
+    .stress-field {
+      width: 100%;
+      height: 400px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .stress-dot {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .fps-counter {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      padding: 8px 14px;
+      background: #111827;
+      color: #10b981;
+      font-family: 'SF Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 200;
+      box-shadow: var(--shadow-lg);
+      display: none;
+    }
+
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      #sidebar { display: none }
+      #main { margin-left: 0; padding: 24px 16px 64px }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <div class="logo">
+    <h1><span>Hyper</span>act</h1>
+    <p>Ultra-fast interactions library</p>
+  </div>
+  <nav>
+    <div class="nav-group">
+      <div class="nav-group-label">Basic Drag</div>
+      <a href="#simple-drag"><span class="nav-num">1.1</span> Simple Drag</a>
+      <a href="#handle-drag"><span class="nav-num">1.2</span> Drag with Handle</a>
+      <a href="#axis-drag"><span class="nav-num">1.3</span> Axis-locked Drag</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Advanced Drag</div>
+      <a href="#bounded-drag"><span class="nav-num">2.1</span> Bounded Drag</a>
+      <a href="#grid-drag"><span class="nav-num">2.2</span> Grid Snap</a>
+      <a href="#momentum-drag"><span class="nav-num">2.3</span> Momentum / Throw</a>
+      <a href="#snap-targets-drag"><span class="nav-num">2.4</span> Snap to Targets</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Resize</div>
+      <a href="#basic-resize"><span class="nav-num">3.1</span> Basic Resize</a>
+      <a href="#aspect-resize"><span class="nav-num">3.2</span> Aspect Ratio (16:9)</a>
+      <a href="#constrained-resize"><span class="nav-num">3.3</span> Min/Max Constraints</a>
+      <a href="#grid-resize"><span class="nav-num">3.4</span> Grid Resize</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Gesture</div>
+      <a href="#gesture-demo"><span class="nav-num">4.1</span> Pinch / Rotate / Scale</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Drag &amp; Drop</div>
+      <a href="#dropzone-demo"><span class="nav-num">5.1</span> Dropzones</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Combined</div>
+      <a href="#drag-resize"><span class="nav-num">6.1</span> Drag + Resize</a>
+      <a href="#kanban"><span class="nav-num">6.2</span> Kanban Board</a>
+      <a href="#sortable-list"><span class="nav-num">6.3</span> Sortable List</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Performance</div>
+      <a href="#stress-test"><span class="nav-num">7.1</span> Stress Test</a>
+    </div>
+  </nav>
+</aside>
+
+<!-- FPS Counter -->
+<div class="fps-counter" id="fps-counter">-- FPS</div>
+
+<!-- Main Content -->
+<main id="main">
+
+  <div class="page-header">
+    <h1>Hyperact Examples</h1>
+    <p>Interactive showcase of every feature in the library. Each demo is live &mdash; grab, drag, resize, pinch, and throw things around.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 1: BASIC DRAG                 -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="simple-drag">
+    <div class="section-header">
+      <h2>1. Basic Drag</h2>
+      <p>The simplest drag interactions &mdash; pick up and move elements anywhere on the page.</p>
+    </div>
+
+    <!-- 1.1 Simple Drag -->
+    <div class="demo">
+      <div class="demo-title">Simple Drag <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area" style="height:200px">
+        <div id="simple-drag-el" class="drag-box">Drag me</div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="simple-drag-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="simple-drag-y">0</span></span>
+        <span><span class="label">vx:</span><span class="value" id="simple-drag-vx">0</span></span>
+        <span><span class="label">vy:</span><span class="value" id="simple-drag-vy">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable } from 'hyperact'
+
+draggable('#simple-drag-el', {
+  onDragMove(e) {
+    console.log(e.totalX, e.totalY)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 1.2 Handle Drag -->
+  <div class="section" id="handle-drag">
+    <div class="demo">
+      <div class="demo-title">Drag with Handle <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area" style="height:200px">
+        <div id="handle-drag-el" class="handle-box">
+          <div class="handle-bar" id="handle-bar">Drag from here</div>
+          <div class="handle-body">This body area cannot be used to drag. Only the colored header acts as a handle.</div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="handle-drag-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="handle-drag-y">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>draggable('#handle-drag-el', {
+  handle: '.handle-bar',
+  onDragMove(e) {
+    console.log(e.totalX, e.totalY)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 1.3 Axis Locked -->
+  <div class="section" id="axis-drag">
+    <div class="demo">
+      <div class="demo-title">Axis-locked Drag <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area" style="height:200px;display:flex;gap:24px;align-items:flex-start">
+        <div id="x-only-el" class="drag-box x-only">X only</div>
+        <div id="y-only-el" class="drag-box y-only" style="margin-left:160px">Y only</div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">X-only x:</span><span class="value" id="axis-x-val">0</span></span>
+        <span><span class="label">Y-only y:</span><span class="value" id="axis-y-val">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>draggable('#x-only-el', { axis: 'x' })
+draggable('#y-only-el', { axis: 'y' })</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 2: ADVANCED DRAG              -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="bounded-drag">
+    <div class="section-header">
+      <h2>2. Advanced Drag</h2>
+      <p>Bounds, grid snapping, physics-based momentum, and modifier-driven snap targets.</p>
+    </div>
+
+    <!-- 2.1 Bounded -->
+    <div class="demo">
+      <div class="demo-title">Bounded Drag <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area">
+        <div class="bounded-container" id="bounded-container">
+          <div id="bounded-el" class="drag-box" style="position:absolute;top:20px;left:20px">Bounded</div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="bounded-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="bounded-y">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>draggable('#bounded-el', {
+  bounds: 'parent',
+  onDragMove(e) {
+    console.log(e.totalX, e.totalY)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 2.2 Grid Snap -->
+  <div class="section" id="grid-drag">
+    <div class="demo">
+      <div class="demo-title">Grid Snap <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area">
+        <div class="grid-overlay" id="grid-container">
+          <div class="grid-lines"></div>
+          <div id="grid-el" class="drag-box" style="position:absolute;top:0;left:0">Grid 40px</div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="grid-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="grid-y">0</span></span>
+        <span><span class="label">snapped:</span><span class="value" id="grid-snap">0, 0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>draggable('#grid-el', {
+  grid: { x: 40, y: 40 },
+  bounds: 'parent'
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 2.3 Momentum -->
+  <div class="section" id="momentum-drag">
+    <div class="demo">
+      <div class="demo-title">Momentum / Throw <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area">
+        <div class="momentum-area" id="momentum-container">
+          <div id="momentum-el" class="drag-box" style="position:absolute;top:80px;left:80px;background:linear-gradient(135deg,#f59e0b,#d97706)">Throw me!</div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="momentum-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="momentum-y">0</span></span>
+        <span><span class="label">vx:</span><span class="value" id="momentum-vx">0</span></span>
+        <span><span class="label">vy:</span><span class="value" id="momentum-vy">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>draggable('#momentum-el', {
+  momentum: { friction: 0.95, minSpeed: 0.1 },
+  bounds: 'parent',
+  onDragMove(e) {
+    console.log('velocity:', e.velocityX, e.velocityY)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 2.4 Snap Targets -->
+  <div class="section" id="snap-targets-drag">
+    <div class="demo">
+      <div class="demo-title">Snap to Targets <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area">
+        <div class="snap-area" id="snap-container">
+          <div class="snap-target" id="st-0" style="left:60px;top:60px"></div>
+          <div class="snap-target" id="st-1" style="left:240px;top:60px"></div>
+          <div class="snap-target" id="st-2" style="left:420px;top:60px"></div>
+          <div class="snap-target" id="st-3" style="left:150px;top:200px"></div>
+          <div class="snap-target" id="st-4" style="left:330px;top:200px"></div>
+          <!-- range rings show the snap radius -->
+          <svg class="snap-rings" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
+            <circle cx="240" cy="60" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
+            <circle cx="420" cy="60" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
+            <circle cx="150" cy="200" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
+            <circle cx="330" cy="200" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
+          </svg>
+          <div id="snap-el" class="drag-box" style="position:absolute;top:120px;left:180px;width:50px;height:50px;font-size:11px;background:linear-gradient(135deg,#f43f5e,#be123c)">Drag</div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="snap-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="snap-y">0</span></span>
+        <span><span class="label">snapped:</span><span class="value" id="snap-target-id">none</span></span>
+        <span>
+          <span class="label">pivot:</span>
+          <select id="snap-pivot" style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:12px">
+            <option value="center" selected>center</option>
+            <option value="top-left">top-left</option>
+            <option value="top">top</option>
+            <option value="top-right">top-right</option>
+            <option value="left">left</option>
+            <option value="right">right</option>
+            <option value="bottom-left">bottom-left</option>
+            <option value="bottom">bottom</option>
+            <option value="bottom-right">bottom-right</option>
+          </select>
+        </span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable, snapTargets } from 'hyperact'
+
+// relativePoints controls which point on the element
+// is used for snapping:
+//   {x:0.5, y:0.5} = center (default in this demo)
+//   {x:0, y:0}     = top-left corner
+//   {x:1, y:1}     = bottom-right corner
+draggable('#snap-el', {
+  modifiers: [
+    snapTargets({
+      coordinateMode: 'parent',
+      relativePoints: [{ x: 0.5, y: 0.5 }],
+      targets: [
+        { x: 60, y: 60 },
+        { x: 240, y: 60 },
+        ...
+      ],
+      range: 50
+    })
+  ]
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 3: RESIZE                     -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="basic-resize">
+    <div class="section-header">
+      <h2>3. Resize</h2>
+      <p>Resize elements from edges and corners, with optional aspect ratio, constraints, and grid snapping.</p>
+    </div>
+
+    <!-- 3.1 Basic Resize -->
+    <div class="demo">
+      <div class="demo-title">Basic Resize (all edges) <span class="badge badge-resize">resize</span></div>
+      <div class="demo-area" style="height:260px">
+        <div id="basic-resize-el" class="resize-box">Resize me</div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">w:</span><span class="value" id="resize-w">200</span></span>
+        <span><span class="label">h:</span><span class="value" id="resize-h">150</span></span>
+        <span><span class="label">dw:</span><span class="value" id="resize-dw">0</span></span>
+        <span><span class="label">dh:</span><span class="value" id="resize-dh">0</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { resizable } from 'hyperact'
+
+resizable('#basic-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  onResizeMove(e) {
+    console.log(e.width, e.height)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 3.2 Aspect Ratio -->
+  <div class="section" id="aspect-resize">
+    <div class="demo">
+      <div class="demo-title">Aspect Ratio (16:9) <span class="badge badge-resize">resize</span></div>
+      <div class="demo-area" style="height:300px">
+        <div id="aspect-resize-el" class="resize-box" style="width:320px;height:180px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border-color:#0ea5e9">
+          16:9 Ratio
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">w:</span><span class="value" id="aspect-w">320</span></span>
+        <span><span class="label">h:</span><span class="value" id="aspect-h">180</span></span>
+        <span><span class="label">ratio:</span><span class="value" id="aspect-ratio">1.78</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>resizable('#aspect-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  aspectRatio: 16 / 9,
+  minWidth: 160,
+  minHeight: 90
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 3.3 Min/Max Constraints -->
+  <div class="section" id="constrained-resize">
+    <div class="demo">
+      <div class="demo-title">Min/Max Constraints <span class="badge badge-resize">resize</span></div>
+      <div class="demo-area" style="height:300px">
+        <div id="constrained-resize-el" class="resize-box" style="width:200px;height:150px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-color:#10b981">
+          100&ndash;400 px
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">w:</span><span class="value" id="constrained-w">200</span></span>
+        <span><span class="label">h:</span><span class="value" id="constrained-h">150</span></span>
+        <span><span class="label">min:</span><span class="value">100x80</span></span>
+        <span><span class="label">max:</span><span class="value">400x300</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>resizable('#constrained-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  minWidth: 100,
+  minHeight: 80,
+  maxWidth: 400,
+  maxHeight: 300
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 3.4 Grid Resize -->
+  <div class="section" id="grid-resize">
+    <div class="demo">
+      <div class="demo-title">Grid Snap Resize <span class="badge badge-resize">resize</span></div>
+      <div class="demo-area" style="height:300px">
+        <div style="position:relative;width:100%;height:260px;border:2px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;opacity:.4"></div>
+          <div id="grid-resize-el" class="resize-box" style="position:absolute;top:0;left:0;width:200px;height:160px;border-color:#8b5cf6;color:#8b5cf6">
+            Grid 40px
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">w:</span><span class="value" id="grid-resize-w">200</span></span>
+        <span><span class="label">h:</span><span class="value" id="grid-resize-h">160</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>resizable('#grid-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  grid: { width: 40, height: 40 },
+  minWidth: 80,
+  minHeight: 80
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 4: GESTURE                    -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="gesture-demo">
+    <div class="section-header">
+      <h2>4. Gesture (Multi-touch)</h2>
+      <p>Pinch to zoom and rotate with two fingers or pointers. Use touch or multiple mouse pointers (e.g. dev tools touch emulation).</p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-title">Pinch / Rotate / Scale <span class="badge badge-gesture">gesture</span></div>
+      <div class="demo-area">
+        <div class="gesture-area">
+          <div id="gesture-el" class="gesture-target">
+            Pinch &amp; Rotate<br><small>(use 2 fingers)</small>
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">scale:</span><span class="value" id="gesture-scale">1.00</span></span>
+        <span><span class="label">rotation:</span><span class="value" id="gesture-rotation">0.0</span>&deg;</span>
+        <span><span class="label">distance:</span><span class="value" id="gesture-distance">0</span>px</span>
+        <span><span class="label">angle:</span><span class="value" id="gesture-angle">0.0</span>&deg;</span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { gesturable } from 'hyperact'
+
+let scale = 1, rotation = 0
+
+gesturable('#gesture-el', {
+  onGestureMove(e) {
+    scale = e.scale
+    rotation = e.rotation
+    el.style.transform =
+      `scale(${scale}) rotate(${rotation}deg)`
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 5: DRAG & DROP               -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="dropzone-demo">
+    <div class="section-header">
+      <h2>5. Drag &amp; Drop (Dropzone)</h2>
+      <p>Drag colored cards into dropzones. Each zone has different accept rules and tracks drop count.</p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-title">Dropzones with Accept Rules <span class="badge badge-drop">drop</span></div>
+      <div class="demo-area">
+        <div class="dnd-container">
+          <div class="dnd-cards" id="dnd-source">
+            <div class="dnd-card red" data-color="red">Red Card</div>
+            <div class="dnd-card blue" data-color="blue">Blue Card</div>
+            <div class="dnd-card green" data-color="green">Green Card</div>
+            <div class="dnd-card purple" data-color="purple">Purple Card</div>
+            <div class="dnd-card amber" data-color="amber">Amber Card</div>
+          </div>
+          <div class="drop-zone" id="dz-any">
+            <div class="zone-label">Any Card</div>
+            <div class="zone-count" id="dz-any-count">Drops: 0</div>
+          </div>
+          <div class="drop-zone" id="dz-warm">
+            <div class="zone-label">Warm Colors</div>
+            <div class="zone-count" id="dz-warm-count">Drops: 0</div>
+          </div>
+          <div class="drop-zone" id="dz-cool">
+            <div class="zone-label">Cool Colors</div>
+            <div class="zone-count" id="dz-cool-count">Drops: 0</div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">dragging:</span><span class="value" id="dnd-dragging">none</span></span>
+        <span><span class="label">hover zone:</span><span class="value" id="dnd-hover">none</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable, dropzone, DropzoneManager } from 'hyperact'
+
+const zone = dropzone('#dz-warm', {
+  accept: (el) => ['red', 'amber'].includes(el.dataset.color),
+  activeClass: 'dz-active',
+  hoverClass: 'dz-hover',
+  onDrop(e) {
+    console.log('dropped:', e.draggable)
+  }
+})
+
+// On drag start, notify DropzoneManager
+draggable(card, {
+  onDragStart(e) { DropzoneManager.onDragStart(e.target) },
+  onDragMove(e) { DropzoneManager.onDragMove(e.target, pointer) },
+  onDragEnd(e) { DropzoneManager.onDragEnd(e.target, pointer) }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 6: COMBINED                   -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="drag-resize">
+    <div class="section-header">
+      <h2>6. Combined Interactions</h2>
+      <p>Mix drag and resize on the same element, or build complex UIs like a kanban board.</p>
+    </div>
+
+    <!-- 6.1 Drag + Resize -->
+    <div class="demo">
+      <div class="demo-title">Drag + Resize <span class="badge badge-combo">combo</span></div>
+      <div class="demo-area" style="height:300px">
+        <div id="combined-el" class="combined-box">Drag center<br>Resize edges</div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">x:</span><span class="value" id="combined-x">0</span></span>
+        <span><span class="label">y:</span><span class="value" id="combined-y">0</span></span>
+        <span><span class="label">w:</span><span class="value" id="combined-w">200</span></span>
+        <span><span class="label">h:</span><span class="value" id="combined-h">140</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { interactable } from 'hyperact'
+
+interactable('#combined-el', {
+  drag: true,
+  resize: {
+    edges: { top: true, right: true, bottom: true, left: true },
+    minWidth: 100,
+    minHeight: 80
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 6.2 Kanban -->
+  <div class="section" id="kanban">
+    <div class="demo">
+      <div class="demo-title">Kanban Board <span class="badge badge-combo">combo</span></div>
+      <div class="demo-area">
+        <div class="kanban" id="kanban-board">
+          <div class="kanban-col" id="col-todo">
+            <h4>To Do</h4>
+            <div class="cards" id="cards-todo">
+              <div class="kanban-card" data-id="1">Design homepage</div>
+              <div class="kanban-card" data-id="2">Write tests</div>
+              <div class="kanban-card" data-id="3">Setup CI/CD</div>
+            </div>
+          </div>
+          <div class="kanban-col" id="col-progress">
+            <h4>In Progress</h4>
+            <div class="cards" id="cards-progress">
+              <div class="kanban-card" data-id="4">Build API</div>
+            </div>
+          </div>
+          <div class="kanban-col" id="col-done">
+            <h4>Done</h4>
+            <div class="cards" id="cards-done">
+              <div class="kanban-card" data-id="5">Project setup</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">todo:</span><span class="value" id="kanban-todo">3</span></span>
+        <span><span class="label">progress:</span><span class="value" id="kanban-progress">1</span></span>
+        <span><span class="label">done:</span><span class="value" id="kanban-done">1</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { sortable } from 'hyperact'
+
+// Each column's .cards container is a sortable
+// with the same group name — items move between them
+sortable('#cards-todo', {
+  items: '.kanban-card',
+  group: 'kanban',
+  dragClass: 'kanban-dragging',
+  onAdd({ item, to }) {
+    console.log(`${item.textContent} added to ${to.container.id}`)
+  }
+})
+sortable('#cards-progress', {
+  items: '.kanban-card',
+  group: 'kanban',
+  dragClass: 'kanban-dragging',
+})
+sortable('#cards-done', {
+  items: '.kanban-card',
+  group: 'kanban',
+  dragClass: 'kanban-dragging',
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- 6.3 Sortable List -->
+  <div class="section" id="sortable-list">
+    <div class="demo">
+      <div class="demo-title">Sortable List <span class="badge badge-drag">sortable</span></div>
+      <div class="demo-area" style="display:flex;gap:40px;justify-content:center;padding:30px">
+        <!-- Vertical sortable -->
+        <div>
+          <h4 style="margin:0 0 12px;color:#94a3b8;font-size:13px;text-transform:uppercase;letter-spacing:1px">Vertical</h4>
+          <div id="sortable-v" style="width:240px;display:flex;flex-direction:column;gap:6px">
+            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Buy groceries</div>
+            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Walk the dog</div>
+            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Write documentation</div>
+            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Review PRs</div>
+            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Deploy to staging</div>
+          </div>
+        </div>
+        <!-- Horizontal sortable -->
+        <div>
+          <h4 style="margin:0 0 12px;color:#94a3b8;font-size:13px;text-transform:uppercase;letter-spacing:1px">Horizontal</h4>
+          <div id="sortable-h" style="display:flex;gap:6px">
+            <div class="sort-item-h" style="width:60px;height:60px;background:#7c3aed;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">A</div>
+            <div class="sort-item-h" style="width:60px;height:60px;background:#2563eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">B</div>
+            <div class="sort-item-h" style="width:60px;height:60px;background:#059669;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">C</div>
+            <div class="sort-item-h" style="width:60px;height:60px;background:#d97706;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">D</div>
+            <div class="sort-item-h" style="width:60px;height:60px;background:#dc2626;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">E</div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">last action:</span><span class="value" id="sort-action">-</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { sortable } from 'hyperact'
+
+// Vertical sortable list
+sortable('#my-list', {
+  axis: 'y',
+  dragClass: 'is-dragging',
+  animationDuration: 200,
+  onSortEnd({ oldIndex, newIndex }) {
+    console.log(`Moved from ${oldIndex} to ${newIndex}`)
+  }
+})
+
+// Horizontal sortable
+sortable('#my-row', {
+  axis: 'x',
+  onSortEnd({ item, oldIndex, newIndex }) {
+    console.log(`${item.textContent}: ${oldIndex} → ${newIndex}`)
+  }
+})</pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 7: STRESS TEST                -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="stress-test">
+    <div class="section-header">
+      <h2>7. Stress Test</h2>
+      <p>Spawn hundreds (or thousands) of independently draggable elements and see the FPS counter hold steady.</p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-title">Performance Benchmark <span class="badge badge-drag">drag</span></div>
+      <div class="demo-area">
+        <div class="stress-controls">
+          <label for="stress-slider">Count:</label>
+          <input type="range" id="stress-slider" min="100" max="2000" step="100" value="500">
+          <span class="value" id="stress-count-label">500</span>
+          <button id="stress-go">Spawn Elements</button>
+          <button id="stress-clear" style="background:#6b7280">Clear</button>
+        </div>
+        <div class="stress-field" id="stress-field"></div>
+      </div>
+      <div class="demo-info">
+        <span><span class="label">elements:</span><span class="value" id="stress-el-count">0</span></span>
+        <span><span class="label">fps:</span><span class="value" id="stress-fps">--</span></span>
+      </div>
+      <details class="demo-code">
+        <summary>View Code</summary>
+        <pre>import { draggable } from 'hyperact'
+
+for (let i = 0; i &lt; count; i++) {
+  const dot = document.createElement('div')
+  dot.style.left = Math.random() * width + 'px'
+  dot.style.top = Math.random() * height + 'px'
+  field.appendChild(dot)
+  draggable(dot)
+}</pre>
+      </details>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+import { draggable, resizable, gesturable, dropzone, DropzoneManager, interactable } from './src/index.ts'
+import { snapTargets } from './src/modifiers/snap-targets.ts'
+import { sortable } from './src/sortable.ts'
+
+// ─── Helper: update a stat value ───
+const $ = (sel) => document.querySelector(sel)
+const setText = (sel, v) => { const el = $(sel); if (el) el.textContent = v }
+
+// ═══════════════════════════════════════
+//  1.1  Simple Drag
+// ═══════════════════════════════════════
+draggable('#simple-drag-el', {
+  onDragMove(e) {
+    setText('#simple-drag-x', Math.round(e.totalX))
+    setText('#simple-drag-y', Math.round(e.totalY))
+    setText('#simple-drag-vx', Math.round(e.velocityX))
+    setText('#simple-drag-vy', Math.round(e.velocityY))
+  }
+})
+
+// ═══════════════════════════════════════
+//  1.2  Handle Drag
+// ═══════════════════════════════════════
+draggable('#handle-drag-el', {
+  handle: '.handle-bar',
+  onDragMove(e) {
+    setText('#handle-drag-x', Math.round(e.totalX))
+    setText('#handle-drag-y', Math.round(e.totalY))
+  }
+})
+
+// ═══════════════════════════════════════
+//  1.3  Axis Locked
+// ═══════════════════════════════════════
+draggable('#x-only-el', {
+  axis: 'x',
+  onDragMove(e) { setText('#axis-x-val', Math.round(e.totalX)) }
+})
+draggable('#y-only-el', {
+  axis: 'y',
+  onDragMove(e) { setText('#axis-y-val', Math.round(e.totalY)) }
+})
+
+// ═══════════════════════════════════════
+//  2.1  Bounded Drag
+// ═══════════════════════════════════════
+draggable('#bounded-el', {
+  bounds: 'parent',
+  onDragMove(e) {
+    setText('#bounded-x', Math.round(e.totalX))
+    setText('#bounded-y', Math.round(e.totalY))
+  }
+})
+
+// ═══════════════════════════════════════
+//  2.2  Grid Snap
+// ═══════════════════════════════════════
+{
+  const inst = draggable('#grid-el', {
+    grid: { x: 40, y: 40 },
+    bounds: 'parent',
+    onDragMove(e) {
+      const pos = inst.getPosition()
+      setText('#grid-x', Math.round(pos.x))
+      setText('#grid-y', Math.round(pos.y))
+      setText('#grid-snap', `${Math.round(pos.x / 40) * 40}, ${Math.round(pos.y / 40) * 40}`)
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  2.3  Momentum
+// ═══════════════════════════════════════
+{
+  const inst = draggable('#momentum-el', {
+    momentum: { friction: 0.95, minSpeed: 0.1 },
+    bounds: 'parent',
+    onDragMove(e) {
+      setText('#momentum-x', Math.round(e.totalX))
+      setText('#momentum-y', Math.round(e.totalY))
+      setText('#momentum-vx', Math.round(e.velocityX))
+      setText('#momentum-vy', Math.round(e.velocityY))
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  2.4  Snap Targets
+// ═══════════════════════════════════════
+{
+  const targets = [
+    { x: 60, y: 60 },
+    { x: 240, y: 60 },
+    { x: 420, y: 60 },
+    { x: 150, y: 200 },
+    { x: 330, y: 200 },
+  ]
+  const SNAP_RANGE = 50
+
+  const snapTargetEls = targets.map((_, i) => $(`#st-${i}`))
+  const snapContainer = $('#snap-container')
+  const snapEl = $('#snap-el')
+  const pivotSelect = $('#snap-pivot')
+
+  const pivotMap = {
+    'center': { x: 0.5, y: 0.5 },
+    'top-left': { x: 0, y: 0 },
+    'bottom-right': { x: 1, y: 1 },
+  }
+
+  let currentInst = null
+  let snapMod = null
+
+  function createSnapDraggable() {
+    if (currentInst) currentInst.destroy()
+    const pivotName = pivotSelect.value
+
+    snapMod = snapTargets({
+      coordinateMode: 'parent',
+      relativePoints: [pivotName],
+      targets: targets.map(t => ({ x: t.x, y: t.y })),
+      range: SNAP_RANGE,
+    })
+
+    currentInst = draggable(snapEl, {
+      modifiers: [snapMod],
+      onDragMove() {
+        const containerRect = snapContainer.getBoundingClientRect()
+        const elRect = snapEl.getBoundingClientRect()
+        const pivot = pivotMap[pivotName] || pivotMap['center']
+        const px = elRect.left - containerRect.left + elRect.width * pivot.x
+        const py = elRect.top - containerRect.top + elRect.height * pivot.y
+
+        setText('#snap-x', Math.round(px))
+        setText('#snap-y', Math.round(py))
+
+        // Use the modifier's own snap state — no re-deriving needed
+        const idx = snapMod.snappedIndex
+        snapTargetEls.forEach((el, i) => el.classList.toggle('active', i === idx))
+        setText('#snap-target-id', idx >= 0 ? `target ${idx + 1}` : 'none')
+      },
+      onDragEnd() {
+        snapTargetEls.forEach(el => el.classList.remove('active'))
+        setText('#snap-target-id', 'none')
+      }
+    })
+  }
+
+  createSnapDraggable()
+  pivotSelect.addEventListener('change', () => {
+    snapEl.style.transform = ''
+    createSnapDraggable()
+  })
+}
+
+// ═══════════════════════════════════════
+//  3.1  Basic Resize
+// ═══════════════════════════════════════
+resizable('#basic-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  onResizeMove(e) {
+    setText('#resize-w', Math.round(e.width))
+    setText('#resize-h', Math.round(e.height))
+    setText('#resize-dw', Math.round(e.deltaWidth))
+    setText('#resize-dh', Math.round(e.deltaHeight))
+  }
+})
+
+// ═══════════════════════════════════════
+//  3.2  Aspect Ratio
+// ═══════════════════════════════════════
+resizable('#aspect-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  aspectRatio: 16 / 9,
+  minWidth: 160,
+  minHeight: 90,
+  onResizeMove(e) {
+    setText('#aspect-w', Math.round(e.width))
+    setText('#aspect-h', Math.round(e.height))
+    setText('#aspect-ratio', (e.width / e.height).toFixed(2))
+  }
+})
+
+// ═══════════════════════════════════════
+//  3.3  Constrained Resize
+// ═══════════════════════════════════════
+resizable('#constrained-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  minWidth: 100,
+  minHeight: 80,
+  maxWidth: 400,
+  maxHeight: 300,
+  onResizeMove(e) {
+    setText('#constrained-w', Math.round(e.width))
+    setText('#constrained-h', Math.round(e.height))
+  }
+})
+
+// ═══════════════════════════════════════
+//  3.4  Grid Resize
+// ═══════════════════════════════════════
+resizable('#grid-resize-el', {
+  edges: { top: true, right: true, bottom: true, left: true },
+  grid: { width: 40, height: 40 },
+  minWidth: 80,
+  minHeight: 80,
+  onResizeMove(e) {
+    setText('#grid-resize-w', Math.round(e.width))
+    setText('#grid-resize-h', Math.round(e.height))
+  }
+})
+
+// ═══════════════════════════════════════
+//  4.1  Gesture
+// ═══════════════════════════════════════
+{
+  const el = $('#gesture-el')
+  let currentScale = 1
+  let currentRotation = 0
+
+  gesturable(el, {
+    onGestureMove(e) {
+      currentScale = Math.max(0.3, Math.min(3, e.scale))
+      currentRotation = e.rotation
+      el.style.transform = `scale(${currentScale}) rotate(${currentRotation}deg)`
+
+      setText('#gesture-scale', currentScale.toFixed(2))
+      setText('#gesture-rotation', currentRotation.toFixed(1))
+      setText('#gesture-distance', Math.round(e.distance))
+      setText('#gesture-angle', e.angle.toFixed(1))
+    },
+    onGestureEnd() {
+      setText('#gesture-scale', currentScale.toFixed(2))
+      setText('#gesture-rotation', currentRotation.toFixed(1))
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  5.1  Drag & Drop
+// ═══════════════════════════════════════
+{
+  const warmColors = ['red', 'amber']
+  const coolColors = ['blue', 'green', 'purple']
+  const counts = { any: 0, warm: 0, cool: 0 }
+
+  function makeDropzone(id, label, countId, acceptFn) {
+    return dropzone(id, {
+      accept: acceptFn,
+      overlap: 'center',
+      activeClass: 'dz-active',
+      hoverClass: 'dz-hover',
+      onDragEnter() { setText('#dnd-hover', label) },
+      onDragLeave() { setText('#dnd-hover', 'none') },
+      onDrop(e) {
+        // Move card into the dropzone visually
+        const zone = e.target
+        const card = e.draggable
+        card.style.transform = ''
+        zone.appendChild(card)
+
+        // Rebuild draggable on the moved card (it needs new position context)
+        setupCard(card)
+
+        // Update count
+        const key = countId.replace('dz-', '').replace('-count', '')
+        counts[key]++
+        setText('#' + countId, `Drops: ${counts[key]}`)
+      }
+    })
+  }
+
+  makeDropzone('#dz-any', 'Any Card', 'dz-any-count', undefined)
+  makeDropzone('#dz-warm', 'Warm Colors', 'dz-warm-count', (el) => warmColors.includes(el.dataset.color))
+  makeDropzone('#dz-cool', 'Cool Colors', 'dz-cool-count', (el) => coolColors.includes(el.dataset.color))
+
+  const cardInstances = new Map()
+
+  function setupCard(card) {
+    const old = cardInstances.get(card)
+    if (old) old.destroy()
+
+    const inst = draggable(card, {
+      onDragStart() {
+        card.classList.add('dragging')
+        card._parentBeforeDrag = card.parentElement
+        setText('#dnd-dragging', card.dataset.color)
+        DropzoneManager.onDragStart(card)
+      },
+      onDragMove() {
+        const rect = card.getBoundingClientRect()
+        const ptr = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        DropzoneManager.onDragMove(card, ptr)
+      },
+      onDragEnd() {
+        const rect = card.getBoundingClientRect()
+        const ptr = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        // onDrop fires synchronously inside this call (moves card to zone)
+        DropzoneManager.onDragEnd(card, ptr)
+
+        card.classList.remove('dragging')
+
+        // If the card's parent didn't change, it wasn't dropped — snap back
+        if (card.parentElement === card._parentBeforeDrag) {
+          inst.setPosition(0, 0)
+        }
+
+        setText('#dnd-dragging', 'none')
+        setText('#dnd-hover', 'none')
+      }
+    })
+
+    cardInstances.set(card, inst)
+  }
+
+  document.querySelectorAll('#dnd-source .dnd-card').forEach(setupCard)
+}
+
+// ═══════════════════════════════════════
+//  6.1  Drag + Resize
+// ═══════════════════════════════════════
+{
+  const inst = interactable('#combined-el', {
+    drag: {
+      onDragMove(e) {
+        setText('#combined-x', Math.round(e.totalX))
+        setText('#combined-y', Math.round(e.totalY))
+      }
+    },
+    resize: {
+      edges: { top: true, right: true, bottom: true, left: true },
+      minWidth: 100,
+      minHeight: 80,
+      handleSize: 14,
+      onResizeMove(e) {
+        setText('#combined-w', Math.round(e.width))
+        setText('#combined-h', Math.round(e.height))
+      }
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  6.2  Kanban (using Sortable with groups)
+// ═══════════════════════════════════════
+{
+  const countMap = {
+    'cards-todo': 'kanban-todo',
+    'cards-progress': 'kanban-progress',
+    'cards-done': 'kanban-done',
+  }
+
+  function updateKanbanCounts() {
+    for (const [containerId, labelId] of Object.entries(countMap)) {
+      const count = $(`#${containerId}`).children.length
+      setText(`#${labelId}`, count)
+    }
+  }
+
+  // Each column's .cards div is a sortable with the same group
+  // — cards can be reordered within a column AND dragged between columns
+  const kanbanOptions = {
+    items: '.kanban-card',
+    group: 'kanban',
+    dragClass: 'kanban-dragging',
+    animationDuration: 150,
+    onSortEnd() { updateKanbanCounts() },
+    onAdd() { updateKanbanCounts() },
+    onRemove() { updateKanbanCounts() },
+  }
+
+  sortable('#cards-todo', kanbanOptions)
+  sortable('#cards-progress', kanbanOptions)
+  sortable('#cards-done', kanbanOptions)
+}
+
+// ═══════════════════════════════════════
+//  6.3  Sortable Lists
+// ═══════════════════════════════════════
+{
+  sortable('#sortable-v', {
+    items: '.sort-item',
+    axis: 'y',
+    dragClass: 'sortable-dragging',
+    animationDuration: 200,
+    onSort(e) {
+      setText('#sort-action', `sorting: ${e.oldIndex} → ${e.newIndex}`)
+    },
+    onSortEnd(e) {
+      setText('#sort-action', `moved: ${e.oldIndex} → ${e.newIndex}`)
+    }
+  })
+
+  sortable('#sortable-h', {
+    items: '.sort-item-h',
+    axis: 'x',
+    dragClass: 'sortable-dragging',
+    animationDuration: 200,
+    onSortEnd(e) {
+      setText('#sort-action', `${e.item.textContent}: ${e.oldIndex} → ${e.newIndex}`)
+    }
+  })
+}
+
+// ═══════════════════════════════════════
+//  7.1  Stress Test
+// ═══════════════════════════════════════
+{
+  const slider = $('#stress-slider')
+  const label = $('#stress-count-label')
+  const field = $('#stress-field')
+  const goBtn = $('#stress-go')
+  const clearBtn = $('#stress-clear')
+  const fpsEl = $('#fps-counter')
+  let stressInstances = []
+
+  slider.addEventListener('input', () => {
+    label.textContent = slider.value
+  })
+
+  const colors = [
+    '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b',
+    '#10b981', '#3b82f6', '#06b6d4', '#84cc16', '#a855f7'
+  ]
+
+  goBtn.addEventListener('click', () => {
+    // Clear existing
+    stressInstances.forEach(d => d.destroy())
+    stressInstances = []
+    field.innerHTML = ''
+
+    const count = parseInt(slider.value)
+    const w = field.clientWidth
+    const h = field.clientHeight
+
+    for (let i = 0; i < count; i++) {
+      const dot = document.createElement('div')
+      dot.className = 'stress-dot'
+      dot.style.left = (Math.random() * (w - 24)) + 'px'
+      dot.style.top = (Math.random() * (h - 24)) + 'px'
+      dot.style.background = colors[i % colors.length]
+      field.appendChild(dot)
+      stressInstances.push(draggable(dot))
+    }
+
+    setText('#stress-el-count', count)
+
+    // Show FPS counter
+    fpsEl.style.display = 'block'
+    startFPS()
+  })
+
+  clearBtn.addEventListener('click', () => {
+    stressInstances.forEach(d => d.destroy())
+    stressInstances = []
+    field.innerHTML = ''
+    setText('#stress-el-count', '0')
+    setText('#stress-fps', '--')
+    fpsEl.style.display = 'none'
+    stopFPS()
+  })
+
+  // FPS counter
+  let fpsRAF = null
+  let fpsFrames = 0
+  let fpsLast = performance.now()
+
+  function fpsLoop() {
+    fpsFrames++
+    const now = performance.now()
+    if (now - fpsLast >= 1000) {
+      const fps = Math.round(fpsFrames * 1000 / (now - fpsLast))
+      setText('#stress-fps', fps)
+      fpsEl.textContent = fps + ' FPS'
+      fpsFrames = 0
+      fpsLast = now
+    }
+    fpsRAF = requestAnimationFrame(fpsLoop)
+  }
+
+  function startFPS() {
+    if (fpsRAF) return
+    fpsLast = performance.now()
+    fpsFrames = 0
+    fpsRAF = requestAnimationFrame(fpsLoop)
+  }
+
+  function stopFPS() {
+    if (fpsRAF) {
+      cancelAnimationFrame(fpsRAF)
+      fpsRAF = null
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+//  Sidebar active state
+// ═══════════════════════════════════════
+{
+  const links = document.querySelectorAll('#sidebar nav a')
+  const sections = [...links].map(a => {
+    const id = a.getAttribute('href')?.slice(1)
+    return id ? document.getElementById(id) : null
+  }).filter(Boolean)
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'))
+        const link = document.querySelector(`#sidebar nav a[href="#${entry.target.id}"]`)
+        if (link) link.classList.add('active')
+      }
+    })
+  }, { rootMargin: '-20% 0px -70% 0px' })
+
+  sections.forEach(s => observer.observe(s))
+}
+</script>
+
+</body>
+</html>
