@@ -1,12 +1,12 @@
-// Optimized drag addon for hyperact-nano (~2KB minified)
+// Optimized drag addon for grip-nano (~2KB minified)
 
-import { Hyperact, InteractionEvent, HyperactOptions } from './nano'
+import { Grip, InteractionEvent, GripOptions } from './nano'
 import type { Modifier, ModifierContext } from './types'
 import { applyModifiers } from './types'
 import { DropzoneManager } from './dropzone'
 import { setDraggableAttrs, setDraggingAttrs, clearDraggableAttrs, announce, getMessages } from './aria'
 
-export interface DragOptions extends HyperactOptions {
+export interface DragOptions extends GripOptions {
   /** Enable ARIA attributes for accessibility (default: true) */
   aria?: boolean
   axis?: 'x' | 'y' | 'xy' | 'start'
@@ -32,7 +32,7 @@ export interface DragEvent extends InteractionEvent {
   velocityY: number
 }
 
-export class Draggable extends Hyperact {
+export class Draggable extends Grip {
   private dragOptions: DragOptions
   private transform = { x: 0, y: 0 }
   private startTransform = { x: 0, y: 0 }

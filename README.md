@@ -27,31 +27,31 @@ Measured from the `dist/` output (minified with terser, gzipped):
 
 | Import path | Min | Gzip | What you get |
 |---|---|---|---|
-| `hyperact/nano` | 5.4 KB | 1.6 KB | Core pointer tracking, velocity, tap detection |
-| `hyperact/drag` | 11.9 KB | 3.3 KB | Draggable with axis, bounds, grid, momentum, modifiers |
-| `hyperact/resize` | 11.5 KB | 3.2 KB | Resizable with edges, aspect ratio, min/max, modifiers |
-| `hyperact/gesture` | 8.3 KB | 2.3 KB | Multi-touch pinch, rotate, pan |
-| `hyperact/dropzone` | 3.0 KB | 1.0 KB | Drop targets with overlap modes |
-| `hyperact/sortable` | 18.2 KB | 5.0 KB | Sortable lists with cross-container group support |
-| `hyperact/modifiers` | 8.3 KB | 2.6 KB | All modifiers (restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll) |
-| `hyperact` | 38.6 KB | 9.8 KB | Full bundle with everything |
+| `gripjs/nano` | 5.4 KB | 1.6 KB | Core pointer tracking, velocity, tap detection |
+| `gripjs/drag` | 11.9 KB | 3.3 KB | Draggable with axis, bounds, grid, momentum, modifiers |
+| `gripjs/resize` | 11.5 KB | 3.2 KB | Resizable with edges, aspect ratio, min/max, modifiers |
+| `gripjs/gesture` | 8.3 KB | 2.3 KB | Multi-touch pinch, rotate, pan |
+| `gripjs/dropzone` | 3.0 KB | 1.0 KB | Drop targets with overlap modes |
+| `gripjs/sortable` | 18.2 KB | 5.0 KB | Sortable lists with cross-container group support |
+| `gripjs/modifiers` | 8.3 KB | 2.6 KB | All modifiers (restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll) |
+| `gripjs` | 38.6 KB | 9.8 KB | Full bundle with everything |
 
 For comparison, interact.js ships approximately 140 KB minified.
 
 ## Installation
 
 ```bash
-npm install hyperact
+npm install gripjs
 # or
-pnpm add hyperact
+pnpm add gripjs
 # or
-yarn add hyperact
+yarn add gripjs
 ```
 
 ## Quick Start
 
 ```ts
-import { draggable } from 'hyperact/drag'
+import { draggable } from 'gripjs/drag'
 
 const drag = draggable('#my-element', {
   onDragMove: (e) => console.log(e.totalX, e.totalY),
@@ -149,7 +149,7 @@ if (drag.interacting) {
 ### Draggable
 
 ```ts
-import { draggable } from 'hyperact/drag'
+import { draggable } from 'gripjs/drag'
 ```
 
 #### Options
@@ -189,8 +189,8 @@ d.destroy()                    // Remove all listeners
 #### Example
 
 ```ts
-import { draggable } from 'hyperact/drag'
-import { snapGrid, inertia } from 'hyperact/modifiers'
+import { draggable } from 'gripjs/drag'
+import { snapGrid, inertia } from 'gripjs/modifiers'
 
 draggable('#card', {
   bounds: 'parent',
@@ -217,7 +217,7 @@ draggable('#swipeable', {
 ### Resizable
 
 ```ts
-import { resizable } from 'hyperact/resize'
+import { resizable } from 'gripjs/resize'
 ```
 
 #### Options
@@ -281,7 +281,7 @@ resizable('#box', {
 ### Gesturable
 
 ```ts
-import { gesturable } from 'hyperact/gesture'
+import { gesturable } from 'gripjs/gesture'
 ```
 
 Multi-touch gesture recognition (pinch-to-zoom, rotate). Activates when the required number of pointers are down.
@@ -303,7 +303,7 @@ Multi-touch gesture recognition (pinch-to-zoom, rotate). Activates when the requ
 #### Example
 
 ```ts
-import { gesturable } from 'hyperact/gesture'
+import { gesturable } from 'gripjs/gesture'
 
 gesturable('#canvas', {
   onGestureMove: (e) => {
@@ -318,7 +318,7 @@ gesturable('#canvas', {
 ### Dropzone
 
 ```ts
-import { dropzone } from 'hyperact/dropzone'
+import { dropzone } from 'gripjs/dropzone'
 ```
 
 Define drop targets that respond to `draggable` elements created with `droppable: true`.
@@ -348,8 +348,8 @@ Define drop targets that respond to `draggable` elements created with `droppable
 #### Example
 
 ```ts
-import { draggable } from 'hyperact/drag'
-import { dropzone } from 'hyperact/dropzone'
+import { draggable } from 'gripjs/drag'
+import { dropzone } from 'gripjs/dropzone'
 
 draggable('#item', { droppable: true })
 
@@ -365,7 +365,7 @@ dropzone('#bin', {
 ### Sortable
 
 ```ts
-import { sortable } from 'hyperact/sortable'
+import { sortable } from 'gripjs/sortable'
 ```
 
 Drag-to-reorder lists with animated item displacement. Supports cross-container transfers via the `group` option.
@@ -427,7 +427,7 @@ sortable('#done', { group: 'kanban' })
 import {
   restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll,
   rubberband, restrictSize, restrictEdges, snapSize, snapEdges,
-} from 'hyperact/modifiers'
+} from 'gripjs/modifiers'
 ```
 
 Modifiers are composable transforms applied to the position each frame. Pass them as an array to the `modifiers` option of `draggable` or `resizable`.
@@ -618,7 +618,7 @@ Modifiers run in array order. Each modifier receives the output of the previous 
 ### Interactable
 
 ```ts
-import { interactable } from 'hyperact'
+import { interactable } from 'gripjs'
 ```
 
 Convenience factory that creates drag, resize, and gesture instances on the same element. Hyperact coordinates them automatically (resize has priority over drag when pointer is near an edge).
@@ -643,7 +643,7 @@ Pass `true` for default options or an options object.
 ### interactAll()
 
 ```ts
-import { interactAll } from 'hyperact'
+import { interactAll } from 'gripjs'
 ```
 
 Create interaction instances for every element matching a CSS selector. Returns an object with an `instances` array and a single `destroy()` method to tear down all of them.
@@ -694,7 +694,7 @@ When a `draggable` is created, the following attributes are set on the element:
 | `tabindex` | `0` | Makes the element keyboard-focusable (only set if not already present) |
 | `role` | `button` | Identifies the element as an interactive control (only set if not already present) |
 | `aria-roledescription` | `draggable` | Tells screen readers this is a draggable element |
-| `aria-describedby` | `hyperact-instructions` | Points to a visually hidden element containing keyboard instructions |
+| `aria-describedby` | `grip-instructions` | Points to a visually hidden element containing keyboard instructions |
 | `aria-grabbed` | `true` / `false` | Toggled when a drag starts and ends |
 
 Screen readers will announce the element as a "draggable button" and read the keyboard instructions on focus. When a drag starts, the live region announces "Picked up"; when it ends, "Dropped".
@@ -716,7 +716,7 @@ Sortable containers and their items receive additional attributes to convey list
 | `tabindex` | `0` | Keyboard-focusable |
 | `role` | `option` | Identifies each item as a list option (only set if not already present) |
 | `aria-roledescription` | `sortable` | Tells screen readers this is a sortable item |
-| `aria-describedby` | `hyperact-instructions` | Keyboard instructions |
+| `aria-describedby` | `grip-instructions` | Keyboard instructions |
 | `aria-posinset` | `1`, `2`, ... | Current position in the list (1-based) |
 | `aria-setsize` | total count | Total number of items in the list |
 
@@ -779,7 +779,7 @@ interface AriaMessages {
 Use `setMessages()` with a partial or full set of replacements. Any keys you omit will keep their current values.
 
 ```ts
-import { setMessages } from 'hyperact'
+import { setMessages } from 'gripjs'
 
 setMessages({
   instructions: '...',
@@ -794,7 +794,7 @@ setMessages({
 #### Full translation example (German)
 
 ```ts
-import { setMessages } from 'hyperact'
+import { setMessages } from 'gripjs'
 
 setMessages({
   instructions:
@@ -810,7 +810,7 @@ setMessages({
 You can also read the current messages at any time with `getMessages()`:
 
 ```ts
-import { getMessages } from 'hyperact'
+import { getMessages } from 'gripjs'
 
 const current = getMessages()
 console.log(current.instructions)
@@ -821,7 +821,7 @@ console.log(current.instructions)
 ## React Integration
 
 ```ts
-import { useDraggable, useResizable, useGesturable, useDropzone, useSortable, useInteractable } from 'hyperact/react'
+import { useDraggable, useResizable, useGesturable, useDropzone, useSortable, useInteractable } from 'gripjs/react'
 ```
 
 Each hook returns `{ ref, instance }`. Attach `ref` to your element; read or control the interaction through `instance.current`.
@@ -850,7 +850,7 @@ const { ref } = useDraggable({ axis }, [axis])
 Pre-built components that forward options as props:
 
 ```tsx
-import { DraggableComponent, ResizableComponent, InteractableComponent } from 'hyperact/react'
+import { DraggableComponent, ResizableComponent, InteractableComponent } from 'gripjs/react'
 
 <DraggableComponent bounds="parent" as="section" className="card">
   Content
@@ -863,20 +863,20 @@ The `as` prop controls the rendered element (default `div`).
 
 | Hook | Component | Import |
 |---|---|---|
-| `useHyperact` | `HyperactComponent` | `hyperact/react` |
-| `useDraggable` | `DraggableComponent` | `hyperact/react` |
-| `useResizable` | `ResizableComponent` | `hyperact/react` |
-| `useGesturable` | `GesturableComponent` | `hyperact/react` |
-| `useDropzone` | -- | `hyperact/react` |
-| `useSortable` | -- | `hyperact/react` |
-| `useInteractable` | `InteractableComponent` | `hyperact/react` |
+| `useGrip` | `GripComponent` | `gripjs/react` |
+| `useDraggable` | `DraggableComponent` | `gripjs/react` |
+| `useResizable` | `ResizableComponent` | `gripjs/react` |
+| `useGesturable` | `GesturableComponent` | `gripjs/react` |
+| `useDropzone` | -- | `gripjs/react` |
+| `useSortable` | -- | `gripjs/react` |
+| `useInteractable` | `InteractableComponent` | `gripjs/react` |
 
 ---
 
 ## Vue 3 Integration
 
 ```ts
-import { useDraggable, vDraggable, HyperactPlugin } from 'hyperact/vue'
+import { useDraggable, vDraggable, GripPlugin } from 'gripjs/vue'
 ```
 
 ### Composables
@@ -885,7 +885,7 @@ Each composable returns `{ elRef, instance }`. Bind `elRef` with `ref=` in your 
 
 ```vue
 <script setup lang="ts">
-import { useDraggable } from 'hyperact/vue'
+import { useDraggable } from 'gripjs/vue'
 
 const { elRef } = useDraggable({
   bounds: 'parent',
@@ -922,9 +922,9 @@ Register all directives globally:
 
 ```ts
 import { createApp } from 'vue'
-import { HyperactPlugin } from 'hyperact/vue'
+import { GripPlugin } from 'gripjs/vue'
 
-createApp(App).use(HyperactPlugin).mount('#app')
+createApp(App).use(GripPlugin).mount('#app')
 ```
 
 This registers `v-draggable`, `v-resizable`, `v-gesturable`, and `v-sortable`.
@@ -933,7 +933,7 @@ This registers `v-draggable`, `v-resizable`, `v-gesturable`, and `v-sortable`.
 
 | Composable | Directive |
 |---|---|
-| `useHyperact` | -- |
+| `useGrip` | -- |
 | `useDraggable` | `vDraggable` |
 | `useResizable` | `vResizable` |
 | `useGesturable` | `vGesturable` |
@@ -949,19 +949,19 @@ Every module is available as a separate entry point. Your bundler will only incl
 
 ```ts
 // Only drag -- pulls in nano as a dependency (~3.3 KB gzip)
-import { draggable } from 'hyperact/drag'
+import { draggable } from 'gripjs/drag'
 
 // Only modifiers
-import { snapGrid, inertia } from 'hyperact/modifiers'
+import { snapGrid, inertia } from 'gripjs/modifiers'
 
 // Only React hooks
-import { useDraggable } from 'hyperact/react'
+import { useDraggable } from 'gripjs/react'
 
 // Only Vue composables
-import { useDraggable } from 'hyperact/vue'
+import { useDraggable } from 'gripjs/vue'
 
 // Full bundle if you need everything
-import { interactable, interactAll, draggable, resizable, gesturable, dropzone, sortable } from 'hyperact'
+import { interactable, interactAll, draggable, resizable, gesturable, dropzone, sortable } from 'gripjs'
 ```
 
 All entry points ship ESM (`.mjs`) and CJS (`.cjs`) with full TypeScript declarations.

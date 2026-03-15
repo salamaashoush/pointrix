@@ -1,6 +1,6 @@
 // Multi-touch gesture system for pinch/rotate/pan
 
-import { Hyperact, type InteractionEvent, type Point, type HyperactOptions } from './nano'
+import { Grip, type InteractionEvent, type Point, type GripOptions } from './nano'
 
 export interface GestureEvent extends InteractionEvent {
   scale: number
@@ -12,14 +12,14 @@ export interface GestureEvent extends InteractionEvent {
   deltaAngle: number
 }
 
-export interface GestureOptions extends HyperactOptions {
+export interface GestureOptions extends GripOptions {
   minPointers?: number
   onGestureStart?: (event: GestureEvent) => void
   onGestureMove?: (event: GestureEvent) => void
   onGestureEnd?: (event: GestureEvent) => void
 }
 
-export class Gesturable extends Hyperact {
+export class Gesturable extends Grip {
   private gestureOptions: GestureOptions
   private gestureActive = false
   private startDistance = 0

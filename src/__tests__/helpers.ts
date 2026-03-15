@@ -1,4 +1,4 @@
-// Test helpers for hyperact unit tests
+// Test helpers for grip unit tests
 
 import { vi } from 'vitest'
 

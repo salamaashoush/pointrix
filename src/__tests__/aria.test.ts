@@ -159,15 +159,15 @@ describe('Draggable ARIA', () => {
   it('sets aria-describedby pointing to instructions element', () => {
     instance = new Draggable(el)
     const describedBy = el.getAttribute('aria-describedby')
-    expect(describedBy).toBe('hyperact-instructions')
+    expect(describedBy).toBe('grip-instructions')
 
-    const instructionsEl = document.getElementById('hyperact-instructions')
+    const instructionsEl = document.getElementById('grip-instructions')
     expect(instructionsEl).not.toBeNull()
   })
 
   it('instructions element exists and has correct text', () => {
     instance = new Draggable(el)
-    const instructionsEl = document.getElementById('hyperact-instructions')
+    const instructionsEl = document.getElementById('grip-instructions')
     expect(instructionsEl).not.toBeNull()
     expect(instructionsEl!.textContent).toContain('Press Space or Enter to pick up')
   })

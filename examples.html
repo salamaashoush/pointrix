@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hyperact - Interactive Examples Showcase</title>
+  <title>Grip - Interactive Examples Showcase</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
 
@@ -895,7 +895,7 @@
 <main id="main">
 
   <div class="page-header">
-    <h1>Hyperact Examples</h1>
+    <h1>Grip Examples</h1>
     <p>Interactive showcase of every feature in the library. Each demo is live &mdash; grab, drag, resize, pinch, and throw things around.</p>
   </div>
 
@@ -922,7 +922,7 @@
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable } from 'hyperact'
+        <pre>import { draggable } from '''gripjs'''
 
 draggable('#simple-drag-el', {
   onDragMove(e) {
@@ -1108,7 +1108,7 @@ draggable('#y-only-el', { axis: 'y' })</pre>
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable, snapTargets } from 'hyperact'
+        <pre>import { draggable, snapTargets } from '''gripjs'''
 
 // relativePoints controls which point on the element
 // is used for snapping:
@@ -1156,7 +1156,7 @@ draggable('#snap-el', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { resizable } from 'hyperact'
+        <pre>import { resizable } from '''gripjs'''
 
 resizable('#basic-resize-el', {
   edges: { top: true, right: true, bottom: true, left: true },
@@ -1276,7 +1276,7 @@ resizable('#basic-resize-el', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { gesturable } from 'hyperact'
+        <pre>import { gesturable } from '''gripjs'''
 
 let scale = 1, rotation = 0
 
@@ -1332,7 +1332,7 @@ gesturable('#gesture-el', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable, dropzone, DropzoneManager } from 'hyperact'
+        <pre>import { draggable, dropzone, DropzoneManager } from '''gripjs'''
 
 const zone = dropzone('#dz-warm', {
   accept: (el) => ['red', 'amber'].includes(el.dataset.color),
@@ -1376,7 +1376,7 @@ draggable(card, {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { interactable } from 'hyperact'
+        <pre>import { interactable } from '''gripjs'''
 
 interactable('#combined-el', {
   drag: true,
@@ -1425,7 +1425,7 @@ interactable('#combined-el', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { sortable } from 'hyperact'
+        <pre>import { sortable } from '''gripjs'''
 
 // Each column's .cards container is a sortable
 // with the same group name — items move between them
@@ -1484,7 +1484,7 @@ sortable('#cards-done', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { sortable } from 'hyperact'
+        <pre>import { sortable } from '''gripjs'''
 
 // Vertical sortable list
 sortable('#my-list', {
@@ -1534,7 +1534,7 @@ sortable('#my-row', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable } from 'hyperact'
+        <pre>import { draggable } from '''gripjs'''
 
 for (let i = 0; i &lt; count; i++) {
   const dot = document.createElement('div')
@@ -1569,7 +1569,7 @@ for (let i = 0; i &lt; count; i++) {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable } from 'hyperact'
+        <pre>import { draggable } from '''gripjs'''
 
 draggable('#hold-delay-el', {
   holdDelay: 500,
@@ -1604,7 +1604,7 @@ draggable('#hold-delay-el', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable } from 'hyperact'
+        <pre>import { draggable } from '''gripjs'''
 
 draggable('#card', {
   allowFrom: '.card-header',
@@ -1631,7 +1631,7 @@ draggable('#card', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable } from 'hyperact'
+        <pre>import { draggable } from '''gripjs'''
 
 draggable('#el', {
   axis: 'start',
@@ -1662,8 +1662,8 @@ draggable('#el', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable } from 'hyperact'
-import { rubberband } from 'hyperact/modifiers/rubberband'
+        <pre>import { draggable } from '''gripjs'''
+import { rubberband } from 'gripjs/modifiers/rubberband'
 
 draggable('#el', {
   modifiers: [
@@ -1704,7 +1704,7 @@ draggable('#el', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { resizable } from 'hyperact'
+        <pre>import { resizable } from '''gripjs'''
 
 // Normal resize stops at min size
 resizable('#normal', {
@@ -1746,7 +1746,7 @@ resizable('#reposition', {
       </div>
       <details class="demo-code">
         <summary>View Code</summary>
-        <pre>import { draggable } from 'hyperact'
+        <pre>import { draggable } from '''gripjs'''
 
 const d = draggable('#el')
 

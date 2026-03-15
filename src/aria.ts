@@ -62,7 +62,7 @@ export function announce(message: string): void {
 // ─── Instructions ───────────────────────────────────────────────────
 
 let instructionsEl: HTMLElement | null = null
-const INSTRUCTIONS_ID = 'hyperact-instructions'
+const INSTRUCTIONS_ID = 'grip-instructions'
 
 export function ensureInstructions(): string {
   if (instructionsEl && instructionsEl.isConnected) {

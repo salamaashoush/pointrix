@@ -1,6 +1,6 @@
-// Ultra-optimized React wrapper for hyperact (~1KB minified)
+// Ultra-optimized React wrapper for grip (~1KB minified)
 import React, { useEffect, useRef, MutableRefObject } from 'react'
-import { hyperact, Hyperact, HyperactOptions } from './nano'
+import { grip, Grip, GripOptions } from './nano'
 import { draggable, Draggable, DragOptions } from './drag'
 import { resizable, Resizable, ResizeOptions } from './resize'
 import { gesturable, Gesturable, GestureOptions } from './gesture'
@@ -9,10 +9,10 @@ import { sortable, Sortable, SortableOptions } from './sortable'
 import { interactable, InteractableOptions } from './index'
 
 // Generic hook factory
-function createHook<T extends Hyperact, O>(
+function createHook<T extends Grip, O>(
   factory: (element: HTMLElement, options: O) => T
 ) {
-  return function useHyperact(
+  return function useGrip(
     options: O = {} as O,
     deps: React.DependencyList = []
   ): { ref: MutableRefObject<HTMLElement | null>; instance: MutableRefObject<T | null> } {
@@ -39,7 +39,7 @@ function createHook<T extends Hyperact, O>(
 }
 
 // Specific hooks
-export const useHyperact = createHook(hyperact)
+export const useGrip = createHook(grip)
 export const useDraggable = createHook(draggable)
 export const useResizable = createHook(resizable)
 export const useGesturable = createHook(gesturable)
@@ -86,7 +86,7 @@ export function useSortable(
   return { ref, instance: instanceRef }
 }
 
-// Special handling for interactable since it returns a combined object, not Hyperact
+// Special handling for interactable since it returns a combined object, not Grip
 export function useInteractable(
   options: InteractableOptions = {},
   deps: React.DependencyList = []
@@ -147,7 +147,7 @@ function createComponent<O extends object>(
 }
 
 // Components
-export const HyperactComponent = createComponent<HyperactOptions>(useHyperact)
+export const GripComponent = createComponent<GripOptions>(useGrip)
 export const DraggableComponent = createComponent<DragOptions>(useDraggable)
 export const ResizableComponent = createComponent<ResizeOptions>(useResizable)
 export const GesturableComponent = createComponent<GestureOptions>(useGesturable)
@@ -155,7 +155,7 @@ export const InteractableComponent = createComponent<InteractableOptions>(useInt
 
 // Re-export types
 export type {
-  HyperactOptions,
+  GripOptions,
   DragOptions,
   ResizeOptions,
   GestureOptions,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hyperact vs interact.js - Browser Benchmarks</title>
+  <title>Grip vs interact.js - Browser Benchmarks</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -16,8 +16,8 @@
       --text-dim: #8888a0;
       --accent: #6c5ce7;
       --accent-glow: rgba(108, 92, 231, 0.3);
-      --hyperact: #00d2ff;
-      --hyperact-glow: rgba(0, 210, 255, 0.2);
+      --gripjs: #00d2ff;
+      --grip-glow: rgba(0, 210, 255, 0.2);
       --interact: #ff6b6b;
       --interact-glow: rgba(255, 107, 107, 0.2);
       --success: #00e676;
@@ -59,7 +59,7 @@
       font-size: 2.8rem;
       font-weight: 800;
       letter-spacing: -0.03em;
-      background: linear-gradient(135deg, var(--hyperact), var(--accent));
+      background: linear-gradient(135deg, var(--grip), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -195,7 +195,7 @@
 
     .progress-bar .fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--hyperact));
+      background: linear-gradient(90deg, var(--accent), var(--grip));
       border-radius: 2px;
       transition: width 0.3s ease;
       width: 0%;
@@ -241,9 +241,9 @@
       border-radius: 6px;
     }
 
-    .result-value.hyperact {
-      background: var(--hyperact-glow);
-      color: var(--hyperact);
+    .result-value.grip {
+      background: var(--grip-glow);
+      color: var(--grip);
     }
 
     .result-value.interact {
@@ -261,9 +261,9 @@
       font-weight: 700;
     }
 
-    .winner-badge.hyperact-wins {
-      background: var(--hyperact-glow);
-      color: var(--hyperact);
+    .winner-badge.grip-wins {
+      background: var(--grip-glow);
+      color: var(--grip);
     }
 
     .winner-badge.interact-wins {
@@ -314,7 +314,7 @@
       min-width: fit-content;
     }
 
-    .bar-fill.hyperact-bar {
+    .bar-fill.grip-bar {
       background: linear-gradient(90deg, rgba(0, 210, 255, 0.8), rgba(0, 210, 255, 0.5));
     }
 
@@ -363,7 +363,7 @@
     .summary-stat .value {
       font-size: 2.2rem;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--hyperact), var(--accent));
+      background: linear-gradient(135deg, var(--grip), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -395,8 +395,8 @@
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      background: var(--hyperact);
-      box-shadow: 0 0 12px var(--hyperact-glow);
+      background: var(--grip);
+      box-shadow: 0 0 12px var(--grip-glow);
       will-change: transform;
     }
 
@@ -433,7 +433,7 @@
 
     .anim-controls span {
       font-family: monospace;
-      color: var(--hyperact);
+      color: var(--grip);
       font-weight: 700;
     }
 
@@ -471,7 +471,7 @@
   <div class="page-bg"></div>
   <div class="container">
     <header>
-      <h1>Hyperact vs interact.js</h1>
+      <h1>Grip vs interact.js</h1>
       <p>Real browser performance benchmarks &mdash; see who wins</p>
     </header>
 
@@ -647,20 +647,20 @@
       let html = ''
 
       for (const row of rows) {
-        const hVal = row.hyperact
+        const hVal = row.grip
         const iVal = row.interact
         const hIsOps = row.unit === 'ops/sec'
-        const hyperactBetter = hIsOps ? hVal > iVal : hVal < iVal
-        const ratio = hyperactBetter
+        const gripBetter = hIsOps ? hVal > iVal : hVal < iVal
+        const ratio = gripBetter
           ? (hIsOps ? hVal / iVal : iVal / hVal)
           : (hIsOps ? iVal / hVal : hVal / iVal)
         const ratioText = ratio.toFixed(1) + 'x'
         const winnerClass = Math.abs(ratio - 1) < 0.05
           ? 'tie'
-          : hyperactBetter ? 'hyperact-wins' : 'interact-wins'
+          : gripBetter ? 'grip-wins' : 'interact-wins'
         const winnerLabel = Math.abs(ratio - 1) < 0.05
           ? 'Tie'
-          : hyperactBetter ? `Hyperact ${ratioText}` : `interact.js ${ratioText}`
+          : gripBetter ? `Grip ${ratioText}` : `interact.js ${ratioText}`
 
         const maxVal = Math.max(hVal, iVal)
         const hPct = (hVal / maxVal * 100).toFixed(1)
@@ -672,13 +672,13 @@
         html += `
           <div class="result-row">
             <div class="label">${row.name}</div>
-            <div class="result-value hyperact">${hDisplay}</div>
+            <div class="result-value grip">${hDisplay}</div>
             <div class="result-value interact">${iDisplay}</div>
             <div><span class="winner-badge ${winnerClass}">${winnerLabel}</span></div>
           </div>
           <div class="bar-chart">
-            <div class="bar-label" style="color:var(--hyperact)">Hyperact</div>
-            <div class="bar-track"><div class="bar-fill hyperact-bar" style="width:${hPct}%">${hDisplay}</div></div>
+            <div class="bar-label" style="color:var(--grip)">Grip</div>
+            <div class="bar-track"><div class="bar-fill grip-bar" style="width:${hPct}%">${hDisplay}</div></div>
           </div>
           <div class="bar-chart" style="margin-bottom:16px;">
             <div class="bar-label" style="color:var(--interact)">interact.js</div>
@@ -724,20 +724,20 @@
     }
 
     function showSummary() {
-      let hyperactWins = 0
+      let gripWins = 0
       let interactWins = 0
       let totalRatio = 0
       let count = 0
 
       for (const r of allResults) {
         const hIsOps = r.unit === 'ops/sec'
-        const hyperactBetter = hIsOps ? r.hyperact > r.interact : r.hyperact < r.interact
-        const ratio = hyperactBetter
-          ? (hIsOps ? r.hyperact / r.interact : r.interact / r.hyperact)
-          : 1 / (hIsOps ? r.hyperact / r.interact : r.interact / r.hyperact)
+        const gripBetter = hIsOps ? r.grip > r.interact : r.grip < r.interact
+        const ratio = gripBetter
+          ? (hIsOps ? r.grip / r.interact : r.interact / r.grip)
+          : 1 / (hIsOps ? r.grip / r.interact : r.interact / r.grip)
 
-        if (hyperactBetter) {
-          hyperactWins++
+        if (gripBetter) {
+          gripWins++
           totalRatio += ratio
         } else {
           interactWins++
@@ -751,12 +751,12 @@
       const container = document.getElementById('summary-stats')
       container.innerHTML = `
         <div class="summary-stat">
-          <div class="value">${hyperactWins}/${count}</div>
-          <div class="label">Benchmarks Won by Hyperact</div>
+          <div class="value">${gripWins}/${count}</div>
+          <div class="label">Benchmarks Won by Grip</div>
         </div>
         <div class="summary-stat">
           <div class="value">${avgSpeedup}x</div>
-          <div class="label">Avg Speedup (Hyperact)</div>
+          <div class="label">Avg Speedup (Grip)</div>
         </div>
         <div class="summary-stat">
           <div class="value">${count}</div>
@@ -778,7 +778,7 @@
       const elements = createElements(N)
 
       setProgress(id, 30)
-      const hResult = await runBenchmark('Hyperact create+destroy', () => {
+      const hResult = await runBenchmark('Grip create+destroy', () => {
         const instances = elements.map(el => draggable(el))
         instances.forEach(inst => inst.destroy())
       }, 50)
@@ -797,7 +797,7 @@
 
       const rows = [{
         name: `Create + Destroy ${N} instances`,
-        hyperact: hResult.opsPerSec,
+        gripjs: hResult.opsPerSec,
         interact: iResult.opsPerSec,
         unit: 'ops/sec'
       }]
@@ -824,7 +824,7 @@
         setProgress(id, (ci / counts.length) * 100)
         setStatus(id, `<span class="spinner"></span>Testing ${count} elements...`)
 
-        // Hyperact
+        // Grip
         let elements = createElements(count)
         let startH = performance.now()
         const hInstances = elements.map(el => draggable(el))
@@ -891,13 +891,13 @@
 
         rows.push({
           name: `${count} elements - Creation`,
-          hyperact: hCreateTime,
+          gripjs: hCreateTime,
           interact: iCreateTime,
           unit: 'ms'
         })
         rows.push({
           name: `${count} elements - Drag cycle`,
-          hyperact: hDragTime,
+          gripjs: hDragTime,
           interact: iDragTime,
           unit: 'ms'
         })
@@ -924,7 +924,7 @@
       const elements = createElements(1)
       const el = elements[0]
 
-      // Hyperact
+      // Grip
       let moveCount = 0
       const hInst = draggable(el, {
         threshold: 0,
@@ -986,13 +986,13 @@
       const rows = [
         {
           name: `${EVENT_COUNT} pointermove events`,
-          hyperact: 1000 / hTime * EVENT_COUNT,
+          gripjs: 1000 / hTime * EVENT_COUNT,
           interact: 1000 / iTime * EVENT_COUNT,
           unit: 'ops/sec'
         },
         {
           name: 'Total processing time',
-          hyperact: hTime,
+          gripjs: hTime,
           interact: iTime,
           unit: 'ms'
         }
@@ -1018,13 +1018,13 @@
       const dummyEl = document.createElement('div')
       document.body.appendChild(dummyEl)
 
-      // Hyperact modifiers
+      // Grip modifiers
       const hSnap = snapGrid({ x: 20, y: 20 })
       const hRestrict = restrict({ bounds: { left: 0, top: 0, right: 800, bottom: 600 } })
       const modifiers = [hSnap, hRestrict]
 
       setProgress(id, 30)
-      const hResult = await runBenchmark('Hyperact modifiers', () => {
+      const hResult = await runBenchmark('Grip modifiers', () => {
         for (let i = 0; i < COUNT; i++) {
           applyModifiers(modifiers, {
             position: { x: Math.random() * 1000, y: Math.random() * 1000 },
@@ -1058,7 +1058,7 @@
 
       const rows = [{
         name: `${formatNum(COUNT)} modifier applications`,
-        hyperact: hResult.opsPerSec,
+        gripjs: hResult.opsPerSec,
         interact: iResult.opsPerSec,
         unit: 'ops/sec'
       }]
@@ -1094,7 +1094,7 @@
 
       const elements = createElements(N)
 
-      // Hyperact memory
+      // Grip memory
       if (window.gc) window.gc()
       await yieldFrame()
       const hBefore = mem.usedJSHeapSize
@@ -1139,19 +1139,19 @@
       const rows = [
         {
           name: `${N} instances - Total heap (KB)`,
-          hyperact: hTotal,
+          gripjs: hTotal,
           interact: iTotal,
           unit: 'ms' // use 'ms' so lower is better
         },
         {
           name: 'Per instance (bytes)',
-          hyperact: Math.max(0, hMemPerInstance),
+          gripjs: Math.max(0, hMemPerInstance),
           interact: Math.max(0, iMemPerInstance),
           unit: 'ms' // lower is better
         },
         {
           name: 'Heap reclaimed after destroy (KB)',
-          hyperact: Math.max(0, (hAfter - hAfterDestroy) / 1024),
+          gripjs: Math.max(0, (hAfter - hAfterDestroy) / 1024),
           interact: Math.max(0, (iAfter - iAfterDestroy) / 1024),
           unit: 'ops/sec' // higher is better
         }
@@ -1305,7 +1305,7 @@
 
         rows.push({
           name: `${count} elements - FPS`,
-          hyperact: fps,
+          gripjs: fps,
           interact: fps, // Baseline FPS (no library overhead for raw animation)
           unit: 'ops/sec'
         })

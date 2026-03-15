@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Hyperact is an ultra-fast, modern drag/resize/gesture library designed as a high-performance alternative to interact.js. The library is framework-agnostic with optional React and Vue 3 integrations.
+Grip is an ultra-fast, modern drag/resize/gesture library designed as a high-performance alternative to interact.js. The library is framework-agnostic with optional React and Vue 3 integrations.
 
 ## Development Commands
 

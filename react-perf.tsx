@@ -880,7 +880,7 @@ function App() {
   return (
     <div style={styles.app}>
       <header style={styles.header}>
-        <h1 style={styles.title}>Hyperact React Performance</h1>
+        <h1 style={styles.title}>Grip React Performance</h1>
         <p style={styles.subtitle}>Testing hooks, components, and interaction performance in React</p>
       </header>
 
@@ -906,7 +906,7 @@ function App() {
       <InteractiveExamples />
 
       <footer style={{ textAlign: 'center', padding: '32px 0', color: '#4a4a6a', fontSize: 12 }}>
-        Hyperact React Performance Testing Page
+        Grip React Performance Testing Page
       </footer>
     </div>
   )

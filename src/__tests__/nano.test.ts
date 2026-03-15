@@ -6,10 +6,10 @@ import {
   firePointerUp,
   flushRAF,
 } from './helpers'
-import { Hyperact, hyperact } from '../nano'
+import { Grip, grip } from '../nano'
 
 
-describe('Hyperact', () => {
+describe('Grip', () => {
   let el: HTMLElement
 
   beforeEach(() => {
@@ -23,26 +23,26 @@ describe('Hyperact', () => {
 
   describe('Constructor', () => {
     it('creates an instance', () => {
-      const instance = new Hyperact(el)
-      expect(instance).toBeInstanceOf(Hyperact)
+      const instance = new Grip(el)
+      expect(instance).toBeInstanceOf(Grip)
       instance.destroy()
     })
 
     it('sets touch-action to none on the element', () => {
-      const instance = new Hyperact(el)
+      const instance = new Grip(el)
       expect(el.style.touchAction).toBe('none')
       instance.destroy()
     })
 
     it('sets userSelect to none on the element', () => {
-      const instance = new Hyperact(el)
+      const instance = new Grip(el)
       expect(el.style.userSelect).toBe('none')
       instance.destroy()
     })
 
     it('applies default options', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart, threshold: 0 })
+      const instance = new Grip(el, { onStart, threshold: 0 })
       firePointerDown(el, { clientX: 10, clientY: 10 })
       expect(onStart).toHaveBeenCalled()
       instance.destroy()
@@ -52,7 +52,7 @@ describe('Hyperact', () => {
   describe('Pointer tracking', () => {
     it('tracks pointer down', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart, threshold: 0 })
+      const instance = new Grip(el, { onStart, threshold: 0 })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
       expect(onStart).toHaveBeenCalledTimes(1)
@@ -66,7 +66,7 @@ describe('Hyperact', () => {
 
     it('tracks pointer move after activation', () => {
       const onMove = vi.fn()
-      const instance = new Hyperact(el, { onMove, threshold: 0 })
+      const instance = new Grip(el, { onMove, threshold: 0 })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
       firePointerMove(document, { clientX: 60, clientY: 70 })
@@ -81,7 +81,7 @@ describe('Hyperact', () => {
 
     it('tracks pointer up and fires onEnd', () => {
       const onEnd = vi.fn()
-      const instance = new Hyperact(el, { onEnd, threshold: 0 })
+      const instance = new Grip(el, { onEnd, threshold: 0 })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
       firePointerMove(document, { clientX: 60, clientY: 70 })
@@ -97,7 +97,7 @@ describe('Hyperact', () => {
   describe('Threshold', () => {
     it('does not start interaction until movement exceeds threshold', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart, threshold: 10 })
+      const instance = new Grip(el, { onStart, threshold: 10 })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
       // Move less than threshold (10)
@@ -111,7 +111,7 @@ describe('Hyperact', () => {
 
     it('starts interaction once movement exceeds threshold', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart, threshold: 5 })
+      const instance = new Grip(el, { onStart, threshold: 5 })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
       // Move more than threshold (5)
@@ -125,7 +125,7 @@ describe('Hyperact', () => {
 
     it('starts immediately when threshold is 0', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart, threshold: 0 })
+      const instance = new Grip(el, { onStart, threshold: 0 })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
       expect(onStart).toHaveBeenCalledTimes(1)
@@ -135,7 +135,7 @@ describe('Hyperact', () => {
 
     it('uses default threshold of 3 when not specified', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart })
+      const instance = new Grip(el, { onStart })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
       // Move less than default threshold (3)
@@ -155,7 +155,7 @@ describe('Hyperact', () => {
   describe('RAF batching', () => {
     it('does not fire onMove on every pointer move, only on RAF', () => {
       const onMove = vi.fn()
-      const instance = new Hyperact(el, { onMove, threshold: 0 })
+      const instance = new Grip(el, { onMove, threshold: 0 })
 
       firePointerDown(el, { clientX: 50, clientY: 50 })
 
@@ -182,7 +182,7 @@ describe('Hyperact', () => {
   describe('Velocity calculation', () => {
     it('computes smoothed velocity', () => {
       const onMove = vi.fn()
-      const instance = new Hyperact(el, { onMove, threshold: 0 })
+      const instance = new Grip(el, { onMove, threshold: 0 })
 
       firePointerDown(el, { clientX: 0, clientY: 0 })
 
@@ -202,7 +202,7 @@ describe('Hyperact', () => {
 
     it('applies exponential smoothing to velocity (0.7/0.3 ratio)', () => {
       const onMove = vi.fn()
-      const instance = new Hyperact(el, { onMove, threshold: 0 })
+      const instance = new Grip(el, { onMove, threshold: 0 })
 
       firePointerDown(el, { clientX: 0, clientY: 0 })
 
@@ -232,7 +232,7 @@ describe('Hyperact', () => {
   describe('Multi-pointer', () => {
     it('tracks multiple pointers independently', () => {
       const onMove = vi.fn()
-      const instance = new Hyperact(el, { onMove, threshold: 0 })
+      const instance = new Grip(el, { onMove, threshold: 0 })
 
       // First pointer down
       firePointerDown(el, { clientX: 50, clientY: 50, pointerId: 1 })
@@ -258,7 +258,7 @@ describe('Hyperact', () => {
 
     it('removes pointer on pointer up while keeping others', () => {
       const onEnd = vi.fn()
-      const instance = new Hyperact(el, { onEnd, threshold: 0 })
+      const instance = new Grip(el, { onEnd, threshold: 0 })
 
       firePointerDown(el, { clientX: 50, clientY: 50, pointerId: 1 })
       firePointerDown(el, { clientX: 100, clientY: 100, pointerId: 2 })
@@ -282,7 +282,7 @@ describe('Hyperact', () => {
   describe('Event callbacks', () => {
     it('onStart fires with correct InteractionEvent shape', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart, threshold: 0 })
+      const instance = new Grip(el, { onStart, threshold: 0 })
 
       firePointerDown(el, { clientX: 10, clientY: 20 })
 
@@ -298,7 +298,7 @@ describe('Hyperact', () => {
 
     it('onMove fires with delta and total', () => {
       const onMove = vi.fn()
-      const instance = new Hyperact(el, { onMove, threshold: 0 })
+      const instance = new Grip(el, { onMove, threshold: 0 })
 
       firePointerDown(el, { clientX: 10, clientY: 10 })
       firePointerMove(document, { clientX: 30, clientY: 40 })
@@ -314,7 +314,7 @@ describe('Hyperact', () => {
 
     it('onEnd fires when last pointer is released', () => {
       const onEnd = vi.fn()
-      const instance = new Hyperact(el, { onEnd, threshold: 0 })
+      const instance = new Grip(el, { onEnd, threshold: 0 })
 
       firePointerDown(el, { clientX: 10, clientY: 10 })
       firePointerMove(document, { clientX: 30, clientY: 30 })
@@ -328,7 +328,7 @@ describe('Hyperact', () => {
 
     it('does not fire callbacks after interaction ends', () => {
       const onMove = vi.fn()
-      const instance = new Hyperact(el, { onMove, threshold: 0 })
+      const instance = new Grip(el, { onMove, threshold: 0 })
 
       firePointerDown(el, { clientX: 10, clientY: 10 })
       firePointerMove(document, { clientX: 30, clientY: 30 })
@@ -348,7 +348,7 @@ describe('Hyperact', () => {
 
   describe('Destroy', () => {
     it('resets element styles', () => {
-      const instance = new Hyperact(el)
+      const instance = new Grip(el)
       expect(el.style.touchAction).toBe('none')
 
       instance.destroy()
@@ -359,7 +359,7 @@ describe('Hyperact', () => {
 
     it('cleans up listeners so no further events fire', () => {
       const onStart = vi.fn()
-      const instance = new Hyperact(el, { onStart, threshold: 0 })
+      const instance = new Grip(el, { onStart, threshold: 0 })
 
       instance.destroy()
 
@@ -369,7 +369,7 @@ describe('Hyperact', () => {
 
     it('cleans up active interaction on destroy', () => {
       const onEnd = vi.fn()
-      const instance = new Hyperact(el, { onEnd, threshold: 0 })
+      const instance = new Grip(el, { onEnd, threshold: 0 })
 
       firePointerDown(el, { clientX: 10, clientY: 10 })
       instance.destroy()
@@ -385,8 +385,8 @@ describe('Hyperact', () => {
       const onStartLow = vi.fn()
       const onStartHigh = vi.fn()
 
-      const low = new Hyperact(el, { onStart: onStartLow, threshold: 0 })
-      const high = new Hyperact(el, { onStart: onStartHigh, threshold: 0 })
+      const low = new Grip(el, { onStart: onStartLow, threshold: 0 })
+      const high = new Grip(el, { onStart: onStartHigh, threshold: 0 })
 
       // Access protected priority via casting
       ;(low as any).priority = 0
@@ -403,8 +403,8 @@ describe('Hyperact', () => {
     })
 
     it('does not remove styles until last instance is destroyed', () => {
-      const instance1 = new Hyperact(el)
-      const instance2 = new Hyperact(el)
+      const instance1 = new Grip(el)
+      const instance2 = new Grip(el)
 
       expect(el.style.touchAction).toBe('none')
 
@@ -420,25 +420,25 @@ describe('Hyperact', () => {
 
   describe('Factory function', () => {
     it('creates instance from HTMLElement', () => {
-      const instance = hyperact(el)
-      expect(instance).toBeInstanceOf(Hyperact)
+      const instance = grip(el)
+      expect(instance).toBeInstanceOf(Grip)
       instance.destroy()
     })
 
     it('creates instance from CSS selector', () => {
       el.id = 'test-element'
-      const instance = hyperact('#test-element')
-      expect(instance).toBeInstanceOf(Hyperact)
+      const instance = grip('#test-element')
+      expect(instance).toBeInstanceOf(Grip)
       instance.destroy()
     })
 
     it('throws if selector does not match any element', () => {
-      expect(() => hyperact('#nonexistent')).toThrow('Element not found')
+      expect(() => grip('#nonexistent')).toThrow('Element not found')
     })
 
     it('passes options through', () => {
       const onStart = vi.fn()
-      const instance = hyperact(el, { onStart, threshold: 0 })
+      const instance = grip(el, { onStart, threshold: 0 })
 
       firePointerDown(el, { clientX: 10, clientY: 10 })
       expect(onStart).toHaveBeenCalled()

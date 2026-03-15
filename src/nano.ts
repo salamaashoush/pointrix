@@ -23,7 +23,7 @@ export interface InteractionEvent {
   originalEvent: PointerEvent
 }
 
-export interface HyperactOptions {
+export interface GripOptions {
   onStart?: (event: InteractionEvent) => void
   onMove?: (event: InteractionEvent) => void
   onEnd?: (event: InteractionEvent) => void
@@ -43,8 +43,8 @@ export interface HyperactOptions {
 
 // Shared RAF scheduler for all instances
 let rafId: number | null = null
-let instances: Set<Hyperact> = new Set()
-let dirtyInstances: Set<Hyperact> = new Set()
+let instances: Set<Grip> = new Set()
+let dirtyInstances: Set<Grip> = new Set()
 
 // Cached sentinel event to avoid allocating a new PointerEvent every frame (lazily initialized)
 let SENTINEL_MOVE_EVENT: PointerEvent | null = null
@@ -83,9 +83,9 @@ function scheduleUpdate() {
   })
 }
 
-export class Hyperact {
+export class Grip {
   protected element: HTMLElement
-  protected options: HyperactOptions
+  protected options: GripOptions
   protected pointers = new Map<number, PointerState>()
   private pointersCache: PointerState[] = []
   protected isActive = false
@@ -126,8 +126,8 @@ export class Hyperact {
       this.isActive = false
       instances.delete(this)
       dirtyInstances.delete(this)
-      if (Hyperact.activeInstance.get(this.element) === this) {
-        Hyperact.activeInstance.set(this.element, null)
+      if (Grip.activeInstance.get(this.element) === this) {
+        Grip.activeInstance.set(this.element, null)
       }
       document.removeEventListener('pointermove', this.onPointerMove)
       document.removeEventListener('pointerup', this.onPointerUp)
@@ -140,11 +140,11 @@ export class Hyperact {
   }
 
   // Static registry for coordinating multiple instances on same element
-  private static elementInstances = new WeakMap<HTMLElement, Hyperact[]>()
-  private static activeInstance = new WeakMap<HTMLElement, Hyperact | null>()
+  private static elementInstances = new WeakMap<HTMLElement, Grip[]>()
+  private static activeInstance = new WeakMap<HTMLElement, Grip | null>()
   private static elementListeners = new WeakMap<HTMLElement, (e: PointerEvent) => void>()
   
-  constructor(element: HTMLElement, options: HyperactOptions = {}) {
+  constructor(element: HTMLElement, options: GripOptions = {}) {
     this.element = element
     this.options = {
       threshold: 3,
@@ -157,7 +157,7 @@ export class Hyperact {
     this.registerInstance()
 
     // Optimize element for interactions (only if first instance)
-    const elementInstances = Hyperact.elementInstances.get(element)
+    const elementInstances = Grip.elementInstances.get(element)
     if (elementInstances && elementInstances.length === 1) {
       element.style.touchAction = this.options.touchAction ?? 'none'
       element.style.userSelect = 'none'
@@ -171,33 +171,33 @@ export class Hyperact {
 
     // Add listeners (only if first instance)
     if (elementInstances && elementInstances.length === 1) {
-      const listener = (e: PointerEvent) => Hyperact.handleElementPointerDown(element, e)
-      Hyperact.elementListeners.set(element, listener)
+      const listener = (e: PointerEvent) => Grip.handleElementPointerDown(element, e)
+      Grip.elementListeners.set(element, listener)
       element.addEventListener('pointerdown', listener)
     }
   }
   
   private registerInstance() {
-    const existing = Hyperact.elementInstances.get(this.element)
+    const existing = Grip.elementInstances.get(this.element)
     if (existing) {
       existing.push(this)
     } else {
-      Hyperact.elementInstances.set(this.element, [this])
+      Grip.elementInstances.set(this.element, [this])
     }
   }
   
   private unregisterInstance() {
-    const instances = Hyperact.elementInstances.get(this.element)
+    const instances = Grip.elementInstances.get(this.element)
     if (!instances) return
     const index = instances.indexOf(this)
     if (index >= 0) {
       instances.splice(index, 1)
       if (instances.length === 0) {
-        Hyperact.elementInstances.delete(this.element)
-        Hyperact.activeInstance.delete(this.element)
-        Hyperact.elementListeners.delete(this.element)
+        Grip.elementInstances.delete(this.element)
+        Grip.activeInstance.delete(this.element)
+        Grip.elementListeners.delete(this.element)
       } else {
-        Hyperact.elementInstances.set(this.element, instances)
+        Grip.elementInstances.set(this.element, instances)
       }
     }
   }
@@ -217,9 +217,9 @@ export class Hyperact {
   
   // Static method to handle pointer events for all instances on an element
   private static handleElementPointerDown(element: HTMLElement, e: PointerEvent) {
-    const instances = Hyperact.elementInstances.get(element)
+    const instances = Grip.elementInstances.get(element)
     if (!instances) return
-    const activeInstance = Hyperact.activeInstance.get(element)
+    const activeInstance = Grip.activeInstance.get(element)
     
     // If there's already an active instance, let it continue
     if (activeInstance) {
@@ -228,7 +228,7 @@ export class Hyperact {
     }
     
     // Check all instances to see which should handle this event
-    let handlingInstance: Hyperact | null = null
+    let handlingInstance: Grip | null = null
     let highestPriority = -1
     
     for (const instance of instances) {
@@ -242,7 +242,7 @@ export class Hyperact {
     
     // If we found an instance to handle the event
     if (handlingInstance) {
-      Hyperact.activeInstance.set(element, handlingInstance)
+      Grip.activeInstance.set(element, handlingInstance)
       handlingInstance.handlePointerDown(e)
     }
   }
@@ -413,8 +413,8 @@ export class Hyperact {
     dirtyInstances.delete(this)
     
     // Clear active instance
-    if (Hyperact.activeInstance.get(this.element) === this) {
-      Hyperact.activeInstance.set(this.element, null)
+    if (Grip.activeInstance.get(this.element) === this) {
+      Grip.activeInstance.set(this.element, null)
     }
     
     const event = this.createEvent(e)
@@ -518,13 +518,13 @@ export class Hyperact {
     this.unregisterInstance()
     
     // Only remove listeners if this is the last instance
-    const elementInstances = Hyperact.elementInstances.get(this.element)
+    const elementInstances = Grip.elementInstances.get(this.element)
     if (!elementInstances || elementInstances.length === 0) {
       // Remove the static event listener
-      const listener = Hyperact.elementListeners.get(this.element)
+      const listener = Grip.elementListeners.get(this.element)
       if (listener) {
         this.element.removeEventListener('pointerdown', listener)
-        Hyperact.elementListeners.delete(this.element)
+        Grip.elementListeners.delete(this.element)
       }
       
       
@@ -550,14 +550,14 @@ export class Hyperact {
 }
 
 // Simple factory function
-export function hyperact(element: HTMLElement | string, options?: HyperactOptions): Hyperact {
+export function grip(element: HTMLElement | string, options?: GripOptions): Grip {
   const el = typeof element === 'string' 
     ? document.querySelector<HTMLElement>(element)
     : element
     
   if (!el) throw new Error(`Element not found: ${element}`)
   
-  return new Hyperact(el, options)
+  return new Grip(el, options)
 }
 
-export default hyperact
+export default grip

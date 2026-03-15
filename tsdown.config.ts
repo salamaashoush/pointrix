@@ -8,21 +8,21 @@ const shared = {
 };
 
 export default defineConfig([
-  { entry: { "hyperact-nano": "src/nano.ts" }, ...shared, clean: true },
-  { entry: { "hyperact-drag": "src/drag.ts" }, ...shared },
-  { entry: { "hyperact-resize": "src/resize.ts" }, ...shared },
-  { entry: { "hyperact-gesture": "src/gesture.ts" }, ...shared },
-  { entry: { "hyperact-dropzone": "src/dropzone.ts" }, ...shared },
-  { entry: { "hyperact-sortable": "src/sortable.ts" }, ...shared },
-  { entry: { "hyperact-modifiers": "src/modifiers/index.ts" }, ...shared },
-  { entry: { hyperact: "src/index.ts" }, ...shared },
+  { entry: { "grip-nano": "src/nano.ts" }, ...shared, clean: true },
+  { entry: { "grip-drag": "src/drag.ts" }, ...shared },
+  { entry: { "grip-resize": "src/resize.ts" }, ...shared },
+  { entry: { "grip-gesture": "src/gesture.ts" }, ...shared },
+  { entry: { "grip-dropzone": "src/dropzone.ts" }, ...shared },
+  { entry: { "grip-sortable": "src/sortable.ts" }, ...shared },
+  { entry: { "grip-modifiers": "src/modifiers/index.ts" }, ...shared },
+  { entry: { grip: "src/index.ts" }, ...shared },
   {
-    entry: { "hyperact-react": "src/react.tsx" },
+    entry: { "grip-react": "src/react.tsx" },
     ...shared,
     deps: { neverBundle: ["react"] },
   },
   {
-    entry: { "hyperact-vue": "src/vue.ts" },
+    entry: { "grip-vue": "src/vue.ts" },
     ...shared,
     deps: { neverBundle: ["vue"] },
   },

@@ -1,7 +1,7 @@
-// Vue 3 integration for hyperact - composables, directives, and plugin
+// Vue 3 integration for grip - composables, directives, and plugin
 
 import { ref, shallowRef, onMounted, onBeforeUnmount, watch, unref, isRef, type App, type Ref, type ShallowRef, type ObjectDirective } from 'vue'
-import { hyperact, Hyperact, type HyperactOptions } from './nano'
+import { grip, Grip, type GripOptions } from './nano'
 import { draggable, Draggable, type DragOptions } from './drag'
 import { resizable, Resizable, type ResizeOptions } from './resize'
 import { gesturable, Gesturable, type GestureOptions } from './gesture'
@@ -10,9 +10,9 @@ import { sortable, Sortable, type SortableOptions } from './sortable'
 import { interactable, type InteractableOptions } from './index'
 
 // Symbol key for storing instances on directive elements
-const INSTANCE_KEY = Symbol('hyperact')
+const INSTANCE_KEY = Symbol('grip')
 
-interface HyperactElement extends HTMLElement {
+interface GripElement extends HTMLElement {
   [INSTANCE_KEY]?: { destroy(): void }
 }
 
@@ -67,7 +67,7 @@ function createComposable<T extends { destroy(): void }, O>(
 // Composables
 // ---------------------------------------------------------------------------
 
-export const useHyperact = createComposable<Hyperact, HyperactOptions>(hyperact)
+export const useGrip = createComposable<Grip, GripOptions>(grip)
 export const useDraggable = createComposable<Draggable, DragOptions>(draggable)
 export const useResizable = createComposable<Resizable, ResizeOptions>(resizable)
 export const useGesturable = createComposable<Gesturable, GestureOptions>(gesturable)
@@ -121,21 +121,21 @@ function createDirective<T extends { destroy(): void }, O>(
     mounted(el, binding) {
       const opts = binding.value ?? ({} as O)
       const instance = factory(el, opts);
-      (el as HyperactElement)[INSTANCE_KEY] = instance
+      (el as GripElement)[INSTANCE_KEY] = instance
     },
     updated(el, binding) {
       if (binding.value === binding.oldValue) return
       // Destroy old instance and create new one
-      const old = (el as HyperactElement)[INSTANCE_KEY] as T | undefined
+      const old = (el as GripElement)[INSTANCE_KEY] as T | undefined
       old?.destroy()
       const opts = binding.value ?? ({} as O)
       const instance = factory(el, opts);
-      (el as HyperactElement)[INSTANCE_KEY] = instance
+      (el as GripElement)[INSTANCE_KEY] = instance
     },
     beforeUnmount(el) {
-      const instance = (el as HyperactElement)[INSTANCE_KEY] as T | undefined
+      const instance = (el as GripElement)[INSTANCE_KEY] as T | undefined
       instance?.destroy()
-      delete (el as HyperactElement)[INSTANCE_KEY]
+      delete (el as GripElement)[INSTANCE_KEY]
     }
   }
 }
@@ -153,7 +153,7 @@ export const vSortable: ObjectDirective<HTMLElement, SortableOptions> = createDi
 // Plugin installer
 // ---------------------------------------------------------------------------
 
-export const HyperactPlugin = {
+export const GripPlugin = {
   install(app: App) {
     app.directive('draggable', vDraggable)
     app.directive('resizable', vResizable)
@@ -167,7 +167,7 @@ export const HyperactPlugin = {
 // ---------------------------------------------------------------------------
 
 export type {
-  HyperactOptions,
+  GripOptions,
   InteractionEvent,
   Point,
   PointerState

@@ -1,5 +1,5 @@
 import { bench, describe } from 'vitest'
-import { Hyperact } from '../nano'
+import { Grip } from '../nano'
 import { Draggable } from '../drag'
 import { Resizable } from '../resize'
 import { Gesturable } from '../gesture'
@@ -48,10 +48,10 @@ function randomItems(count: number, worldSize: number): SpatialItem[] {
 // ---------------------------------------------------------------------------
 
 describe('Instance Creation', () => {
-  bench('Hyperact: create 1000 instances', () => {
-    const instances: Hyperact[] = []
+  bench('Grip: create 1000 instances', () => {
+    const instances: Grip[] = []
     for (let i = 0; i < 1000; i++) {
-      instances.push(new Hyperact(createElement()))
+      instances.push(new Grip(createElement()))
     }
     for (const inst of instances) inst.destroy()
   })

@@ -1,4 +1,4 @@
-// Canonical type definitions for hyperact
+// Canonical type definitions for grip
 
 export interface Point {
   x: number

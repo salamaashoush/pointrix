@@ -1,7 +1,7 @@
-// Full hyperact bundle with all features
+// Full grip bundle with all features
 
-export { hyperact, Hyperact } from './nano'
-export type { Point, PointerState, InteractionEvent, HyperactOptions } from './nano'
+export { grip, Grip } from './nano'
+export type { Point, PointerState, InteractionEvent, GripOptions } from './nano'
 
 export { draggable, Draggable } from './drag'
 export type { DragOptions, DragEvent } from './drag'

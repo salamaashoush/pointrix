@@ -1,9 +1,9 @@
-// Optimized resize addon for hyperact-nano (~3KB minified)
+// Optimized resize addon for grip-nano (~3KB minified)
 
-import { Hyperact, InteractionEvent, HyperactOptions } from './nano'
+import { Grip, InteractionEvent, GripOptions } from './nano'
 import { Modifier, ModifierContext, applyModifiers } from './types'
 
-export interface ResizeOptions extends HyperactOptions {
+export interface ResizeOptions extends GripOptions {
   edges?: {
     top?: boolean
     right?: boolean
@@ -41,7 +41,7 @@ export interface ResizeEvent extends InteractionEvent {
 
 type Edge = 'top' | 'right' | 'bottom' | 'left' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null
 
-export class Resizable extends Hyperact {
+export class Resizable extends Grip {
   private resizeOptions: ResizeOptions
   private startSize = { width: 0, height: 0 }
   private startPos = { x: 0, y: 0 }

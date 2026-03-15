@@ -1,7 +1,7 @@
-// Head-to-head benchmark: hyperact vs interact.js
+// Head-to-head benchmark: grip vs interact.js
 import { bench, describe } from 'vitest'
 import interact from 'interactjs'
-import { Hyperact } from '../nano'
+import { Grip } from '../nano'
 import { Draggable } from '../drag'
 import { Resizable } from '../resize'
 import { Gesturable } from '../gesture'
@@ -22,18 +22,18 @@ function createElement(): HTMLElement {
 // ──────────────────────────────────────────────────────────────
 // 1. CORE INSTANCE OVERHEAD
 //    The fundamental cost of setting up the library's internals.
-//    hyperact's core is a single class with a WeakMap registry;
+//    grip's core is a single class with a WeakMap registry;
 //    interact.js creates a Scope, Interactable, and plugin graph.
 // ──────────────────────────────────────────────────────────────
 
 describe('Core instance overhead (create + destroy)', () => {
-  bench('hyperact: 1000 base instances', () => {
+  bench('grip: 1000 base instances', () => {
     const els: HTMLElement[] = []
-    const instances: Hyperact[] = []
+    const instances: Grip[] = []
     for (let i = 0; i < 1000; i++) {
       const el = createElement()
       els.push(el)
-      instances.push(new Hyperact(el))
+      instances.push(new Grip(el))
     }
     for (const inst of instances) inst.destroy()
     for (const el of els) el.remove()
@@ -56,12 +56,12 @@ describe('Core instance overhead (create + destroy)', () => {
 // ──────────────────────────────────────────────────────────────
 // 2. DRAGGABLE SETUP
 //    Creates a draggable with full options.
-//    hyperact does more upfront (transform parsing, style setup)
+//    grip does more upfront (transform parsing, style setup)
 //    so this tests constructor-time cost.
 // ──────────────────────────────────────────────────────────────
 
 describe('Draggable setup (create + destroy)', () => {
-  bench('hyperact: 200 draggable instances', () => {
+  bench('grip: 200 draggable instances', () => {
     const els: HTMLElement[] = []
     const instances: Draggable[] = []
     for (let i = 0; i < 200; i++) {
@@ -99,7 +99,7 @@ describe('Draggable setup (create + destroy)', () => {
 // ──────────────────────────────────────────────────────────────
 
 describe('Hot path: position computation per frame (10K iterations)', () => {
-  bench('hyperact: transform calc + bounds + grid snap', () => {
+  bench('grip: transform calc + bounds + grid snap', () => {
     const startX = 50
     const startY = 50
     const bounds = { left: 0, top: 0, right: 800, bottom: 600 }
@@ -147,7 +147,7 @@ describe('Hot path: position computation per frame (10K iterations)', () => {
 
 // ──────────────────────────────────────────────────────────────
 // 4. MODIFIER SYSTEM: OBJECT ALLOCATION OVERHEAD
-//    hyperact modifiers return new objects each frame.
+//    grip modifiers return new objects each frame.
 //    This measures the cost of the abstraction vs inline math.
 // ──────────────────────────────────────────────────────────────
 
@@ -156,7 +156,7 @@ describe('Modifier system overhead', () => {
   const restrictMod = new RestrictModifier({ bounds: { left: 0, top: 0, right: 800, bottom: 600 } })
   const el = createElement()
 
-  bench('hyperact modifiers: snap + restrict (10K positions)', () => {
+  bench('grip modifiers: snap + restrict (10K positions)', () => {
     for (let i = 0; i < 10000; i++) {
       applyModifiers([snapMod, restrictMod], {
         position: { x: Math.random() * 1000, y: Math.random() * 1000 },
@@ -186,7 +186,7 @@ describe('Modifier system overhead', () => {
 // ──────────────────────────────────────────────────────────────
 
 describe('Velocity smoothing throughput', () => {
-  bench('hyperact: 100K velocity updates', () => {
+  bench('grip: 100K velocity updates', () => {
     let _vx = 0, _vy = 0
     for (let i = 0; i < 100000; i++) {
       const rawVx = Math.random() * 100 - 50
@@ -204,7 +204,7 @@ describe('Velocity smoothing throughput', () => {
 // ──────────────────────────────────────────────────────────────
 
 describe('Full-featured setup: drag + resize + gesture on N elements', () => {
-  bench('hyperact: 50 elements with all features', () => {
+  bench('grip: 50 elements with all features', () => {
     const items: Array<{ el: HTMLElement; d: Draggable; r: Resizable; g: Gesturable }> = []
     for (let i = 0; i < 50; i++) {
       const el = createElement()
