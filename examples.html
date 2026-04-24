@@ -1,2494 +1,1256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grip - Interactive Examples Showcase</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pointrix — Live Examples</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
-
     :root {
-      --sidebar-w: 280px;
-      --bg: #f8f9fb;
-      --surface: #ffffff;
-      --surface-alt: #f1f3f6;
-      --border: #e2e5ea;
-      --text: #1a1d23;
-      --text-muted: #6b7280;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
-      --accent-bg: #eef2ff;
-      --green: #10b981;
-      --green-bg: #d1fae5;
-      --amber: #f59e0b;
-      --amber-bg: #fef3c7;
-      --rose: #f43f5e;
-      --rose-bg: #ffe4e6;
-      --blue: #3b82f6;
-      --blue-bg: #dbeafe;
-      --purple: #8b5cf6;
-      --purple-bg: #ede9fe;
-      --code-bg: #1e1e2e;
-      --code-text: #cdd6f4;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-      --shadow-lg: 0 10px 25px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.04);
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-2: #1a1a26;
+      --border: #2a2a3a;
+      --text: #e4e4ef;
+      --text-dim: #8a8aa0;
+      --accent: #6c5ce7;
+      --accent-2: #00d2ff;
+      --code-bg: #0f0f17;
+      --radius: 10px;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
-    html { scroll-behavior: smooth }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
-      display: flex;
+      line-height: 1.55;
       min-height: 100vh;
     }
 
-    /* ─── Sidebar ─── */
-    #sidebar {
-      position: fixed;
-      top: 0; left: 0;
-      width: var(--sidebar-w);
+    .shell {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+
+    nav.toc {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      position: sticky;
+      top: 0;
       height: 100vh;
-      background: #111827;
-      color: #e5e7eb;
       overflow-y: auto;
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
     }
-    #sidebar .logo {
-      padding: 28px 24px 20px;
-      border-bottom: 1px solid #1f2937;
-    }
-    #sidebar .logo h1 {
-      font-size: 22px;
+
+    nav.toc h1 {
+      font-size: 18px;
       font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
     }
-    #sidebar .logo h1 span { color: var(--accent) }
-    #sidebar .logo p {
-      font-size: 12px;
-      color: #9ca3af;
-      margin-top: 4px;
+    nav.toc .tagline { color: var(--text-dim); font-size: 12px; margin-bottom: 24px; }
+
+    nav.toc a {
+      display: block;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: all 0.15s;
     }
-    #sidebar nav { flex: 1; padding: 16px 0 }
-    #sidebar nav .nav-group {
-      padding: 0 12px;
-      margin-bottom: 8px;
-    }
-    #sidebar nav .nav-group-label {
-      font-size: 10px;
-      font-weight: 600;
+    nav.toc a:hover { background: var(--surface-2); color: var(--text); }
+    nav.toc a.active { background: rgba(108, 92, 231, 0.15); color: var(--accent-2); }
+    nav.toc .toc-group {
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #6b7280;
-      padding: 8px 12px 4px;
+      color: var(--text-dim);
+      margin: 16px 0 6px;
+      padding: 0 8px;
+      opacity: 0.6;
     }
-    #sidebar nav a {
-      display: block;
-      padding: 8px 12px;
-      border-radius: 8px;
-      color: #d1d5db;
-      text-decoration: none;
-      font-size: 13px;
-      transition: all .15s;
-    }
-    #sidebar nav a:hover { background: #1f2937; color: #fff }
-    #sidebar nav a.active { background: var(--accent); color: #fff }
-    #sidebar nav a .nav-num {
-      display: inline-block;
-      width: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #6b7280;
-      margin-right: 4px;
-    }
-    #sidebar nav a:hover .nav-num,
-    #sidebar nav a.active .nav-num { color: inherit }
 
-    /* ─── Main content ─── */
-    #main {
-      margin-left: var(--sidebar-w);
-      flex: 1;
+    main {
+      max-width: 960px;
+      width: 100%;
       padding: 40px 48px 80px;
-      max-width: 1100px;
-    }
-    .page-header {
-      margin-bottom: 48px;
-    }
-    .page-header h1 {
-      font-size: 36px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-    .page-header p {
-      font-size: 16px;
-      color: var(--text-muted);
-      max-width: 600px;
     }
 
-    /* ─── Section ─── */
-    .section {
-      margin-bottom: 64px;
-      scroll-margin-top: 24px;
-    }
-    .section-header {
-      margin-bottom: 24px;
-    }
-    .section-header h2 {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      margin-bottom: 6px;
-    }
-    .section-header p {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
+    section.example { margin-bottom: 64px; scroll-margin-top: 24px; }
+    section.example > h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    section.example > .intro { color: var(--text-dim); margin-bottom: 20px; font-size: 14px; }
 
-    /* ─── Demo card ─── */
-    .demo {
+    .playground {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: auto auto;
+      gap: 16px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      margin-bottom: 24px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
+      padding: 16px;
     }
-    .demo-title {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 600;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .demo-title .badge {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .badge-drag { background: var(--blue-bg); color: var(--blue) }
-    .badge-resize { background: var(--green-bg); color: var(--green) }
-    .badge-gesture { background: var(--purple-bg); color: var(--purple) }
-    .badge-drop { background: var(--amber-bg); color: var(--amber) }
-    .badge-combo { background: var(--rose-bg); color: var(--rose) }
+    .playground .controls { grid-column: 1; grid-row: 1 / span 2; }
+    .playground .demo     { grid-column: 2; grid-row: 1; }
+    .playground .code     { grid-column: 2; grid-row: 2; }
 
-    .demo-area {
-      padding: 24px;
-      position: relative;
-      min-height: 200px;
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      main { padding: 24px 20px 60px; }
+      .playground { grid-template-columns: 1fr; }
+      .playground .controls { grid-column: 1; grid-row: 1; }
+      .playground .demo     { grid-column: 1; grid-row: 2; }
+      .playground .code     { grid-column: 1; grid-row: 3; }
     }
-    .demo-info {
-      padding: 12px 20px;
-      background: var(--surface-alt);
-      border-top: 1px solid var(--border);
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .demo-info span { white-space: nowrap }
-    .demo-info .label { color: var(--text-muted); margin-right: 4px }
-    .demo-info .value { color: var(--text); font-weight: 600 }
 
-    .demo-code {
-      border-top: 1px solid var(--border);
-    }
-    .demo-code summary {
-      padding: 10px 20px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
+    .controls { background: var(--surface-2); border-radius: 8px; padding: 14px; font-size: 13px; }
+    .controls .group-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 10px; }
+    .controls label { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; color: var(--text); }
+    .controls label .label-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); }
+    .controls label .label-row .val { font-family: var(--font-mono); font-size: 11px; color: var(--accent-2); }
+    .controls input[type=range] { width: 100%; accent-color: var(--accent); }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .controls select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 13px;
       cursor: pointer;
-      user-select: none;
-      background: var(--surface-alt);
+      width: 100%;
     }
-    .demo-code summary:hover { color: var(--text) }
-    .demo-code pre {
-      margin: 0;
-      padding: 16px 20px;
+    .controls .checkbox-row { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
+    .controls .divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+    .demo {
       background: var(--code-bg);
-      color: var(--code-text);
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 12px;
-      line-height: 1.7;
-      overflow-x: auto;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      min-height: 240px;
+      position: relative;
+      overflow: hidden;
+    }
+    .demo .demo-readout {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      background: rgba(0,0,0,0.4);
+      padding: 4px 8px;
+      border-radius: 4px;
+      pointer-events: none;
+      user-select: none;
     }
 
-    /* ─── Shared element styles ─── */
-    .drag-box {
-      width: 120px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-      color: #fff;
-      border-radius: 10px;
+    .code { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; }
+    .code pre { margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55; color: var(--text); overflow-x: auto; }
+    .code .copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .code .copy:hover { color: var(--text); border-color: var(--accent); }
+    .code .kw  { color: #c792ea; }
+    .code .str { color: #a5e075; }
+    .code .num { color: #f78c6c; }
+    .code .fn  { color: #82aaff; }
+    .code .cmt { color: var(--text-dim); font-style: italic; }
+
+    .tile {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
       font-weight: 600;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-    }
-    .drag-box.x-only {
-      background: linear-gradient(135deg, var(--blue), #2563eb);
-    }
-    .drag-box.y-only {
-      background: linear-gradient(135deg, var(--green), #059669);
-    }
-
-    .handle-box {
-      width: 180px;
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-    }
-    .handle-box .handle-bar {
-      padding: 8px 12px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
+      border-radius: 8px;
+      touch-action: none;
+      user-select: none;
       cursor: grab;
-    }
-    .handle-box .handle-body {
-      padding: 12px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .bounded-container {
-      width: 100%;
-      height: 260px;
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      position: relative;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 19px, var(--surface-alt) 19px, var(--surface-alt) 20px
-      ),
-      repeating-linear-gradient(
-        90deg, transparent, transparent 19px, var(--surface-alt) 19px, var(--surface-alt) 20px
-      );
-    }
-
-    .grid-overlay {
-      width: 100%;
-      height: 260px;
-      position: relative;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .grid-overlay .grid-lines {
       position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      opacity: 0.5;
+      top: 40px;
+      left: 40px;
+      will-change: transform;
     }
+    .tile:active { cursor: grabbing; }
 
-    .momentum-area {
-      width: 100%;
-      height: 260px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      background: var(--surface);
-    }
-
-    .snap-area {
-      width: 100%;
-      height: 300px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      background: var(--surface);
-    }
-    .snap-target {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--rose);
-      transform: translate(-50%, -50%);
-      opacity: 0.4;
-      transition: opacity .15s, transform .15s;
-      pointer-events: none;
-    }
-    .snap-target.active {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1.5);
-    }
-
-    .resize-box {
-      width: 200px;
-      height: 150px;
-      background: var(--surface);
-      border: 2px solid var(--accent);
-      border-radius: 10px;
+    .panel {
+      width: 180px;
+      height: 120px;
+      background: linear-gradient(135deg, #f43f5e, #f97316);
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
       font-weight: 600;
-      color: var(--accent);
-      box-shadow: var(--shadow-lg);
-      position: relative;
-    }
-    .resize-box::after {
-      content: '';
+      border-radius: 8px;
+      user-select: none;
       position: absolute;
-      bottom: 4px;
-      right: 4px;
-      width: 12px;
-      height: 12px;
-      border-right: 2px solid var(--accent);
-      border-bottom: 2px solid var(--accent);
-      opacity: 0.5;
+      top: 40px;
+      left: 40px;
     }
 
-    .gesture-area {
-      width: 100%;
-      height: 320px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      background: var(--surface);
+    .sortable-list { list-style: none; padding: 16px; display: flex; flex-direction: column; gap: 6px; margin: 0; }
+    .sortable-list li {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      font-size: 14px;
+    }
+    .sortable-list li:active { cursor: grabbing; }
+
+    .dropzone {
+      background: rgba(108, 92, 231, 0.08);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      min-height: 120px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--text-dim);
+      font-size: 13px;
+      transition: all 0.15s;
     }
+    .dropzone.dz-active { border-color: var(--accent); }
+    .dropzone.dz-hover  { background: rgba(108, 92, 231, 0.25); border-color: var(--accent-2); color: var(--text); }
+
     .gesture-target {
-      width: 160px;
-      height: 160px;
-      background: linear-gradient(135deg, var(--purple), #7c3aed);
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
       border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 13px;
+      color: white;
       font-weight: 600;
-      text-align: center;
-      line-height: 1.4;
-      box-shadow: var(--shadow-lg);
-    }
-
-    /* Dropzone styles */
-    .dnd-container {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .dnd-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 140px;
-    }
-    .dnd-card {
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-      box-shadow: var(--shadow);
-      cursor: grab;
-      width: 130px;
-      text-align: center;
-      position: relative;
-    }
-    .dnd-card.dragging {
-      z-index: 100;
-      box-shadow: 0 12px 30px rgba(0,0,0,.3);
-      opacity: 0.9;
-    }
-    .dnd-card.red { background: var(--rose) }
-    .dnd-card.blue { background: var(--blue) }
-    .dnd-card.green { background: var(--green) }
-    .dnd-card.purple { background: var(--purple) }
-    .dnd-card.amber { background: var(--amber) }
-
-    .drop-zone {
-      width: 180px;
-      min-height: 200px;
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: all .2s;
-    }
-    .drop-zone .zone-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .drop-zone .zone-count {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .drop-zone.dz-active {
-      border-color: var(--accent);
-      background: var(--accent-bg);
-    }
-    .drop-zone.dz-hover {
-      border-color: var(--green);
-      background: var(--green-bg);
-      transform: scale(1.02);
-    }
-
-    /* Combined: drag + resize */
-    .combined-box {
-      width: 200px;
-      height: 140px;
-      background: linear-gradient(135deg, #ec4899, #8b5cf6);
-      border-radius: 12px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      line-height: 1.4;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-    }
-    .combined-box::after {
-      content: '';
+      user-select: none;
+      touch-action: none;
       position: absolute;
-      bottom: 4px;
-      right: 4px;
-      width: 14px;
-      height: 14px;
-      border-right: 2px solid rgba(255,255,255,.5);
-      border-bottom: 2px solid rgba(255,255,255,.5);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transform-origin: center;
+      will-change: transform;
     }
 
-    /* Kanban */
-    .kanban {
-      display: flex;
-      gap: 16px;
+    .intro-card {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(0, 210, 255, 0.08));
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: var(--radius);
+      margin-bottom: 40px;
     }
-    .kanban-col {
-      width: 200px;
-      min-height: 280px;
-      background: var(--surface-alt);
-      border-radius: 10px;
-      padding: 12px;
+    .intro-card h2 {
+      font-size: 24px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .kanban-col h4 {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-    .kanban-col .cards { display: flex; flex-direction: column; gap: 8px; min-height: 60px }
-    .kanban-card {
-      padding: 10px 12px;
+    .intro-card p { color: var(--text-dim); font-size: 14px; margin-bottom: 12px; }
+    .intro-card .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      box-shadow: var(--shadow);
-      cursor: grab;
-    }
-    .kanban-col.dz-active { outline: 2px solid var(--accent); outline-offset: -2px }
-    .kanban-col.dz-hover { background: var(--accent-bg) }
-    .kanban-dragging {
-      z-index: 100;
-      opacity: 0.9;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-    }
-
-    .sortable-dragging { opacity: 0.85; box-shadow: 0 8px 25px rgba(0,0,0,.3); z-index: 9999; }
-
-    /* Stress test */
-    .stress-controls {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .stress-controls label {
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .stress-controls input[type=range] {
-      width: 200px;
-      accent-color: var(--accent);
-    }
-    .stress-controls button {
-      padding: 8px 18px;
-      border: none;
-      background: var(--accent);
-      color: #fff;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .15s;
-    }
-    .stress-controls button:hover { background: var(--accent-hover) }
-    .stress-field {
-      width: 100%;
-      height: 400px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      background: var(--surface);
-    }
-    .stress-dot {
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 8px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .fps-counter {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      padding: 8px 14px;
-      background: #111827;
-      color: #10b981;
-      font-family: 'SF Mono', monospace;
-      font-size: 13px;
-      font-weight: 700;
-      border-radius: 8px;
-      z-index: 200;
-      box-shadow: var(--shadow-lg);
-      display: none;
-    }
-
-
-    /* ─── Section 8: New Features ─── */
-    .hold-delay-box {
-      width: 120px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--amber), #d97706);
-      color: #fff;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-      transition: background .3s;
-    }
-    .hold-delay-box.waiting {
-      background: linear-gradient(135deg, var(--rose), #dc2626);
-    }
-    .hold-delay-box.ready {
-      background: linear-gradient(135deg, var(--green), #059669);
-    }
-
-    .allow-ignore-card {
-      width: 220px;
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-    }
-    .allow-ignore-card .card-header {
-      padding: 10px 14px;
-      background: var(--accent);
-      color: #fff;
       font-size: 12px;
-      font-weight: 600;
-      cursor: grab;
+      color: var(--text);
+      margin-right: 6px;
+      margin-bottom: 6px;
+      font-family: var(--font-mono);
     }
-    .allow-ignore-card .card-body {
-      padding: 14px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .allow-ignore-card .card-body button {
-      margin-top: 8px;
-      padding: 6px 14px;
-      border: none;
-      background: var(--accent);
-      color: #fff;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .allow-ignore-card .card-body button:hover {
-      background: var(--accent-hover);
-    }
-
-    .axis-auto-box {
-      width: 100px;
-      height: 100px;
-      background: linear-gradient(135deg, var(--blue), #2563eb);
-      color: #fff;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
-      text-align: center;
-      line-height: 1.4;
-      box-shadow: var(--shadow-lg);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      margin-top: -50px;
-      margin-left: -50px;
-    }
-
-    .rubberband-area {
-      width: 100%;
-      height: 300px;
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      background: var(--surface);
-    }
-    .rubberband-box {
-      width: 100px;
-      height: 100px;
-      background: linear-gradient(135deg, var(--purple), #7c3aed);
-      color: #fff;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
-      text-align: center;
-      line-height: 1.4;
-      box-shadow: var(--shadow-lg);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      margin-top: -50px;
-      margin-left: -50px;
-    }
-
-    .invert-compare {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .invert-panel {
-      flex: 1;
-      min-width: 250px;
-    }
-    .invert-panel h4 {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .invert-container {
-      height: 200px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      position: relative;
-      background: var(--surface);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .invert-box {
-      width: 120px;
-      height: 80px;
-      background: var(--surface);
-      border: 2px solid var(--accent);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent);
-      box-shadow: var(--shadow-lg);
-      position: relative;
-    }
-    .invert-box::after {
-      content: '';
-      position: absolute;
-      bottom: 4px;
-      right: 4px;
-      width: 10px;
-      height: 10px;
-      border-right: 2px solid var(--accent);
-      border-bottom: 2px solid var(--accent);
-      opacity: 0.5;
-    }
-
-    .event-log-area {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .event-log-left {
-      flex-shrink: 0;
-    }
-    .event-log-box {
-      width: 120px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--green), #059669);
-      color: #fff;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: var(--shadow-lg);
-    }
-    .event-log-btns {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .event-log-btns button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #fff;
-    }
-    .event-log-btns .btn-add { background: var(--green) }
-    .event-log-btns .btn-add:hover { background: #059669 }
-    .event-log-btns .btn-remove { background: var(--rose) }
-    .event-log-btns .btn-remove:hover { background: #dc2626 }
-    .event-console {
-      flex: 1;
-      height: 180px;
-      background: var(--code-bg);
-      color: var(--code-text);
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 11px;
-      line-height: 1.6;
-      border-radius: 10px;
-      padding: 12px;
-      overflow-y: auto;
-      min-width: 0;
-    }
-    .event-console .log-line {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .event-console .log-event { color: #89b4fa }
-    .event-console .log-time { color: #6c7086 }
-    .event-console .log-data { color: #a6e3a1 }
-    .event-console .log-info { color: #f9e2af }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      #sidebar { display: none }
-      #main { margin-left: 0; padding: 24px 16px 64px }
-    }
+    .intro-card .pill b { color: var(--accent-2); font-weight: 600; }
   </style>
 </head>
 <body>
+  <div class="shell">
+    <nav class="toc" id="toc">
+      <h1>pointrix</h1>
+      <div class="tagline">Live examples</div>
 
-<!-- Sidebar -->
-<aside id="sidebar">
-  <div class="logo">
-    <h1><span>Hyper</span>act</h1>
-    <p>Ultra-fast interactions library</p>
-  </div>
-  <nav>
-    <div class="nav-group">
-      <div class="nav-group-label">Basic Drag</div>
-      <a href="#simple-drag"><span class="nav-num">1.1</span> Simple Drag</a>
-      <a href="#handle-drag"><span class="nav-num">1.2</span> Drag with Handle</a>
-      <a href="#axis-drag"><span class="nav-num">1.3</span> Axis-locked Drag</a>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label">Advanced Drag</div>
-      <a href="#bounded-drag"><span class="nav-num">2.1</span> Bounded Drag</a>
-      <a href="#grid-drag"><span class="nav-num">2.2</span> Grid Snap</a>
-      <a href="#momentum-drag"><span class="nav-num">2.3</span> Momentum / Throw</a>
-      <a href="#snap-targets-drag"><span class="nav-num">2.4</span> Snap to Targets</a>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label">Resize</div>
-      <a href="#basic-resize"><span class="nav-num">3.1</span> Basic Resize</a>
-      <a href="#aspect-resize"><span class="nav-num">3.2</span> Aspect Ratio (16:9)</a>
-      <a href="#constrained-resize"><span class="nav-num">3.3</span> Min/Max Constraints</a>
-      <a href="#grid-resize"><span class="nav-num">3.4</span> Grid Resize</a>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label">Gesture</div>
-      <a href="#gesture-demo"><span class="nav-num">4.1</span> Pinch / Rotate / Scale</a>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label">Drag &amp; Drop</div>
-      <a href="#dropzone-demo"><span class="nav-num">5.1</span> Dropzones</a>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label">Combined</div>
-      <a href="#drag-resize"><span class="nav-num">6.1</span> Drag + Resize</a>
-      <a href="#kanban"><span class="nav-num">6.2</span> Kanban Board</a>
-      <a href="#sortable-list"><span class="nav-num">6.3</span> Sortable List</a>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label">Performance</div>
-      <a href="#stress-test"><span class="nav-num">7.1</span> Stress Test</a>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label">New Features</div>
-      <a href="#hold-delay"><span class="nav-num">8.1</span> Hold Delay</a>
-      <a href="#allow-ignore"><span class="nav-num">8.2</span> Allow/Ignore From</a>
-      <a href="#axis-autodetect"><span class="nav-num">8.3</span> Axis Auto-detect</a>
-      <a href="#rubberband-demo"><span class="nav-num">8.4</span> Rubberband</a>
-      <a href="#resize-invert"><span class="nav-num">8.5</span> Resize Invert</a>
-      <a href="#event-listeners"><span class="nav-num">8.6</span> Event Listeners</a>
-    </div>
-  </nav>
-</aside>
+      <div class="toc-group">Core</div>
+      <a href="#draggable">Draggable</a>
+      <a href="#axis-bounds">Bounds</a>
+      <a href="#grid">Grid snap</a>
+      <a href="#momentum">Momentum</a>
+      <a href="#handle">Handle</a>
 
-<!-- FPS Counter -->
-<div class="fps-counter" id="fps-counter">-- FPS</div>
+      <div class="toc-group">Advanced</div>
+      <a href="#modifiers">Modifiers</a>
+      <a href="#rubberband">Rubberband</a>
+      <a href="#resizable">Resizable</a>
+      <a href="#gesture">Gesture</a>
 
-<!-- Main Content -->
-<main id="main">
+      <div class="toc-group">Compose</div>
+      <a href="#dropzone">Dropzone</a>
+      <a href="#sortable">Sortable</a>
+      <a href="#sortable-groups">Cross-container</a>
 
-  <div class="page-header">
-    <h1>Grip Examples</h1>
-    <p>Interactive showcase of every feature in the library. Each demo is live &mdash; grab, drag, resize, pinch, and throw things around.</p>
-  </div>
+      <div class="toc-group">More</div>
+      <a href="index.html">Home</a>
+      <a href="benchmark.html">Benchmarks</a>
+      <a href="react-perf.html">React demo</a>
+      <a href="bench-compare.html">Side-by-side</a>
+    </nav>
 
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 1: BASIC DRAG                 -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="simple-drag">
-    <div class="section-header">
-      <h2>1. Basic Drag</h2>
-      <p>The simplest drag interactions &mdash; pick up and move elements anywhere on the page.</p>
-    </div>
-
-    <!-- 1.1 Simple Drag -->
-    <div class="demo">
-      <div class="demo-title">Simple Drag <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area" style="height:200px">
-        <div id="simple-drag-el" class="drag-box">Drag me</div>
+    <main>
+      <div class="intro-card">
+        <h2>Live examples</h2>
+        <p>Every example below runs live. Tweak the controls on the left of each playground; the demo updates in real time via <code>updateOptions</code>, and the code block on the right always reflects the current options — copy-paste into your app.</p>
+        <span class="pill"><b>npm:</b> pointrix</span>
+        <span class="pill"><b>import:</b> pointrix/drag</span>
+        <span class="pill"><b>gzip:</b> 14.4 KB full</span>
+        <span class="pill"><b>vs interact.js:</b> 13–15× faster/event</span>
       </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="simple-drag-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="simple-drag-y">0</span></span>
-        <span><span class="label">vx:</span><span class="value" id="simple-drag-vx">0</span></span>
-        <span><span class="label">vy:</span><span class="value" id="simple-drag-vy">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable } from 'pointrix'
 
-draggable('#simple-drag-el', {
-  onDragMove(e) {
-    console.log(e.totalX, e.totalY)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
+      <!-- ─── DRAGGABLE ──────────────────────────────────────── -->
+      <section id="draggable" class="example">
+        <h2>Draggable</h2>
+        <p class="intro">The core primitive. Auto-applies transforms via <code>translate3d</code>. Option changes update in place — no teardown or listener churn.</p>
 
-  <!-- 1.2 Handle Drag -->
-  <div class="section" id="handle-drag">
-    <div class="demo">
-      <div class="demo-title">Drag with Handle <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area" style="height:200px">
-        <div id="handle-drag-el" class="handle-box">
-          <div class="handle-bar" id="handle-bar">Drag from here</div>
-          <div class="handle-body">This body area cannot be used to drag. Only the colored header acts as a handle.</div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="handle-drag-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="handle-drag-y">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>draggable('#handle-drag-el', {
-  handle: '.handle-bar',
-  onDragMove(e) {
-    console.log(e.totalX, e.totalY)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
+        <div class="playground">
+          <div class="controls" data-ctl="drag">
+            <div class="group-title">Options</div>
 
-  <!-- 1.3 Axis Locked -->
-  <div class="section" id="axis-drag">
-    <div class="demo">
-      <div class="demo-title">Axis-locked Drag <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area" style="height:200px;display:flex;gap:24px;align-items:flex-start">
-        <div id="x-only-el" class="drag-box x-only">X only</div>
-        <div id="y-only-el" class="drag-box y-only" style="margin-left:160px">Y only</div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">X-only x:</span><span class="value" id="axis-x-val">0</span></span>
-        <span><span class="label">Y-only y:</span><span class="value" id="axis-y-val">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>draggable('#x-only-el', { axis: 'x' })
-draggable('#y-only-el', { axis: 'y' })</pre>
-      </details>
-    </div>
-  </div>
+            <label>
+              <span class="label-row"><span>axis</span><span class="val" data-val="axis">xy</span></span>
+              <select data-opt="axis">
+                <option value="xy" selected>xy</option>
+                <option value="x">x</option>
+                <option value="y">y</option>
+                <option value="auto">auto (lock to first-moved)</option>
+              </select>
+            </label>
 
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 2: ADVANCED DRAG              -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="bounded-drag">
-    <div class="section-header">
-      <h2>2. Advanced Drag</h2>
-      <p>Bounds, grid snapping, physics-based momentum, and modifier-driven snap targets.</p>
-    </div>
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="preventScroll" checked />
+              preventScroll
+            </label>
 
-    <!-- 2.1 Bounded -->
-    <div class="demo">
-      <div class="demo-title">Bounded Drag <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area">
-        <div class="bounded-container" id="bounded-container">
-          <div id="bounded-el" class="drag-box" style="position:absolute;top:20px;left:20px">Bounded</div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="bounded-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="bounded-y">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>draggable('#bounded-el', {
-  bounds: 'parent',
-  onDragMove(e) {
-    console.log(e.totalX, e.totalY)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="styleCursor" checked />
+              styleCursor
+            </label>
 
-  <!-- 2.2 Grid Snap -->
-  <div class="section" id="grid-drag">
-    <div class="demo">
-      <div class="demo-title">Grid Snap <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area">
-        <div class="grid-overlay" id="grid-container">
-          <div class="grid-lines"></div>
-          <div id="grid-el" class="drag-box" style="position:absolute;top:0;left:0">Grid 40px</div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="grid-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="grid-y">0</span></span>
-        <span><span class="label">snapped:</span><span class="value" id="grid-snap">0, 0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>draggable('#grid-el', {
-  grid: { x: 40, y: 40 },
-  bounds: 'parent'
-})</pre>
-      </details>
-    </div>
-  </div>
+            <label>
+              <span class="label-row"><span>threshold</span><span class="val" data-val="threshold">3</span></span>
+              <input type="range" data-opt="threshold" min="0" max="50" step="1" value="3" />
+            </label>
 
-  <!-- 2.3 Momentum -->
-  <div class="section" id="momentum-drag">
-    <div class="demo">
-      <div class="demo-title">Momentum / Throw <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area">
-        <div class="momentum-area" id="momentum-container">
-          <div id="momentum-el" class="drag-box" style="position:absolute;top:80px;left:80px;background:linear-gradient(135deg,#f59e0b,#d97706)">Throw me!</div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="momentum-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="momentum-y">0</span></span>
-        <span><span class="label">vx:</span><span class="value" id="momentum-vx">0</span></span>
-        <span><span class="label">vy:</span><span class="value" id="momentum-vy">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>draggable('#momentum-el', {
-  momentum: { friction: 0.95, minSpeed: 0.1 },
-  bounds: 'parent',
-  onDragMove(e) {
-    console.log('velocity:', e.velocityX, e.velocityY)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
+            <div class="divider"></div>
+            <div class="group-title">Callbacks</div>
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="onTap" />
+              onTap
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="onDoubleTap" />
+              onDoubleTap
+            </label>
+          </div>
 
-  <!-- 2.4 Snap Targets -->
-  <div class="section" id="snap-targets-drag">
-    <div class="demo">
-      <div class="demo-title">Snap to Targets <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area">
-        <div class="snap-area" id="snap-container">
-          <div class="snap-target" id="st-0" style="left:60px;top:60px"></div>
-          <div class="snap-target" id="st-1" style="left:240px;top:60px"></div>
-          <div class="snap-target" id="st-2" style="left:420px;top:60px"></div>
-          <div class="snap-target" id="st-3" style="left:150px;top:200px"></div>
-          <div class="snap-target" id="st-4" style="left:330px;top:200px"></div>
-          <!-- range rings show the snap radius -->
-          <svg class="snap-rings" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
-            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
-            <circle cx="240" cy="60" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
-            <circle cx="420" cy="60" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
-            <circle cx="150" cy="200" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
-            <circle cx="330" cy="200" r="50" fill="none" stroke="var(--rose)" stroke-width="1" opacity="0.2" stroke-dasharray="4 3"/>
-          </svg>
-          <div id="snap-el" class="drag-box" style="position:absolute;top:120px;left:180px;width:50px;height:50px;font-size:11px;background:linear-gradient(135deg,#f43f5e,#be123c)">Drag</div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="snap-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="snap-y">0</span></span>
-        <span><span class="label">snapped:</span><span class="value" id="snap-target-id">none</span></span>
-        <span>
-          <span class="label">pivot:</span>
-          <select id="snap-pivot" style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:12px">
-            <option value="center" selected>center</option>
-            <option value="top-left">top-left</option>
-            <option value="top">top</option>
-            <option value="top-right">top-right</option>
-            <option value="left">left</option>
-            <option value="right">right</option>
-            <option value="bottom-left">bottom-left</option>
-            <option value="bottom">bottom</option>
-            <option value="bottom-right">bottom-right</option>
-          </select>
-        </span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable, snapTargets } from 'pointrix'
+          <div class="demo" data-demo="drag">
+            <div class="tile" data-target>Drag</div>
+            <div class="demo-readout" data-readout>—</div>
+          </div>
 
-// relativePoints controls which point on the element
-// is used for snapping:
-//   {x:0.5, y:0.5} = center (default in this demo)
-//   {x:0, y:0}     = top-left corner
-//   {x:1, y:1}     = bottom-right corner
-draggable('#snap-el', {
-  modifiers: [
-    snapTargets({
-      coordinateMode: 'parent',
-      relativePoints: [{ x: 0.5, y: 0.5 }],
-      targets: [
-        { x: 60, y: 60 },
-        { x: 240, y: 60 },
-        ...
-      ],
-      range: 50
-    })
-  ]
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 3: RESIZE                     -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="basic-resize">
-    <div class="section-header">
-      <h2>3. Resize</h2>
-      <p>Resize elements from edges and corners, with optional aspect ratio, constraints, and grid snapping.</p>
-    </div>
-
-    <!-- 3.1 Basic Resize -->
-    <div class="demo">
-      <div class="demo-title">Basic Resize (all edges) <span class="badge badge-resize">resize</span></div>
-      <div class="demo-area" style="height:260px">
-        <div id="basic-resize-el" class="resize-box">Resize me</div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">w:</span><span class="value" id="resize-w">200</span></span>
-        <span><span class="label">h:</span><span class="value" id="resize-h">150</span></span>
-        <span><span class="label">dw:</span><span class="value" id="resize-dw">0</span></span>
-        <span><span class="label">dh:</span><span class="value" id="resize-dh">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { resizable } from 'pointrix'
-
-resizable('#basic-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  onResizeMove(e) {
-    console.log(e.width, e.height)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 3.2 Aspect Ratio -->
-  <div class="section" id="aspect-resize">
-    <div class="demo">
-      <div class="demo-title">Aspect Ratio (16:9) <span class="badge badge-resize">resize</span></div>
-      <div class="demo-area" style="height:300px">
-        <div id="aspect-resize-el" class="resize-box" style="width:320px;height:180px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border-color:#0ea5e9">
-          16:9 Ratio
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">w:</span><span class="value" id="aspect-w">320</span></span>
-        <span><span class="label">h:</span><span class="value" id="aspect-h">180</span></span>
-        <span><span class="label">ratio:</span><span class="value" id="aspect-ratio">1.78</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>resizable('#aspect-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  aspectRatio: 16 / 9,
-  minWidth: 160,
-  minHeight: 90
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 3.3 Min/Max Constraints -->
-  <div class="section" id="constrained-resize">
-    <div class="demo">
-      <div class="demo-title">Min/Max Constraints <span class="badge badge-resize">resize</span></div>
-      <div class="demo-area" style="height:300px">
-        <div id="constrained-resize-el" class="resize-box" style="width:200px;height:150px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-color:#10b981">
-          100&ndash;400 px
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">w:</span><span class="value" id="constrained-w">200</span></span>
-        <span><span class="label">h:</span><span class="value" id="constrained-h">150</span></span>
-        <span><span class="label">min:</span><span class="value">100x80</span></span>
-        <span><span class="label">max:</span><span class="value">400x300</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>resizable('#constrained-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  minWidth: 100,
-  minHeight: 80,
-  maxWidth: 400,
-  maxHeight: 300
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 3.4 Grid Resize -->
-  <div class="section" id="grid-resize">
-    <div class="demo">
-      <div class="demo-title">Grid Snap Resize <span class="badge badge-resize">resize</span></div>
-      <div class="demo-area" style="height:300px">
-        <div style="position:relative;width:100%;height:260px;border:2px solid var(--border);border-radius:10px;overflow:hidden">
-          <div style="position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;opacity:.4"></div>
-          <div id="grid-resize-el" class="resize-box" style="position:absolute;top:0;left:0;width:200px;height:160px;border-color:#8b5cf6;color:#8b5cf6">
-            Grid 40px
+          <div class="code" data-code="drag">
+            <button class="copy">copy</button>
+            <pre></pre>
           </div>
         </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">w:</span><span class="value" id="grid-resize-w">200</span></span>
-        <span><span class="label">h:</span><span class="value" id="grid-resize-h">160</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>resizable('#grid-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  grid: { width: 40, height: 40 },
-  minWidth: 80,
-  minHeight: 80
-})</pre>
-      </details>
-    </div>
-  </div>
+      </section>
 
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 4: GESTURE                    -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="gesture-demo">
-    <div class="section-header">
-      <h2>4. Gesture (Multi-touch)</h2>
-      <p>Pinch to zoom and rotate with two fingers or pointers. Use touch or multiple mouse pointers (e.g. dev tools touch emulation).</p>
-    </div>
+      <!-- ─── BOUNDS ──────────────────────────────────── -->
+      <section id="axis-bounds" class="example">
+        <h2>Bounds</h2>
+        <p class="intro">Restrict movement to a rect. <code>'parent'</code> uses <code>offsetParent</code>; an HTMLElement uses that element's rect; a literal <code>{left, top, right, bottom}</code> uses page-space coords.</p>
 
-    <div class="demo">
-      <div class="demo-title">Pinch / Rotate / Scale <span class="badge badge-gesture">gesture</span></div>
-      <div class="demo-area">
-        <div class="gesture-area">
-          <div id="gesture-el" class="gesture-target">
-            Pinch &amp; Rotate<br><small>(use 2 fingers)</small>
+        <div class="playground">
+          <div class="controls" data-ctl="bounds">
+            <div class="group-title">bounds</div>
+            <label>
+              <select data-opt="bounds">
+                <option value="parent" selected>'parent'</option>
+                <option value="none">(disabled)</option>
+                <option value="region">custom region</option>
+              </select>
+            </label>
+            <label>
+              <span class="label-row"><span>axis</span><span class="val" data-val="axis">xy</span></span>
+              <select data-opt="axis">
+                <option value="xy" selected>xy</option>
+                <option value="x">x</option>
+                <option value="y">y</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="demo" data-demo="bounds">
+            <div class="tile" data-target>Bound</div>
+          </div>
+
+          <div class="code" data-code="bounds">
+            <button class="copy">copy</button>
+            <pre></pre>
           </div>
         </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">scale:</span><span class="value" id="gesture-scale">1.00</span></span>
-        <span><span class="label">rotation:</span><span class="value" id="gesture-rotation">0.0</span>&deg;</span>
-        <span><span class="label">distance:</span><span class="value" id="gesture-distance">0</span>px</span>
-        <span><span class="label">angle:</span><span class="value" id="gesture-angle">0.0</span>&deg;</span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { gesturable } from 'pointrix'
+      </section>
 
-let scale = 1, rotation = 0
+      <!-- ─── GRID SNAP ──────────────────────────────────────── -->
+      <section id="grid" class="example">
+        <h2>Grid snap</h2>
+        <p class="intro">The built-in <code>grid</code> option snaps to a regular grid each frame. For irregular targets use the <code>snapTargets</code> modifier.</p>
 
-gesturable('#gesture-el', {
-  onGestureMove(e) {
-    scale = e.scale
-    rotation = e.rotation
-    el.style.transform =
-      `scale(${scale}) rotate(${rotation}deg)`
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 5: DRAG & DROP               -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="dropzone-demo">
-    <div class="section-header">
-      <h2>5. Drag &amp; Drop (Dropzone)</h2>
-      <p>Drag colored cards into dropzones. Each zone has different accept rules and tracks drop count.</p>
-    </div>
-
-    <div class="demo">
-      <div class="demo-title">Dropzones with Accept Rules <span class="badge badge-drop">drop</span></div>
-      <div class="demo-area">
-        <div class="dnd-container">
-          <div class="dnd-cards" id="dnd-source">
-            <div class="dnd-card red" data-color="red">Red Card</div>
-            <div class="dnd-card blue" data-color="blue">Blue Card</div>
-            <div class="dnd-card green" data-color="green">Green Card</div>
-            <div class="dnd-card purple" data-color="purple">Purple Card</div>
-            <div class="dnd-card amber" data-color="amber">Amber Card</div>
+        <div class="playground">
+          <div class="controls" data-ctl="grid">
+            <label>
+              <span class="label-row"><span>grid.x</span><span class="val" data-val="gx">20</span></span>
+              <input type="range" data-opt="gx" min="0" max="80" step="1" value="20" />
+            </label>
+            <label>
+              <span class="label-row"><span>grid.y</span><span class="val" data-val="gy">20</span></span>
+              <input type="range" data-opt="gy" min="0" max="80" step="1" value="20" />
+            </label>
           </div>
-          <div class="drop-zone" id="dz-any">
-            <div class="zone-label">Any Card</div>
-            <div class="zone-count" id="dz-any-count">Drops: 0</div>
+
+          <div class="demo" data-demo="grid">
+            <div class="tile" data-target>Snap</div>
           </div>
-          <div class="drop-zone" id="dz-warm">
-            <div class="zone-label">Warm Colors</div>
-            <div class="zone-count" id="dz-warm-count">Drops: 0</div>
-          </div>
-          <div class="drop-zone" id="dz-cool">
-            <div class="zone-label">Cool Colors</div>
-            <div class="zone-count" id="dz-cool-count">Drops: 0</div>
+
+          <div class="code" data-code="grid">
+            <button class="copy">copy</button>
+            <pre></pre>
           </div>
         </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">dragging:</span><span class="value" id="dnd-dragging">none</span></span>
-        <span><span class="label">hover zone:</span><span class="value" id="dnd-hover">none</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable, dropzone, DropzoneManager } from 'pointrix'
+      </section>
 
-const zone = dropzone('#dz-warm', {
-  accept: (el) => ['red', 'amber'].includes(el.dataset.color),
-  activeClass: 'dz-active',
-  hoverClass: 'dz-hover',
-  onDrop(e) {
-    console.log('dropped:', e.draggable)
-  }
-})
+      <!-- ─── MOMENTUM ──────────────────────────────────────── -->
+      <section id="momentum" class="example">
+        <h2>Momentum</h2>
+        <p class="intro"><code>friction</code> is 0–1 remaining-velocity-per-second (0.95 = 5 % loss/sec). Frame-rate-independent — 60 Hz and 120 Hz monitors land the same distance.</p>
 
-// On drag start, notify DropzoneManager
-draggable(card, {
-  onDragStart(e) { DropzoneManager.onDragStart(e.target) },
-  onDragMove(e) { DropzoneManager.onDragMove(e.target, pointer) },
-  onDragEnd(e) { DropzoneManager.onDragEnd(e.target, pointer) }
-})</pre>
-      </details>
-    </div>
-  </div>
+        <div class="playground">
+          <div class="controls" data-ctl="momentum">
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="momentum" checked />
+              momentum
+            </label>
+            <label>
+              <span class="label-row"><span>friction</span><span class="val" data-val="friction">0.92</span></span>
+              <input type="range" data-opt="friction" min="0.5" max="0.99" step="0.01" value="0.92" />
+            </label>
+            <label>
+              <span class="label-row"><span>minVelocity</span><span class="val" data-val="minVelocity">10</span></span>
+              <input type="range" data-opt="minVelocity" min="0" max="200" step="1" value="10" />
+            </label>
+          </div>
 
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 6: COMBINED                   -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="drag-resize">
-    <div class="section-header">
-      <h2>6. Combined Interactions</h2>
-      <p>Mix drag and resize on the same element, or build complex UIs like a kanban board.</p>
-    </div>
+          <div class="demo" data-demo="momentum">
+            <div class="tile" data-target>Fling</div>
+            <div class="demo-readout" data-readout>flick me →</div>
+          </div>
 
-    <!-- 6.1 Drag + Resize -->
-    <div class="demo">
-      <div class="demo-title">Drag + Resize <span class="badge badge-combo">combo</span></div>
-      <div class="demo-area" style="height:300px">
-        <div id="combined-el" class="combined-box">Drag center<br>Resize edges</div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="combined-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="combined-y">0</span></span>
-        <span><span class="label">w:</span><span class="value" id="combined-w">200</span></span>
-        <span><span class="label">h:</span><span class="value" id="combined-h">140</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { interactable } from 'pointrix'
+          <div class="code" data-code="momentum">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
 
-interactable('#combined-el', {
-  drag: true,
-  resize: {
-    edges: { top: true, right: true, bottom: true, left: true },
-    minWidth: 100,
-    minHeight: 80
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
+      <!-- ─── HANDLE ────────────────────────────────────────── -->
+      <section id="handle" class="example">
+        <h2>Handle</h2>
+        <p class="intro">Restrict drag-start to a specific region within the element. Pointer events outside the handle selector are ignored.</p>
 
-  <!-- 6.2 Kanban -->
-  <div class="section" id="kanban">
-    <div class="demo">
-      <div class="demo-title">Kanban Board <span class="badge badge-combo">combo</span></div>
-      <div class="demo-area">
-        <div class="kanban" id="kanban-board">
-          <div class="kanban-col" id="col-todo">
-            <h4>To Do</h4>
-            <div class="cards" id="cards-todo">
-              <div class="kanban-card" data-id="1">Design homepage</div>
-              <div class="kanban-card" data-id="2">Write tests</div>
-              <div class="kanban-card" data-id="3">Setup CI/CD</div>
+        <div class="playground">
+          <div class="controls" data-ctl="handle">
+            <div class="group-title">handle</div>
+            <label>
+              <select data-opt="handle">
+                <option value="handle" selected>'.handle'</option>
+                <option value="none">(whole element)</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="demo" data-demo="handle">
+            <div class="panel" data-target style="flex-direction:column;gap:6px;font-size:13px;">
+              <div class="handle" style="padding:2px 10px;background:rgba(0,0,0,0.35);border-radius:4px;cursor:grab;">⋮⋮ drag here</div>
+              <div style="opacity:.8;">(body is ignored)</div>
             </div>
           </div>
-          <div class="kanban-col" id="col-progress">
-            <h4>In Progress</h4>
-            <div class="cards" id="cards-progress">
-              <div class="kanban-card" data-id="4">Build API</div>
+
+          <div class="code" data-code="handle">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── MODIFIERS ──────────────────────────────────────── -->
+      <section id="modifiers" class="example">
+        <h2>Modifiers</h2>
+        <p class="intro">Composable transforms applied each frame. Order matters — each one sees the context mutated by the previous.</p>
+
+        <div class="playground">
+          <div class="controls" data-ctl="modifiers">
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="restrict" checked />
+              restrict({ bounds: 'parent' })
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="snap" checked />
+              snapGrid({ x: 25, y: 25 })
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="snapTargets" />
+              snapTargets({ x: 120, y: 80 })
+            </label>
+          </div>
+
+          <div class="demo" data-demo="modifiers">
+            <div class="tile" data-target>Mod</div>
+          </div>
+
+          <div class="code" data-code="modifiers">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── RUBBERBAND ─────────────────────────────────────── -->
+      <section id="rubberband" class="example">
+        <h2>Rubberband</h2>
+        <p class="intro">iOS-style elastic overscroll. Drag past the bounds feels resistive; release snaps back.</p>
+
+        <div class="playground">
+          <div class="controls" data-ctl="rubberband">
+            <label>
+              <span class="label-row"><span>resistance</span><span class="val" data-val="resistance">0.3</span></span>
+              <input type="range" data-opt="resistance" min="0.05" max="1" step="0.05" value="0.3" />
+            </label>
+            <label>
+              <span class="label-row"><span>maxOvershoot</span><span class="val" data-val="maxOvershoot">80</span></span>
+              <input type="range" data-opt="maxOvershoot" min="0" max="200" step="5" value="80" />
+            </label>
+          </div>
+
+          <div class="demo" data-demo="rubberband">
+            <div class="tile" data-target>Pull</div>
+          </div>
+
+          <div class="code" data-code="rubberband">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── RESIZABLE ──────────────────────────────────────── -->
+      <section id="resizable" class="example">
+        <h2>Resizable</h2>
+        <p class="intro">Drag any combination of edges or corners. Aspect-ratio lock, min/max, grid snapping.</p>
+
+        <div class="playground">
+          <div class="controls" data-ctl="resize">
+            <div class="group-title">edges</div>
+            <label class="checkbox-row"><input type="checkbox" data-opt="top" checked /> top</label>
+            <label class="checkbox-row"><input type="checkbox" data-opt="right" checked /> right</label>
+            <label class="checkbox-row"><input type="checkbox" data-opt="bottom" checked /> bottom</label>
+            <label class="checkbox-row"><input type="checkbox" data-opt="left" checked /> left</label>
+            <div class="divider"></div>
+            <label class="checkbox-row">
+              <input type="checkbox" data-opt="aspect" />
+              aspectRatio: 'preserve'
+            </label>
+            <label>
+              <span class="label-row"><span>minWidth</span><span class="val" data-val="minWidth">80</span></span>
+              <input type="range" data-opt="minWidth" min="40" max="400" step="10" value="80" />
+            </label>
+          </div>
+
+          <div class="demo" data-demo="resize">
+            <div class="panel" data-target>Resize</div>
+            <div class="demo-readout" data-readout>—</div>
+          </div>
+
+          <div class="code" data-code="resize">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── GESTURE ────────────────────────────────────────── -->
+      <section id="gesture" class="example">
+        <h2>Gesture (pinch &amp; rotate)</h2>
+        <p class="intro">Multi-touch only. Two fingers down → <code>onGestureMove</code> fires with <code>scale</code>, <code>rotation</code>, <code>center</code>.</p>
+
+        <div class="playground">
+          <div class="controls" data-ctl="gesture">
+            <p style="color:var(--text-dim);font-size:12px;">No configurable options for this demo — try it with two fingers on a trackpad or touch screen.</p>
+          </div>
+
+          <div class="demo" data-demo="gesture" style="min-height:300px;">
+            <div class="gesture-target" data-target>Pinch / Rotate</div>
+            <div class="demo-readout" data-readout>scale 1.00 · rotate 0°</div>
+          </div>
+
+          <div class="code" data-code="gesture">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── DROPZONE ───────────────────────────────────────── -->
+      <section id="dropzone" class="example">
+        <h2>Dropzone</h2>
+        <p class="intro">Drop targets that coordinate with <code>draggable({ droppable: true })</code>. Filter via <code>accept</code>, pick overlap semantics.</p>
+
+        <div class="playground">
+          <div class="controls" data-ctl="dropzone">
+            <label>
+              <span class="label-row"><span>overlap</span><span class="val" data-val="overlap">pointer</span></span>
+              <select data-opt="overlap">
+                <option value="pointer" selected>'pointer'</option>
+                <option value="center">'center'</option>
+                <option value="0.5">0.5 (50% area)</option>
+                <option value="0.8">0.8 (80% area)</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="demo" data-demo="dropzone" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;">
+            <div style="position:relative;min-height:200px;background:rgba(255,255,255,0.02);border-radius:6px;">
+              <div class="tile" data-target style="top:20px;left:20px;width:60px;height:60px;font-size:12px;">Drop me</div>
+            </div>
+            <div class="dropzone" data-dropzone>drop here</div>
+          </div>
+
+          <div class="code" data-code="dropzone">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SORTABLE ───────────────────────────────────────── -->
+      <section id="sortable" class="example">
+        <h2>Sortable</h2>
+        <p class="intro">Drag-to-reorder with animated neighbour displacement. Set <code>id</code> to get <code>order: string[]</code> in events — drop-in for framework state.</p>
+
+        <div class="playground">
+          <div class="controls" data-ctl="sortable">
+            <label>
+              <span class="label-row"><span>axis</span><span class="val" data-val="axis">y</span></span>
+              <select data-opt="axis">
+                <option value="y" selected>y</option>
+                <option value="x">x</option>
+              </select>
+            </label>
+            <label>
+              <span class="label-row"><span>animationDuration</span><span class="val" data-val="animationDuration">200</span></span>
+              <input type="range" data-opt="animationDuration" min="0" max="600" step="10" value="200" />
+            </label>
+            <div class="divider"></div>
+            <div class="group-title">last order</div>
+            <pre data-last-order style="background:var(--bg);padding:8px;border-radius:4px;font-size:11px;color:var(--accent-2);margin:0;overflow-x:auto;">—</pre>
+          </div>
+
+          <div class="demo" data-demo="sortable" style="padding:0;min-height:auto;">
+            <ul class="sortable-list" data-list>
+              <li data-id="apples">🍎 Apples</li>
+              <li data-id="bananas">🍌 Bananas</li>
+              <li data-id="cherries">🍒 Cherries</li>
+              <li data-id="dates">🌴 Dates</li>
+              <li data-id="elderberries">🫐 Elderberries</li>
+            </ul>
+          </div>
+
+          <div class="code" data-code="sortable">
+            <button class="copy">copy</button>
+            <pre></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── CROSS-CONTAINER ─────────────────────────────────── -->
+      <section id="sortable-groups" class="example">
+        <h2>Cross-container sortable</h2>
+        <p class="intro">Share a <code>group</code> name and items move freely between lists. <code>onAdd</code> / <code>onRemove</code> fire on both sides.</p>
+
+        <div class="playground">
+          <div class="controls" data-ctl="groups">
+            <p style="color:var(--text-dim);font-size:12px;">Both lists use <code>group: 'kanban'</code>.</p>
+            <div class="divider"></div>
+            <div class="group-title">events</div>
+            <pre data-groups-log style="background:var(--bg);padding:8px;border-radius:4px;font-size:11px;color:var(--accent-2);margin:0;max-height:140px;overflow-y:auto;">—</pre>
+          </div>
+
+          <div class="demo" data-demo="groups" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;min-height:auto;">
+            <div>
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);padding:6px 10px;">Todo</div>
+              <ul class="sortable-list" data-list-left style="padding:6px;">
+                <li data-id="g-1">📋 Write tests</li>
+                <li data-id="g-2">📋 Review PR</li>
+                <li data-id="g-3">📋 Update docs</li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);padding:6px 10px;">Done</div>
+              <ul class="sortable-list" data-list-right style="padding:6px;">
+                <li data-id="g-4">✅ Setup project</li>
+              </ul>
             </div>
           </div>
-          <div class="kanban-col" id="col-done">
-            <h4>Done</h4>
-            <div class="cards" id="cards-done">
-              <div class="kanban-card" data-id="5">Project setup</div>
-            </div>
+
+          <div class="code" data-code="groups">
+            <button class="copy">copy</button>
+            <pre></pre>
           </div>
         </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">todo:</span><span class="value" id="kanban-todo">3</span></span>
-        <span><span class="label">progress:</span><span class="value" id="kanban-progress">1</span></span>
-        <span><span class="label">done:</span><span class="value" id="kanban-done">1</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { sortable } from 'pointrix'
-
-// Each column's .cards container is a sortable
-// with the same group name — items move between them
-sortable('#cards-todo', {
-  items: '.kanban-card',
-  group: 'kanban',
-  dragClass: 'kanban-dragging',
-  onAdd({ item, to }) {
-    console.log(`${item.textContent} added to ${to.container.id}`)
-  }
-})
-sortable('#cards-progress', {
-  items: '.kanban-card',
-  group: 'kanban',
-  dragClass: 'kanban-dragging',
-})
-sortable('#cards-done', {
-  items: '.kanban-card',
-  group: 'kanban',
-  dragClass: 'kanban-dragging',
-})</pre>
-      </details>
-    </div>
+      </section>
+    </main>
   </div>
 
-  <!-- 6.3 Sortable List -->
-  <div class="section" id="sortable-list">
-    <div class="demo">
-      <div class="demo-title">Sortable List <span class="badge badge-drag">sortable</span></div>
-      <div class="demo-area" style="display:flex;gap:40px;justify-content:center;padding:30px">
-        <!-- Vertical sortable -->
-        <div>
-          <h4 style="margin:0 0 12px;color:#94a3b8;font-size:13px;text-transform:uppercase;letter-spacing:1px">Vertical</h4>
-          <div id="sortable-v" style="width:240px;display:flex;flex-direction:column;gap:6px">
-            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Buy groceries</div>
-            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Walk the dog</div>
-            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Write documentation</div>
-            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Review PRs</div>
-            <div class="sort-item" style="padding:12px 16px;background:#334155;border-radius:8px;color:#e2e8f0;cursor:grab;font-size:14px">Deploy to staging</div>
-          </div>
-        </div>
-        <!-- Horizontal sortable -->
-        <div>
-          <h4 style="margin:0 0 12px;color:#94a3b8;font-size:13px;text-transform:uppercase;letter-spacing:1px">Horizontal</h4>
-          <div id="sortable-h" style="display:flex;gap:6px">
-            <div class="sort-item-h" style="width:60px;height:60px;background:#7c3aed;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">A</div>
-            <div class="sort-item-h" style="width:60px;height:60px;background:#2563eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">B</div>
-            <div class="sort-item-h" style="width:60px;height:60px;background:#059669;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">C</div>
-            <div class="sort-item-h" style="width:60px;height:60px;background:#d97706;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">D</div>
-            <div class="sort-item-h" style="width:60px;height:60px;background:#dc2626;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;cursor:grab">E</div>
-          </div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">last action:</span><span class="value" id="sort-action">-</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { sortable } from 'pointrix'
+  <script type="module">
+    import { draggable } from './src/drag.ts'
+    import { resizable } from './src/resize.ts'
+    import { gesturable } from './src/gesture.ts'
+    import { dropzone } from './src/dropzone.ts'
+    import { sortable } from './src/sortable.ts'
+    import { restrict, snapGrid, snapTargets, rubberband } from './src/modifiers/index.ts'
 
-// Vertical sortable list
-sortable('#my-list', {
-  axis: 'y',
-  dragClass: 'is-dragging',
-  animationDuration: 200,
-  onSortEnd({ oldIndex, newIndex }) {
-    console.log(`Moved from ${oldIndex} to ${newIndex}`)
-  }
-})
-
-// Horizontal sortable
-sortable('#my-row', {
-  axis: 'x',
-  onSortEnd({ item, oldIndex, newIndex }) {
-    console.log(`${item.textContent}: ${oldIndex} → ${newIndex}`)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 7: STRESS TEST                -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="stress-test">
-    <div class="section-header">
-      <h2>7. Stress Test</h2>
-      <p>Spawn hundreds (or thousands) of independently draggable elements and see the FPS counter hold steady.</p>
-    </div>
-
-    <div class="demo">
-      <div class="demo-title">Performance Benchmark <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area">
-        <div class="stress-controls">
-          <label for="stress-slider">Count:</label>
-          <input type="range" id="stress-slider" min="100" max="2000" step="100" value="500">
-          <span class="value" id="stress-count-label">500</span>
-          <button id="stress-go">Spawn Elements</button>
-          <button id="stress-clear" style="background:#6b7280">Clear</button>
-        </div>
-        <div class="stress-field" id="stress-field"></div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">elements:</span><span class="value" id="stress-el-count">0</span></span>
-        <span><span class="label">fps:</span><span class="value" id="stress-fps">--</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable } from 'pointrix'
-
-for (let i = 0; i &lt; count; i++) {
-  const dot = document.createElement('div')
-  dot.style.left = Math.random() * width + 'px'
-  dot.style.top = Math.random() * height + 'px'
-  field.appendChild(dot)
-  draggable(dot)
-}</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════ -->
-  <!--  SECTION 8: NEW FEATURES               -->
-  <!-- ═══════════════════════════════════════ -->
-  <div class="section" id="hold-delay">
-    <div class="section-header">
-      <h2>8. New Features</h2>
-      <p>Hold delay, allow/ignore filters, axis auto-detection, rubberband physics, resize invert, and event listeners.</p>
-    </div>
-
-    <!-- 8.1 Hold Delay -->
-    <div class="demo">
-      <div class="demo-title">Hold Delay <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area" style="height:200px">
-        <div id="hold-delay-el" class="hold-delay-box">Hold 500ms</div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">status:</span><span class="value" id="hold-delay-status">idle</span></span>
-        <span><span class="label">x:</span><span class="value" id="hold-delay-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="hold-delay-y">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable } from 'pointrix'
-
-draggable('#hold-delay-el', {
-  holdDelay: 500,
-  onDragStart() {
-    // Drag starts only after holding 500ms
-  },
-  onDragMove(e) {
-    console.log(e.totalX, e.totalY)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 8.2 Allow/Ignore From -->
-  <div class="section" id="allow-ignore">
-    <div class="demo">
-      <div class="demo-title">Allow / Ignore From <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area" style="height:220px">
-        <div id="allow-ignore-el" class="allow-ignore-card">
-          <div class="card-header">Drag from this header</div>
-          <div class="card-body">
-            <p>The card drags from the header only. Clicking the button does not start a drag.</p>
-            <button id="allow-ignore-btn">Click me!</button>
-          </div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="allow-ignore-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="allow-ignore-y">0</span></span>
-        <span><span class="label">button clicks:</span><span class="value" id="allow-ignore-clicks">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable } from 'pointrix'
-
-draggable('#card', {
-  allowFrom: '.card-header',
-  ignoreFrom: 'button',
-  onDragMove(e) {
-    console.log(e.totalX, e.totalY)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 8.3 Axis Auto-detect -->
-  <div class="section" id="axis-autodetect">
-    <div class="demo">
-      <div class="demo-title">Axis Auto-detect <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area" style="height:260px;position:relative">
-        <div id="axis-auto-el" class="axis-auto-box">Move me!<br>Axis locks<br>on start</div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">detected axis:</span><span class="value" id="axis-auto-detected">-</span></span>
-        <span><span class="label">x:</span><span class="value" id="axis-auto-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="axis-auto-y">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable } from 'pointrix'
-
-draggable('#el', {
-  axis: 'start',
-  onDragStart() {
-    // First movement direction locks the axis
-  },
-  onDragMove(e) {
-    console.log(e.totalX, e.totalY)
-  }
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 8.4 Rubberband -->
-  <div class="section" id="rubberband-demo">
-    <div class="demo">
-      <div class="demo-title">Rubberband <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area" style="padding:0">
-        <div class="rubberband-area" id="rubberband-area">
-          <div id="rubberband-el" class="rubberband-box">Rubber<br>band</div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">x:</span><span class="value" id="rubberband-x">0</span></span>
-        <span><span class="label">y:</span><span class="value" id="rubberband-y">0</span></span>
-        <span><span class="label">in bounds:</span><span class="value" id="rubberband-bounds">yes</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable } from 'pointrix'
-import { rubberband } from 'pointrix/modifiers/rubberband'
-
-draggable('#el', {
-  modifiers: [
-    rubberband({
-      bounds: 'parent',
-      resistance: 0.15,
-      maxOvershoot: 80
-    })
-  ]
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 8.5 Resize Invert -->
-  <div class="section" id="resize-invert">
-    <div class="demo">
-      <div class="demo-title">Resize Invert <span class="badge badge-resize">resize</span></div>
-      <div class="demo-area">
-        <div class="invert-compare">
-          <div class="invert-panel">
-            <h4>Normal (invert: none)</h4>
-            <div class="invert-container" id="invert-normal-container">
-              <div id="invert-normal-el" class="invert-box">Normal</div>
-            </div>
-          </div>
-          <div class="invert-panel">
-            <h4>Invert: reposition</h4>
-            <div class="invert-container" id="invert-reposition-container">
-              <div id="invert-reposition-el" class="invert-box">Reposition</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">normal:</span><span class="value" id="invert-normal-size">200 x 150</span></span>
-        <span><span class="label">reposition:</span><span class="value" id="invert-reposition-size">200 x 150</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { resizable } from 'pointrix'
-
-// Normal resize stops at min size
-resizable('#normal', {
-  minWidth: 20,
-  minHeight: 20
-})
-
-// Reposition: drag past zero to flip
-resizable('#reposition', {
-  invert: 'reposition',
-  minWidth: 20,
-  minHeight: 20
-})</pre>
-      </details>
-    </div>
-  </div>
-
-  <!-- 8.6 Event Listeners -->
-  <div class="section" id="event-listeners">
-    <div class="demo">
-      <div class="demo-title">Event Listeners (.on / .off) <span class="badge badge-drag">drag</span></div>
-      <div class="demo-area">
-        <div class="event-log-area">
-          <div class="event-log-left">
-            <div id="event-log-el" class="event-log-box">Drag me</div>
-            <div class="event-log-btns">
-              <button class="btn-add" id="event-add-btn">Add listener</button>
-              <button class="btn-remove" id="event-remove-btn">Remove listener</button>
-            </div>
-          </div>
-          <div class="event-console" id="event-console">
-            <div class="log-line"><span class="log-info">Drag the box. Use buttons to add/remove a move listener.</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="demo-info">
-        <span><span class="label">listeners:</span><span class="value" id="event-listener-count">1</span></span>
-        <span><span class="label">events logged:</span><span class="value" id="event-log-count">0</span></span>
-      </div>
-      <details class="demo-code">
-        <summary>View Code</summary>
-        <pre>import { draggable } from 'pointrix'
-
-const d = draggable('#el')
-
-// Add listener with .on()
-const handler = (e) =&gt; console.log('move', e.totalX)
-d.on('dragmove', handler)
-
-// Remove listener with .off()
-d.off('dragmove', handler)</pre>
-      </details>
-    </div>
-  </div>
-
-</main>
-
-<script type="module">
-import { draggable, resizable, gesturable, dropzone, DropzoneManager, interactable } from './src/index.ts'
-import { snapTargets } from './src/modifiers/snap-targets.ts'
-import { rubberband } from './src/modifiers/rubberband.ts'
-import { sortable } from './src/sortable.ts'
-
-// ─── Helper: update a stat value ───
-const $ = (sel) => document.querySelector(sel)
-const setText = (sel, v) => { const el = $(sel); if (el) el.textContent = v }
-
-// ═══════════════════════════════════════
-//  1.1  Simple Drag
-// ═══════════════════════════════════════
-draggable('#simple-drag-el', {
-  onDragMove(e) {
-    setText('#simple-drag-x', Math.round(e.totalX))
-    setText('#simple-drag-y', Math.round(e.totalY))
-    setText('#simple-drag-vx', Math.round(e.velocityX))
-    setText('#simple-drag-vy', Math.round(e.velocityY))
-  }
-})
-
-// ═══════════════════════════════════════
-//  1.2  Handle Drag
-// ═══════════════════════════════════════
-draggable('#handle-drag-el', {
-  handle: '.handle-bar',
-  onDragMove(e) {
-    setText('#handle-drag-x', Math.round(e.totalX))
-    setText('#handle-drag-y', Math.round(e.totalY))
-  }
-})
-
-// ═══════════════════════════════════════
-//  1.3  Axis Locked
-// ═══════════════════════════════════════
-draggable('#x-only-el', {
-  axis: 'x',
-  onDragMove(e) { setText('#axis-x-val', Math.round(e.totalX)) }
-})
-draggable('#y-only-el', {
-  axis: 'y',
-  onDragMove(e) { setText('#axis-y-val', Math.round(e.totalY)) }
-})
-
-// ═══════════════════════════════════════
-//  2.1  Bounded Drag
-// ═══════════════════════════════════════
-draggable('#bounded-el', {
-  bounds: 'parent',
-  onDragMove(e) {
-    setText('#bounded-x', Math.round(e.totalX))
-    setText('#bounded-y', Math.round(e.totalY))
-  }
-})
-
-// ═══════════════════════════════════════
-//  2.2  Grid Snap
-// ═══════════════════════════════════════
-{
-  const inst = draggable('#grid-el', {
-    grid: { x: 40, y: 40 },
-    bounds: 'parent',
-    onDragMove(e) {
-      const pos = inst.getPosition()
-      setText('#grid-x', Math.round(pos.x))
-      setText('#grid-y', Math.round(pos.y))
-      setText('#grid-snap', `${Math.round(pos.x / 40) * 40}, ${Math.round(pos.y / 40) * 40}`)
+    // Single-pass syntax highlighter. HTML-escapes the source first, then
+    // tokenizes with ONE regex where every alternative captures a named group
+    // — so each character is classified exactly once. This avoids the classic
+    // "successive .replace() chains escape each other's tags" bug.
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     }
-  })
-}
 
-// ═══════════════════════════════════════
-//  2.3  Momentum
-// ═══════════════════════════════════════
-{
-  const inst = draggable('#momentum-el', {
-    momentum: { friction: 0.95, minSpeed: 0.1 },
-    bounds: 'parent',
-    onDragMove(e) {
-      setText('#momentum-x', Math.round(e.totalX))
-      setText('#momentum-y', Math.round(e.totalY))
-      setText('#momentum-vx', Math.round(e.velocityX))
-      setText('#momentum-vy', Math.round(e.velocityY))
-    }
-  })
-}
+    const TOKEN_RE = new RegExp([
+      '(\\/\\/[^\\n]*)',                                              // 1: comment
+      '(\'[^\'\\n]*\'|"[^"\\n]*"|`[^`]*`)',                           // 2: string
+      '\\b(import|from|const|let|var|function|return|if|else|for|of|in|true|false|null|undefined|new)\\b', // 3: keyword
+      '\\b(\\d+(?:\\.\\d+)?)\\b',                                     // 4: number
+      '\\b(draggable|resizable|gesturable|dropzone|sortable|restrict|snapGrid|snapTargets|rubberband|pointrix)\\b', // 5: library fn
+    ].join('|'), 'g')
 
-// ═══════════════════════════════════════
-//  2.4  Snap Targets
-// ═══════════════════════════════════════
-{
-  const targets = [
-    { x: 60, y: 60 },
-    { x: 240, y: 60 },
-    { x: 420, y: 60 },
-    { x: 150, y: 200 },
-    { x: 330, y: 200 },
-  ]
-  const SNAP_RANGE = 50
-
-  const snapTargetEls = targets.map((_, i) => $(`#st-${i}`))
-  const snapContainer = $('#snap-container')
-  const snapEl = $('#snap-el')
-  const pivotSelect = $('#snap-pivot')
-
-  const pivotMap = {
-    'center': { x: 0.5, y: 0.5 },
-    'top-left': { x: 0, y: 0 },
-    'bottom-right': { x: 1, y: 1 },
-  }
-
-  let currentInst = null
-  let snapMod = null
-
-  function createSnapDraggable() {
-    if (currentInst) currentInst.destroy()
-    const pivotName = pivotSelect.value
-
-    snapMod = snapTargets({
-      coordinateMode: 'parent',
-      relativePoints: [pivotName],
-      targets: targets.map(t => ({ x: t.x, y: t.y })),
-      range: SNAP_RANGE,
-    })
-
-    currentInst = draggable(snapEl, {
-      modifiers: [snapMod],
-      onDragMove() {
-        const containerRect = snapContainer.getBoundingClientRect()
-        const elRect = snapEl.getBoundingClientRect()
-        const pivot = pivotMap[pivotName] || pivotMap['center']
-        const px = elRect.left - containerRect.left + elRect.width * pivot.x
-        const py = elRect.top - containerRect.top + elRect.height * pivot.y
-
-        setText('#snap-x', Math.round(px))
-        setText('#snap-y', Math.round(py))
-
-        // Use the modifier's own snap state — no re-deriving needed
-        const idx = snapMod.snappedIndex
-        snapTargetEls.forEach((el, i) => el.classList.toggle('active', i === idx))
-        setText('#snap-target-id', idx >= 0 ? `target ${idx + 1}` : 'none')
-      },
-      onDragEnd() {
-        snapTargetEls.forEach(el => el.classList.remove('active'))
-        setText('#snap-target-id', 'none')
+    function highlight(src) {
+      let out = ''
+      let last = 0
+      for (const m of src.matchAll(TOKEN_RE)) {
+        if (m.index > last) out += escapeHtml(src.slice(last, m.index))
+        const [full, cmt, str, kw, num, fn] = m
+        if      (cmt) out += `<span class="cmt">${escapeHtml(cmt)}</span>`
+        else if (str) out += `<span class="str">${escapeHtml(str)}</span>`
+        else if (kw)  out += `<span class="kw">${escapeHtml(kw)}</span>`
+        else if (num) out += `<span class="num">${escapeHtml(num)}</span>`
+        else if (fn)  out += `<span class="fn">${escapeHtml(fn)}</span>`
+        else          out += escapeHtml(full)
+        last = m.index + full.length
       }
-    })
-  }
-
-  createSnapDraggable()
-  pivotSelect.addEventListener('change', () => {
-    snapEl.style.transform = ''
-    createSnapDraggable()
-  })
-}
-
-// ═══════════════════════════════════════
-//  3.1  Basic Resize
-// ═══════════════════════════════════════
-resizable('#basic-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  onResizeMove(e) {
-    setText('#resize-w', Math.round(e.width))
-    setText('#resize-h', Math.round(e.height))
-    setText('#resize-dw', Math.round(e.deltaWidth))
-    setText('#resize-dh', Math.round(e.deltaHeight))
-  }
-})
-
-// ═══════════════════════════════════════
-//  3.2  Aspect Ratio
-// ═══════════════════════════════════════
-resizable('#aspect-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  aspectRatio: 16 / 9,
-  minWidth: 160,
-  minHeight: 90,
-  onResizeMove(e) {
-    setText('#aspect-w', Math.round(e.width))
-    setText('#aspect-h', Math.round(e.height))
-    setText('#aspect-ratio', (e.width / e.height).toFixed(2))
-  }
-})
-
-// ═══════════════════════════════════════
-//  3.3  Constrained Resize
-// ═══════════════════════════════════════
-resizable('#constrained-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  minWidth: 100,
-  minHeight: 80,
-  maxWidth: 400,
-  maxHeight: 300,
-  onResizeMove(e) {
-    setText('#constrained-w', Math.round(e.width))
-    setText('#constrained-h', Math.round(e.height))
-  }
-})
-
-// ═══════════════════════════════════════
-//  3.4  Grid Resize
-// ═══════════════════════════════════════
-resizable('#grid-resize-el', {
-  edges: { top: true, right: true, bottom: true, left: true },
-  grid: { width: 40, height: 40 },
-  minWidth: 80,
-  minHeight: 80,
-  onResizeMove(e) {
-    setText('#grid-resize-w', Math.round(e.width))
-    setText('#grid-resize-h', Math.round(e.height))
-  }
-})
-
-// ═══════════════════════════════════════
-//  4.1  Gesture
-// ═══════════════════════════════════════
-{
-  const el = $('#gesture-el')
-  let currentScale = 1
-  let currentRotation = 0
-
-  gesturable(el, {
-    onGestureMove(e) {
-      currentScale = Math.max(0.3, Math.min(3, e.scale))
-      currentRotation = e.rotation
-      el.style.transform = `scale(${currentScale}) rotate(${currentRotation}deg)`
-
-      setText('#gesture-scale', currentScale.toFixed(2))
-      setText('#gesture-rotation', currentRotation.toFixed(1))
-      setText('#gesture-distance', Math.round(e.distance))
-      setText('#gesture-angle', e.angle.toFixed(1))
-    },
-    onGestureEnd() {
-      setText('#gesture-scale', currentScale.toFixed(2))
-      setText('#gesture-rotation', currentRotation.toFixed(1))
+      if (last < src.length) out += escapeHtml(src.slice(last))
+      return out
     }
-  })
-}
 
-// ═══════════════════════════════════════
-//  5.1  Drag & Drop
-// ═══════════════════════════════════════
-{
-  const warmColors = ['red', 'amber']
-  const coolColors = ['blue', 'green', 'purple']
-  const counts = { any: 0, warm: 0, cool: 0 }
+    function renderCode(section, src) {
+      const pre = document.querySelector(`[data-code="${section}"] pre`)
+      if (pre) pre.innerHTML = highlight(src)
+    }
 
-  function makeDropzone(id, label, countId, acceptFn) {
-    return dropzone(id, {
-      accept: acceptFn,
-      overlap: 'center',
-      activeClass: 'dz-active',
-      hoverClass: 'dz-hover',
-      onDragEnter() { setText('#dnd-hover', label) },
-      onDragLeave() { setText('#dnd-hover', 'none') },
-      onDrop(e) {
-        // Move card into the dropzone visually
-        const zone = e.target
-        const card = e.draggable
-        card.style.transform = ''
-        zone.appendChild(card)
-
-        // Rebuild draggable on the moved card (it needs new position context)
-        setupCard(card)
-
-        // Update count
-        const key = countId.replace('dz-', '').replace('-count', '')
-        counts[key]++
-        setText('#' + countId, `Drops: ${counts[key]}`)
-      }
+    document.querySelectorAll('[data-code]').forEach((wrap) => {
+      wrap.querySelector('.copy').addEventListener('click', () => {
+        const text = wrap.querySelector('pre').innerText
+        navigator.clipboard.writeText(text)
+      })
     })
-  }
 
-  makeDropzone('#dz-any', 'Any Card', 'dz-any-count', undefined)
-  makeDropzone('#dz-warm', 'Warm Colors', 'dz-warm-count', (el) => warmColors.includes(el.dataset.color))
-  makeDropzone('#dz-cool', 'Cool Colors', 'dz-cool-count', (el) => coolColors.includes(el.dataset.color))
+    // ─── Draggable ─────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="drag"]')
+      const demo = document.querySelector('[data-demo="drag"]')
+      const target = demo.querySelector('[data-target]')
+      const readout = demo.querySelector('[data-readout]')
+      let inst
 
-  const cardInstances = new Map()
+      function read() {
+        return {
+          axis: ctl.querySelector('[data-opt="axis"]').value,
+          preventScroll: ctl.querySelector('[data-opt="preventScroll"]').checked,
+          styleCursor: ctl.querySelector('[data-opt="styleCursor"]').checked,
+          threshold: Number(ctl.querySelector('[data-opt="threshold"]').value),
+          onTap: ctl.querySelector('[data-opt="onTap"]').checked,
+          onDoubleTap: ctl.querySelector('[data-opt="onDoubleTap"]').checked,
+        }
+      }
 
-  function setupCard(card) {
-    const old = cardInstances.get(card)
-    if (old) old.destroy()
+      function sync() {
+        const o = read()
+        ctl.querySelector('[data-val="axis"]').textContent = o.axis
+        ctl.querySelector('[data-val="threshold"]').textContent = o.threshold
 
-    const inst = draggable(card, {
-      onDragStart() {
-        card.classList.add('dragging')
-        card._parentBeforeDrag = card.parentElement
-        setText('#dnd-dragging', card.dataset.color)
-        DropzoneManager.onDragStart(card)
-      },
-      onDragMove() {
-        const rect = card.getBoundingClientRect()
-        const ptr = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-        DropzoneManager.onDragMove(card, ptr)
-      },
-      onDragEnd() {
-        const rect = card.getBoundingClientRect()
-        const ptr = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-        // onDrop fires synchronously inside this call (moves card to zone)
-        DropzoneManager.onDragEnd(card, ptr)
+        const opts = {
+          axis: o.axis,
+          preventScroll: o.preventScroll,
+          styleCursor: o.styleCursor,
+          threshold: o.threshold,
+          onDragMove: (e) => { readout.textContent = `x: ${Math.round(e.totalX)}  y: ${Math.round(e.totalY)}` },
+        }
+        if (o.onTap) opts.onTap = () => { readout.textContent = 'tap!' }
+        if (o.onDoubleTap) opts.onDoubleTap = () => { readout.textContent = 'double-tap!' }
 
-        card.classList.remove('dragging')
+        if (!inst) inst = draggable(target, opts)
+        else inst.updateOptions(opts)
 
-        // If the card's parent didn't change, it wasn't dropped — snap back
-        if (card.parentElement === card._parentBeforeDrag) {
-          inst.setPosition(0, 0)
+        renderCode('drag', `import { draggable } from 'pointrix/drag'
+
+draggable(el, {
+  axis: '${o.axis}',
+  preventScroll: ${o.preventScroll},
+  styleCursor: ${o.styleCursor},
+  threshold: ${o.threshold},${o.onTap ? `\n  onTap: (e) => console.log('tap'),` : ''}${o.onDoubleTap ? `\n  onDoubleTap: (e) => console.log('double'),` : ''}
+  onDragMove: (e) => console.log(e.totalX, e.totalY),
+})`)
+      }
+
+      ctl.addEventListener('input', sync)
+      ctl.addEventListener('change', sync)
+      sync()
+    })()
+
+    // ─── Bounds ────────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="bounds"]')
+      const demo = document.querySelector('[data-demo="bounds"]')
+      const target = demo.querySelector('[data-target]')
+      let inst
+
+      function sync() {
+        const boundsSel = ctl.querySelector('[data-opt="bounds"]').value
+        const axis = ctl.querySelector('[data-opt="axis"]').value
+        ctl.querySelector('[data-val="axis"]').textContent = axis
+
+        let bounds, boundsCode
+        if (boundsSel === 'parent') { bounds = 'parent'; boundsCode = `'parent'` }
+        else if (boundsSel === 'region') {
+          bounds = { left: 20, top: 20, right: 220, bottom: 220 }
+          boundsCode = `{ left: 20, top: 20, right: 220, bottom: 220 }`
         }
 
-        setText('#dnd-dragging', 'none')
-        setText('#dnd-hover', 'none')
+        // Bounds requires recreation at drag-start (bounds rect is computed once).
+        if (inst) { inst.destroy(); target.style.transform = '' }
+        inst = draggable(target, { axis, bounds })
+
+        renderCode('bounds', `import { draggable } from 'pointrix/drag'
+
+draggable(el, {
+  axis: '${axis}',
+  bounds: ${boundsCode ?? 'undefined'},
+})`)
       }
-    })
+      ctl.addEventListener('change', sync)
+      sync()
+    })()
 
-    cardInstances.set(card, inst)
-  }
+    // ─── Grid snap ────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="grid"]')
+      const demo = document.querySelector('[data-demo="grid"]')
+      const target = demo.querySelector('[data-target]')
+      let inst
 
-  document.querySelectorAll('#dnd-source .dnd-card').forEach(setupCard)
-}
+      function sync() {
+        const gx = Number(ctl.querySelector('[data-opt="gx"]').value)
+        const gy = Number(ctl.querySelector('[data-opt="gy"]').value)
+        ctl.querySelector('[data-val="gx"]').textContent = gx
+        ctl.querySelector('[data-val="gy"]').textContent = gy
 
-// ═══════════════════════════════════════
-//  6.1  Drag + Resize
-// ═══════════════════════════════════════
-{
-  const inst = interactable('#combined-el', {
-    drag: {
-      onDragMove(e) {
-        setText('#combined-x', Math.round(e.totalX))
-        setText('#combined-y', Math.round(e.totalY))
+        const opts = { bounds: 'parent', grid: gx && gy ? { x: gx, y: gy } : undefined }
+        if (!inst) inst = draggable(target, opts)
+        else inst.updateOptions(opts)
+
+        renderCode('grid', `import { draggable } from 'pointrix/drag'
+
+draggable(el, {
+  bounds: 'parent',
+  grid: { x: ${gx}, y: ${gy} },
+})`)
       }
-    },
-    resize: {
-      edges: { top: true, right: true, bottom: true, left: true },
-      minWidth: 100,
-      minHeight: 80,
-      handleSize: 14,
-      onResizeMove(e) {
-        setText('#combined-w', Math.round(e.width))
-        setText('#combined-h', Math.round(e.height))
+      ctl.addEventListener('input', sync)
+      sync()
+    })()
+
+    // ─── Momentum ─────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="momentum"]')
+      const demo = document.querySelector('[data-demo="momentum"]')
+      const target = demo.querySelector('[data-target]')
+      const readout = demo.querySelector('[data-readout]')
+      let inst
+
+      function sync() {
+        const enabled = ctl.querySelector('[data-opt="momentum"]').checked
+        const friction = Number(ctl.querySelector('[data-opt="friction"]').value)
+        const minVelocity = Number(ctl.querySelector('[data-opt="minVelocity"]').value)
+        ctl.querySelector('[data-val="friction"]').textContent = friction.toFixed(2)
+        ctl.querySelector('[data-val="minVelocity"]').textContent = minVelocity
+
+        const momentum = enabled ? { friction, minVelocity } : false
+        const opts = {
+          bounds: 'parent',
+          momentum,
+          onDragEnd: (e) => { readout.textContent = `vx: ${Math.round(e.velocityX)}  vy: ${Math.round(e.velocityY)}` },
+        }
+        if (!inst) inst = draggable(target, opts)
+        else inst.updateOptions(opts)
+
+        renderCode('momentum', `import { draggable } from 'pointrix/drag'
+
+draggable(el, {
+  bounds: 'parent',
+  momentum: ${enabled ? `{ friction: ${friction.toFixed(2)}, minVelocity: ${minVelocity} }` : 'false'},
+})`)
       }
-    }
-  })
-}
+      ctl.addEventListener('input', sync)
+      ctl.addEventListener('change', sync)
+      sync()
+    })()
 
-// ═══════════════════════════════════════
-//  6.2  Kanban (using Sortable with groups)
-// ═══════════════════════════════════════
-{
-  const countMap = {
-    'cards-todo': 'kanban-todo',
-    'cards-progress': 'kanban-progress',
-    'cards-done': 'kanban-done',
-  }
+    // ─── Handle ────────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="handle"]')
+      const demo = document.querySelector('[data-demo="handle"]')
+      const target = demo.querySelector('[data-target]')
+      let inst
 
-  function updateKanbanCounts() {
-    for (const [containerId, labelId] of Object.entries(countMap)) {
-      const count = $(`#${containerId}`).children.length
-      setText(`#${labelId}`, count)
-    }
-  }
+      function sync() {
+        const which = ctl.querySelector('[data-opt="handle"]').value
+        const handle = which === 'handle' ? '.handle' : undefined
+        const opts = { bounds: 'parent', handle }
+        if (!inst) inst = draggable(target, opts)
+        else inst.updateOptions(opts)
 
-  // Each column's .cards div is a sortable with the same group
-  // — cards can be reordered within a column AND dragged between columns
-  const kanbanOptions = {
-    items: '.kanban-card',
-    group: 'kanban',
-    dragClass: 'kanban-dragging',
-    animationDuration: 150,
-    onSortEnd() { updateKanbanCounts() },
-    onAdd() { updateKanbanCounts() },
-    onRemove() { updateKanbanCounts() },
-  }
+        renderCode('handle', `import { draggable } from 'pointrix/drag'
 
-  sortable('#cards-todo', kanbanOptions)
-  sortable('#cards-progress', kanbanOptions)
-  sortable('#cards-done', kanbanOptions)
-}
-
-// ═══════════════════════════════════════
-//  6.3  Sortable Lists
-// ═══════════════════════════════════════
-{
-  sortable('#sortable-v', {
-    items: '.sort-item',
-    axis: 'y',
-    dragClass: 'sortable-dragging',
-    animationDuration: 200,
-    onSort(e) {
-      setText('#sort-action', `sorting: ${e.oldIndex} → ${e.newIndex}`)
-    },
-    onSortEnd(e) {
-      setText('#sort-action', `moved: ${e.oldIndex} → ${e.newIndex}`)
-    }
-  })
-
-  sortable('#sortable-h', {
-    items: '.sort-item-h',
-    axis: 'x',
-    dragClass: 'sortable-dragging',
-    animationDuration: 200,
-    onSortEnd(e) {
-      setText('#sort-action', `${e.item.textContent}: ${e.oldIndex} → ${e.newIndex}`)
-    }
-  })
-}
-
-// ═══════════════════════════════════════
-//  7.1  Stress Test
-// ═══════════════════════════════════════
-{
-  const slider = $('#stress-slider')
-  const label = $('#stress-count-label')
-  const field = $('#stress-field')
-  const goBtn = $('#stress-go')
-  const clearBtn = $('#stress-clear')
-  const fpsEl = $('#fps-counter')
-  let stressInstances = []
-
-  slider.addEventListener('input', () => {
-    label.textContent = slider.value
-  })
-
-  const colors = [
-    '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b',
-    '#10b981', '#3b82f6', '#06b6d4', '#84cc16', '#a855f7'
-  ]
-
-  goBtn.addEventListener('click', () => {
-    // Clear existing
-    stressInstances.forEach(d => d.destroy())
-    stressInstances = []
-    field.innerHTML = ''
-
-    const count = parseInt(slider.value)
-    const w = field.clientWidth
-    const h = field.clientHeight
-
-    for (let i = 0; i < count; i++) {
-      const dot = document.createElement('div')
-      dot.className = 'stress-dot'
-      dot.style.left = (Math.random() * (w - 24)) + 'px'
-      dot.style.top = (Math.random() * (h - 24)) + 'px'
-      dot.style.background = colors[i % colors.length]
-      field.appendChild(dot)
-      stressInstances.push(draggable(dot))
-    }
-
-    setText('#stress-el-count', count)
-
-    // Show FPS counter
-    fpsEl.style.display = 'block'
-    startFPS()
-  })
-
-  clearBtn.addEventListener('click', () => {
-    stressInstances.forEach(d => d.destroy())
-    stressInstances = []
-    field.innerHTML = ''
-    setText('#stress-el-count', '0')
-    setText('#stress-fps', '--')
-    fpsEl.style.display = 'none'
-    stopFPS()
-  })
-
-  // FPS counter
-  let fpsRAF = null
-  let fpsFrames = 0
-  let fpsLast = performance.now()
-
-  function fpsLoop() {
-    fpsFrames++
-    const now = performance.now()
-    if (now - fpsLast >= 1000) {
-      const fps = Math.round(fpsFrames * 1000 / (now - fpsLast))
-      setText('#stress-fps', fps)
-      fpsEl.textContent = fps + ' FPS'
-      fpsFrames = 0
-      fpsLast = now
-    }
-    fpsRAF = requestAnimationFrame(fpsLoop)
-  }
-
-  function startFPS() {
-    if (fpsRAF) return
-    fpsLast = performance.now()
-    fpsFrames = 0
-    fpsRAF = requestAnimationFrame(fpsLoop)
-  }
-
-  function stopFPS() {
-    if (fpsRAF) {
-      cancelAnimationFrame(fpsRAF)
-      fpsRAF = null
-    }
-  }
-}
-
-// ═══════════════════════════════════════
-//  8.1  Hold Delay
-// ═══════════════════════════════════════
-{
-  const el = $('#hold-delay-el')
-  let holdTimeout = null
-
-  el.addEventListener('pointerdown', () => {
-    el.classList.add('waiting')
-    el.textContent = 'Hold...'
-    setText('#hold-delay-status', 'waiting...')
-
-    holdTimeout = setTimeout(() => {
-      el.classList.remove('waiting')
-      el.classList.add('ready')
-      el.textContent = 'Ready! Drag'
-      setText('#hold-delay-status', 'ready')
-    }, 500)
-  })
-
-  el.addEventListener('pointerup', () => {
-    if (holdTimeout) {
-      clearTimeout(holdTimeout)
-      holdTimeout = null
-    }
-    el.classList.remove('waiting', 'ready')
-    el.textContent = 'Hold 500ms'
-    setText('#hold-delay-status', 'idle')
-  })
-
-  draggable('#hold-delay-el', {
-    holdDelay: 500,
-    onDragStart() {
-      setText('#hold-delay-status', 'dragging')
-    },
-    onDragMove(e) {
-      setText('#hold-delay-x', Math.round(e.totalX))
-      setText('#hold-delay-y', Math.round(e.totalY))
-    },
-    onDragEnd() {
-      el.classList.remove('waiting', 'ready')
-      el.textContent = 'Hold 500ms'
-      setText('#hold-delay-status', 'idle')
-    }
-  })
-}
-
-// ═══════════════════════════════════════
-//  8.2  Allow / Ignore From
-// ═══════════════════════════════════════
-{
-  let clicks = 0
-
-  draggable('#allow-ignore-el', {
-    allowFrom: '.card-header',
-    ignoreFrom: 'button',
-    onDragMove(e) {
-      setText('#allow-ignore-x', Math.round(e.totalX))
-      setText('#allow-ignore-y', Math.round(e.totalY))
-    }
-  })
-
-  $('#allow-ignore-btn').addEventListener('click', () => {
-    clicks++
-    setText('#allow-ignore-clicks', clicks)
-  })
-}
-
-// ═══════════════════════════════════════
-//  8.3  Axis Auto-detect
-// ═══════════════════════════════════════
-{
-  draggable('#axis-auto-el', {
-    axis: 'start',
-    onDragStart() {
-      setText('#axis-auto-detected', '-')
-    },
-    onDragMove(e) {
-      const axisLabel = e.totalX !== 0 && e.totalY === 0 ? 'x'
-        : e.totalX === 0 && e.totalY !== 0 ? 'y'
-        : e.totalX !== 0 ? 'x (locked)' : '-'
-      // Detect based on which values are changing
-      if (Math.abs(e.totalX) > 0 || Math.abs(e.totalY) > 0) {
-        if (Math.abs(e.totalY) === 0) setText('#axis-auto-detected', 'x')
-        else if (Math.abs(e.totalX) === 0) setText('#axis-auto-detected', 'y')
+draggable(el, {
+  bounds: 'parent',
+  ${handle ? `handle: '.handle',` : '// handle: undefined,'}
+})`)
       }
-      setText('#axis-auto-x', Math.round(e.totalX))
-      setText('#axis-auto-y', Math.round(e.totalY))
-    }
-  })
-}
+      ctl.addEventListener('change', sync)
+      sync()
+    })()
 
-// ═══════════════════════════════════════
-//  8.4  Rubberband
-// ═══════════════════════════════════════
-{
-  const area = $('#rubberband-area')
-  const areaRect = area.getBoundingClientRect
+    // ─── Modifiers ─────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="modifiers"]')
+      const demo = document.querySelector('[data-demo="modifiers"]')
+      const target = demo.querySelector('[data-target]')
+      let inst
 
-  draggable('#rubberband-el', {
-    modifiers: [
-      rubberband({
-        bounds: 'parent',
-        resistance: 0.15,
-        maxOvershoot: 80
+      function sync() {
+        const useRestrict = ctl.querySelector('[data-opt="restrict"]').checked
+        const useSnap = ctl.querySelector('[data-opt="snap"]').checked
+        const useTargets = ctl.querySelector('[data-opt="snapTargets"]').checked
+
+        const mods = []
+        const srcMods = []
+        if (useRestrict) { mods.push(restrict({ bounds: 'parent' })); srcMods.push(`restrict({ bounds: 'parent' })`) }
+        if (useSnap) { mods.push(snapGrid({ x: 25, y: 25 })); srcMods.push(`snapGrid({ x: 25, y: 25 })`) }
+        if (useTargets) {
+          mods.push(snapTargets({ targets: [{ x: 120, y: 80 }], range: 40 }))
+          srcMods.push(`snapTargets({ targets: [{ x: 120, y: 80 }], range: 40 })`)
+        }
+
+        if (!inst) inst = draggable(target, { modifiers: mods })
+        else inst.updateOptions({ modifiers: mods })
+
+        renderCode('modifiers', `import { draggable } from 'pointrix/drag'
+import { restrict, snapGrid, snapTargets } from 'pointrix/modifiers'
+
+draggable(el, {
+  modifiers: [
+    ${srcMods.join(',\n    ')}
+  ],
+})`)
+      }
+      ctl.addEventListener('change', sync)
+      sync()
+    })()
+
+    // ─── Rubberband ─────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="rubberband"]')
+      const demo = document.querySelector('[data-demo="rubberband"]')
+      const target = demo.querySelector('[data-target]')
+      let inst
+
+      function sync() {
+        const resistance = Number(ctl.querySelector('[data-opt="resistance"]').value)
+        const maxOvershoot = Number(ctl.querySelector('[data-opt="maxOvershoot"]').value)
+        ctl.querySelector('[data-val="resistance"]').textContent = resistance.toFixed(2)
+        ctl.querySelector('[data-val="maxOvershoot"]').textContent = maxOvershoot
+
+        // Rubberband caches bounds at drag-start, so rebuild instance on change.
+        if (inst) { inst.destroy(); target.style.transform = '' }
+        inst = draggable(target, {
+          modifiers: [rubberband({ bounds: 'parent', resistance, maxOvershoot })],
+        })
+
+        renderCode('rubberband', `import { draggable } from 'pointrix/drag'
+import { rubberband } from 'pointrix/modifiers'
+
+draggable(el, {
+  modifiers: [
+    rubberband({ bounds: 'parent', resistance: ${resistance.toFixed(2)}, maxOvershoot: ${maxOvershoot} }),
+  ],
+})`)
+      }
+      ctl.addEventListener('input', sync)
+      sync()
+    })()
+
+    // ─── Resizable ─────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="resize"]')
+      const demo = document.querySelector('[data-demo="resize"]')
+      const target = demo.querySelector('[data-target]')
+      const readout = demo.querySelector('[data-readout]')
+      let inst
+
+      function sync() {
+        const edges = {
+          top: ctl.querySelector('[data-opt="top"]').checked,
+          right: ctl.querySelector('[data-opt="right"]').checked,
+          bottom: ctl.querySelector('[data-opt="bottom"]').checked,
+          left: ctl.querySelector('[data-opt="left"]').checked,
+        }
+        const aspect = ctl.querySelector('[data-opt="aspect"]').checked
+        const minWidth = Number(ctl.querySelector('[data-opt="minWidth"]').value)
+        ctl.querySelector('[data-val="minWidth"]').textContent = minWidth
+
+        const opts = {
+          edges,
+          minWidth,
+          aspectRatio: aspect ? 'preserve' : undefined,
+          onResizeMove: (e) => { readout.textContent = `${Math.round(e.width)} × ${Math.round(e.height)}` },
+        }
+        if (!inst) inst = resizable(target, opts)
+        else inst.updateOptions(opts)
+
+        renderCode('resize', `import { resizable } from 'pointrix/resize'
+
+resizable(el, {
+  edges: { top: ${edges.top}, right: ${edges.right}, bottom: ${edges.bottom}, left: ${edges.left} },
+  minWidth: ${minWidth},${aspect ? `\n  aspectRatio: 'preserve',` : ''}
+  onResizeMove: (e) => console.log(e.width, e.height),
+})`)
+      }
+      ctl.addEventListener('input', sync)
+      ctl.addEventListener('change', sync)
+      sync()
+    })()
+
+    // ─── Gesture ────────────────────────────────────────
+    ;(() => {
+      const demo = document.querySelector('[data-demo="gesture"]')
+      const target = demo.querySelector('[data-target]')
+      const readout = demo.querySelector('[data-readout]')
+
+      gesturable(target, {
+        onGestureMove: (e) => {
+          readout.textContent = `scale ${e.scale.toFixed(2)} · rotate ${Math.round(e.rotation)}°`
+          target.style.transform = `translate(-50%, -50%) scale(${e.scale}) rotate(${e.rotation}deg)`
+        },
+        onGestureEnd: () => {
+          setTimeout(() => {
+            target.style.transition = 'transform 400ms ease'
+            target.style.transform = 'translate(-50%, -50%) scale(1) rotate(0deg)'
+            setTimeout(() => { target.style.transition = '' }, 420)
+          }, 600)
+        },
       })
-    ],
-    onDragMove(e) {
-      setText('#rubberband-x', Math.round(e.totalX))
-      setText('#rubberband-y', Math.round(e.totalY))
-      // Check if element is within bounds
-      const el = e.target
-      const parent = el.parentElement
-      const elRect = el.getBoundingClientRect()
-      const parentRect = parent.getBoundingClientRect()
-      const inBounds = elRect.left >= parentRect.left &&
-        elRect.right <= parentRect.right &&
-        elRect.top >= parentRect.top &&
-        elRect.bottom <= parentRect.bottom
-      setText('#rubberband-bounds', inBounds ? 'yes' : 'no (elastic)')
-    },
-    onDragEnd() {
-      setText('#rubberband-bounds', 'yes')
-    }
-  })
-}
 
-// ═══════════════════════════════════════
-//  8.5  Resize Invert
-// ═══════════════════════════════════════
-{
-  resizable('#invert-normal-el', {
-    minWidth: 20,
-    minHeight: 20,
-    onResizeMove(e) {
-      setText('#invert-normal-size', `${Math.round(e.width)} x ${Math.round(e.height)}`)
-    }
-  })
+      renderCode('gesture', `import { gesturable } from 'pointrix/gesture'
 
-  resizable('#invert-reposition-el', {
-    invert: 'reposition',
-    minWidth: 20,
-    minHeight: 20,
-    onResizeMove(e) {
-      setText('#invert-reposition-size', `${Math.round(e.width)} x ${Math.round(e.height)}`)
-    }
-  })
-}
+gesturable(el, {
+  onGestureMove: (e) => {
+    el.style.transform =
+      \`scale(\${e.scale}) rotate(\${e.rotation}deg)\`
+  },
+})`)
+    })()
 
-// ═══════════════════════════════════════
-//  8.6  Event Listeners
-// ═══════════════════════════════════════
-{
-  const consoleEl = $('#event-console')
-  let logCount = 0
-  let listenerCount = 1
-  let moveHandlerActive = false
+    // ─── Dropzone ───────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="dropzone"]')
+      const demo = document.querySelector('[data-demo="dropzone"]')
+      const target = demo.querySelector('[data-target]')
+      const zoneEl = demo.querySelector('[data-dropzone]')
+      let drag, zone
 
-  const d = draggable('#event-log-el')
+      function sync() {
+        const v = ctl.querySelector('[data-opt="overlap"]').value
+        ctl.querySelector('[data-val="overlap"]').textContent = v
+        const overlap = (v === 'pointer' || v === 'center') ? v : Number(v)
 
-  function logEvent(type, data) {
-    logCount++
-    setText('#event-log-count', logCount)
-    const time = new Date().toLocaleTimeString('en-US', { hour12: false })
-    const line = document.createElement('div')
-    line.className = 'log-line'
-    line.innerHTML = `<span class="log-time">${time}</span> <span class="log-event">${type}</span> <span class="log-data">${data}</span>`
-    consoleEl.appendChild(line)
-    consoleEl.scrollTop = consoleEl.scrollHeight
-  }
+        if (zone) zone.destroy()
+        zone = dropzone(zoneEl, {
+          overlap,
+          activeClass: 'dz-active',
+          hoverClass: 'dz-hover',
+          onDrop: () => { zoneEl.textContent = 'dropped!'; setTimeout(() => (zoneEl.textContent = 'drop here'), 800) },
+        })
+        if (!drag) drag = draggable(target, { droppable: true })
 
-  // Default start/end listeners
-  d.on('dragstart', () => logEvent('dragstart', 'interaction began'))
-  d.on('dragend', () => logEvent('dragend', 'interaction ended'))
+        renderCode('dropzone', `import { draggable } from 'pointrix/drag'
+import { dropzone } from 'pointrix/dropzone'
 
-  // The togglable move listener
-  function moveHandler(e) {
-    logEvent('dragmove', `x=${Math.round(e.totalX)} y=${Math.round(e.totalY)}`)
-  }
+draggable(source, { droppable: true })
 
-  // Add listener button
-  $('#event-add-btn').addEventListener('click', () => {
-    if (!moveHandlerActive) {
-      d.on('dragmove', moveHandler)
-      moveHandlerActive = true
-      listenerCount++
-      setText('#event-listener-count', listenerCount)
-      logEvent('system', 'move listener added')
-    } else {
-      logEvent('system', 'move listener already active')
-    }
-  })
+dropzone(zone, {
+  overlap: ${typeof overlap === 'number' ? overlap : `'${overlap}'`},
+  activeClass: 'dz-active',
+  hoverClass: 'dz-hover',
+  onDrop: (e) => console.log('dropped', e.draggable),
+})`)
+      }
+      ctl.addEventListener('change', sync)
+      sync()
+    })()
 
-  // Remove listener button
-  $('#event-remove-btn').addEventListener('click', () => {
-    if (moveHandlerActive) {
-      d.off('dragmove', moveHandler)
-      moveHandlerActive = false
-      listenerCount--
-      setText('#event-listener-count', listenerCount)
-      logEvent('system', 'move listener removed')
-    } else {
-      logEvent('system', 'no move listener to remove')
-    }
-  })
-}
+    // ─── Sortable ───────────────────────────────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="sortable"]')
+      const demo = document.querySelector('[data-demo="sortable"]')
+      const list = demo.querySelector('[data-list]')
+      const orderEl = ctl.querySelector('[data-last-order]')
+      let inst
 
-// ═══════════════════════════════════════
-//  Sidebar active state
-// ═══════════════════════════════════════
-{
-  const links = document.querySelectorAll('#sidebar nav a')
-  const sections = [...links].map(a => {
-    const id = a.getAttribute('href')?.slice(1)
-    return id ? document.getElementById(id) : null
-  }).filter(Boolean)
+      function sync() {
+        const axis = ctl.querySelector('[data-opt="axis"]').value
+        const animationDuration = Number(ctl.querySelector('[data-opt="animationDuration"]').value)
+        ctl.querySelector('[data-val="axis"]').textContent = axis
+        ctl.querySelector('[data-val="animationDuration"]').textContent = animationDuration
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        links.forEach(a => a.classList.remove('active'))
-        const link = document.querySelector(`#sidebar nav a[href="#${entry.target.id}"]`)
+        const opts = {
+          axis,
+          animationDuration,
+          id: (el) => el.dataset.id,
+          onSortEnd: ({ order }) => { orderEl.textContent = JSON.stringify(order, null, 2) },
+        }
+        if (!inst) inst = sortable(list, opts)
+        else inst.updateOptions(opts)
+
+        renderCode('sortable', `import { sortable } from 'pointrix/sortable'
+
+sortable(list, {
+  axis: '${axis}',
+  animationDuration: ${animationDuration},
+  id: (el) => el.dataset.id,
+  onSortEnd: ({ order }) => {
+    console.log('new order:', order)
+  },
+})`)
+      }
+      ctl.addEventListener('change', sync)
+      ctl.addEventListener('input', sync)
+      sync()
+    })()
+
+    // ─── Cross-container sortable ─────────────
+    ;(() => {
+      const ctl = document.querySelector('[data-ctl="groups"]')
+      const demo = document.querySelector('[data-demo="groups"]')
+      const left = demo.querySelector('[data-list-left]')
+      const right = demo.querySelector('[data-list-right]')
+      const log = ctl.querySelector('[data-groups-log]')
+
+      function append(msg) {
+        const lines = log.textContent.split('\n')
+        lines.unshift(msg)
+        log.textContent = lines.slice(0, 6).join('\n')
+      }
+
+      sortable(left, {
+        group: 'kanban',
+        id: (el) => el.dataset.id,
+        onAdd:    (e) => append(`+ added ${e.itemId} to Todo`),
+        onRemove: (e) => append(`- removed ${e.itemId} from Todo`),
+      })
+      sortable(right, {
+        group: 'kanban',
+        id: (el) => el.dataset.id,
+        onAdd:    (e) => append(`+ added ${e.itemId} to Done`),
+        onRemove: (e) => append(`- removed ${e.itemId} from Done`),
+      })
+      log.textContent = '(drag between lists)'
+
+      renderCode('groups', `import { sortable } from 'pointrix/sortable'
+
+sortable(todoListEl, {
+  group: 'kanban',
+  id: (el) => el.dataset.id,
+  onAdd:    (e) => console.log('added', e.itemId),
+  onRemove: (e) => console.log('removed', e.itemId),
+})
+
+sortable(doneListEl, {
+  group: 'kanban',
+  id: (el) => el.dataset.id,
+  onAdd:    (e) => console.log('added', e.itemId),
+  onRemove: (e) => console.log('removed', e.itemId),
+})`)
+    })()
+
+    // ─── TOC active-section tracking ─────────────────────
+    const sections = Array.from(document.querySelectorAll('section.example'))
+    const tocLinks = new Map(
+      Array.from(document.querySelectorAll('nav.toc a[href^="#"]')).map((a) => [a.getAttribute('href').slice(1), a]),
+    )
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue
+        tocLinks.forEach((a) => a.classList.remove('active'))
+        const link = tocLinks.get(e.target.id)
         if (link) link.classList.add('active')
       }
-    })
-  }, { rootMargin: '-20% 0px -70% 0px' })
-
-  sections.forEach(s => observer.observe(s))
-}
-</script>
-
+    }, { rootMargin: '-30% 0px -60% 0px' })
+    sections.forEach((s) => io.observe(s))
+  </script>
 </body>
 </html>
