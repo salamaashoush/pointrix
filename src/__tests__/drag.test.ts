@@ -345,10 +345,11 @@ describe('Draggable', () => {
     it('modifier can alter position', () => {
       const modifier = {
         name: 'clamp-modifier',
-        modify: (ctx: any) => ({
-          position: { x: 0, y: 0 }, // Always force to origin
-          velocity: ctx.velocity,
-        }),
+        modify: (ctx: any) => {
+          // Mutate context in place — always force to origin.
+          ctx.position.x = 0
+          ctx.position.y = 0
+        },
       }
 
       instance = new Draggable(el, { modifiers: [modifier], threshold: 0 })

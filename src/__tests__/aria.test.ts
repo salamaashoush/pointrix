@@ -66,15 +66,26 @@ describe('announce()', () => {
     expect(regions.length).toBe(1)
   })
 
-  it('sets text content after requestAnimationFrame', () => {
+  it('sets text content synchronously', () => {
     announce('hello screen reader')
-
     const region = document.querySelector('[aria-live]') as HTMLElement
-    // Before RAF flush, text is cleared
-    expect(region.textContent).toBe('')
-
-    flushRAF()
     expect(region.textContent).toBe('hello screen reader')
+  })
+
+  it('forces a mutation when announcing the same message twice', () => {
+    const msg = 'unique-announce-test-' + Math.random().toString(36).slice(2)
+    announce(msg)
+    const region = document.querySelector('[aria-live]') as HTMLElement
+    expect(region.textContent).toBe(msg)
+
+    // A second identical announcement appends a space so screen readers
+    // notice the mutation and re-announce.
+    announce(msg)
+    const got = region.textContent ?? ''
+    // Same message + at least one trailing space (append is cumulative if repeated
+    // further, but we only need to check the mutation happened).
+    expect(got.startsWith(msg)).toBe(true)
+    expect(got.length).toBeGreaterThan(msg.length)
   })
 })
 
@@ -159,15 +170,15 @@ describe('Draggable ARIA', () => {
   it('sets aria-describedby pointing to instructions element', () => {
     instance = new Draggable(el)
     const describedBy = el.getAttribute('aria-describedby')
-    expect(describedBy).toBe('grip-instructions')
+    expect(describedBy).toBe('pointrix-instructions')
 
-    const instructionsEl = document.getElementById('grip-instructions')
+    const instructionsEl = document.getElementById('pointrix-instructions')
     expect(instructionsEl).not.toBeNull()
   })
 
   it('instructions element exists and has correct text', () => {
     instance = new Draggable(el)
-    const instructionsEl = document.getElementById('grip-instructions')
+    const instructionsEl = document.getElementById('pointrix-instructions')
     expect(instructionsEl).not.toBeNull()
     expect(instructionsEl!.textContent).toContain('Press Space or Enter to pick up')
   })

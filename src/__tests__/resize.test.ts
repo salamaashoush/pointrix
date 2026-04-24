@@ -333,11 +333,13 @@ describe('Resizable', () => {
     it('modifier can alter size', () => {
       const modifier = {
         name: 'snap-modifier',
-        modify: (ctx: any) => ({
-          position: ctx.position,
-          velocity: ctx.velocity,
-          size: { width: 300, height: 300 },
-        }),
+        modify: (ctx: any) => {
+          // Mutate context.size in place — force to 300x300.
+          if (ctx.size) {
+            ctx.size.width = 300
+            ctx.size.height = 300
+          }
+        },
       }
 
       instance = new Resizable(el, { modifiers: [modifier] })

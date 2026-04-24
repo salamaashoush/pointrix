@@ -2,6 +2,10 @@
 
 import { vi } from 'vitest'
 
+// React testing flag — silences the "not configured to support act(...)"
+// warning emitted when we render with react-dom/client.
+;(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
 // PointerEvent polyfill for jsdom
 if (typeof globalThis.PointerEvent === 'undefined') {
   class PointerEventPolyfill extends MouseEvent {
@@ -123,12 +127,15 @@ globalThis.requestAnimationFrame = ((cb: FrameRequestCallback): number => {
 
 globalThis.cancelAnimationFrame = (() => {}) as typeof cancelAnimationFrame
 
+/**
+ * Drain currently-queued RAF callbacks once. If a callback schedules more
+ * RAFs (momentum animations, inertia), those stay queued for the next
+ * flushRAF call — tests can loop if they want frame-by-frame advancement.
+ */
 export function flushRAF(): void {
   const cbs = rafCallbacks.splice(0)
   const now = performance.now()
-  for (const cb of cbs) {
-    cb(now)
-  }
+  for (const cb of cbs) cb(now)
 }
 
 // Drain any stale RAF callbacks without triggering new ones.
