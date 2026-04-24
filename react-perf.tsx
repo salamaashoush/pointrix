@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
-import { useDraggable, useResizable, useInteractable, DraggableComponent, ResizableComponent } from './src/react'
+import { useDraggable, useResizable, useInteractable } from './src/react'
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
@@ -316,14 +316,11 @@ function StressItem({ index }: { index: number }) {
   const [pos, setPos] = useState({ x: 0, y: 0 })
   const { renderCount, avgTime } = useRenderTimer()
 
-  const ref = useDraggable(
-    {
-      onDragMove: (e: any) => {
-        setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 })
-      },
+  const ref = useDraggable({
+    onDragMove: (e: any) => {
+      setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 })
     },
-    [],
-  )
+  })
 
   const hue = (index * 37) % 360
   return (
@@ -540,12 +537,9 @@ function DynamicListTest() {
 
 function HookDraggable() {
   const [pos, setPos] = useState({ x: 0, y: 0 })
-  const ref = useDraggable(
-    {
-      onDragMove: (e: any) => setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 }),
-    },
-    [],
-  )
+  const ref = useDraggable({
+    onDragMove: (e: any) => setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 }),
+  })
 
   return (
     <div
@@ -576,11 +570,16 @@ function HookDraggable() {
 }
 
 function ComponentDraggable() {
+  // The component API was removed in the v1 API cleanup — show a second
+  // hook-based draggable here for now so this demo section still renders.
   const [pos, setPos] = useState({ x: 0, y: 0 })
+  const ref = useDraggable({
+    onDragMove: (e: any) => setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 }),
+  })
 
   return (
-    <DraggableComponent
-      onDragMove={(e: any) => setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 })}
+    <div
+      ref={ref as React.Ref<HTMLDivElement>}
       style={{
         width: 160,
         height: 100,
@@ -598,11 +597,11 @@ function ComponentDraggable() {
         position: 'relative',
       }}
     >
-      <div style={{ fontSize: 12, opacity: 0.7 }}>DraggableComponent</div>
+      <div style={{ fontSize: 12, opacity: 0.7 }}>useDraggable (hook)</div>
       <div style={{ fontFamily: 'monospace', fontSize: 13 }}>
         {pos.x.toFixed(0)}, {pos.y.toFixed(0)}
       </div>
-    </DraggableComponent>
+    </div>
   )
 }
 
@@ -638,7 +637,7 @@ function ComponentVsHook() {
 
 // Sortable List
 function SortableItem({ label, color }: { label: string; color: string }) {
-  const ref = useDraggable({ axis: 'y' }, [])
+  const ref = useDraggable({ axis: 'y' })
 
   return (
     <div
@@ -690,14 +689,11 @@ function DraggableCard({ title, index }: { title: string; index: number }) {
   const [pos, setPos] = useState({ x: 0, y: 0 })
   const [dragging, setDragging] = useState(false)
 
-  const ref = useDraggable(
-    {
-      onDragStart: () => setDragging(true),
-      onDragMove: (e: any) => setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 }),
-      onDragEnd: () => setDragging(false),
-    },
-    [],
-  )
+  const ref = useDraggable({
+    onDragStart: () => setDragging(true),
+    onDragMove: (e: any) => setPos({ x: e.totalX ?? 0, y: e.totalY ?? 0 }),
+    onDragEnd: () => setDragging(false),
+  })
 
   const hue = index * 60
 
@@ -751,15 +747,12 @@ function DraggableCards() {
 // Resizable Panels
 function ResizablePanel({ title, color }: { title: string; color: string }) {
   const [size, setSize] = useState({ w: 200, h: 150 })
-  const ref = useResizable(
-    {
-      edges: { top: true, right: true, bottom: true, left: true },
-      minWidth: 100,
-      minHeight: 80,
-      onResizeMove: (e: any) => setSize({ w: e.width ?? 200, h: e.height ?? 150 }),
-    },
-    [],
-  )
+  const ref = useResizable({
+    edges: { top: true, right: true, bottom: true, left: true },
+    minWidth: 100,
+    minHeight: 80,
+    onResizeMove: (e: any) => setSize({ w: e.width ?? 200, h: e.height ?? 150 }),
+  })
 
   return (
     <div
@@ -803,20 +796,17 @@ function ResizablePanels() {
 // Combined Drag + Resize
 function DragResizeWidget() {
   const [info, setInfo] = useState({ x: 0, y: 0, w: 0, h: 0 })
-  const ref = useInteractable(
-    {
-      drag: {
-        onDragMove: (e: any) => setInfo((prev) => ({ ...prev, x: e.totalX ?? 0, y: e.totalY ?? 0 })),
-      },
-      resize: {
-        edges: { top: true, right: true, bottom: true, left: true },
-        minWidth: 120,
-        minHeight: 80,
-        onResizeMove: (e: any) => setInfo((prev) => ({ ...prev, w: e.width ?? 0, h: e.height ?? 0 })),
-      },
+  const ref = useInteractable({
+    drag: {
+      onDragMove: (e: any) => setInfo((prev) => ({ ...prev, x: e.totalX ?? 0, y: e.totalY ?? 0 })),
     },
-    [],
-  )
+    resize: {
+      edges: { top: true, right: true, bottom: true, left: true },
+      minWidth: 120,
+      minHeight: 80,
+      onResizeMove: (e: any) => setInfo((prev) => ({ ...prev, w: e.width ?? 0, h: e.height ?? 0 })),
+    },
+  })
 
   return (
     <div>
@@ -880,8 +870,8 @@ function App() {
   return (
     <div style={styles.app}>
       <header style={styles.header}>
-        <h1 style={styles.title}>Grip React Performance</h1>
-        <p style={styles.subtitle}>Testing hooks, components, and interaction performance in React</p>
+        <h1 style={styles.title}>pointrix React Performance</h1>
+        <p style={styles.subtitle}>Testing hooks and interaction performance in React</p>
       </header>
 
       <div style={styles.metricsBar}>
@@ -906,7 +896,7 @@ function App() {
       <InteractiveExamples />
 
       <footer style={{ textAlign: 'center', padding: '32px 0', color: '#4a4a6a', fontSize: 12 }}>
-        Grip React Performance Testing Page
+        pointrix React Performance Testing Page
       </footer>
     </div>
   )

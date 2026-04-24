@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grip vs interact.js - Browser Benchmarks</title>
+  <title>pointrix vs interact.js — Browser Benchmarks</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,7 +17,7 @@
       --accent: #6c5ce7;
       --accent-glow: rgba(108, 92, 231, 0.3);
       --pointrix: #00d2ff;
-      --grip-glow: rgba(0, 210, 255, 0.2);
+      --pointrix-glow: rgba(0, 210, 255, 0.2);
       --interact: #ff6b6b;
       --interact-glow: rgba(255, 107, 107, 0.2);
       --success: #00e676;
@@ -59,7 +59,7 @@
       font-size: 2.8rem;
       font-weight: 800;
       letter-spacing: -0.03em;
-      background: linear-gradient(135deg, var(--grip), var(--accent));
+      background: linear-gradient(135deg, var(--pointrix), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -195,7 +195,7 @@
 
     .progress-bar .fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--grip));
+      background: linear-gradient(90deg, var(--accent), var(--pointrix));
       border-radius: 2px;
       transition: width 0.3s ease;
       width: 0%;
@@ -241,9 +241,9 @@
       border-radius: 6px;
     }
 
-    .result-value.grip {
-      background: var(--grip-glow);
-      color: var(--grip);
+    .result-value.pointrix {
+      background: var(--pointrix-glow);
+      color: var(--pointrix);
     }
 
     .result-value.interact {
@@ -261,9 +261,9 @@
       font-weight: 700;
     }
 
-    .winner-badge.grip-wins {
-      background: var(--grip-glow);
-      color: var(--grip);
+    .winner-badge.pointrix-wins {
+      background: var(--pointrix-glow);
+      color: var(--pointrix);
     }
 
     .winner-badge.interact-wins {
@@ -314,7 +314,7 @@
       min-width: fit-content;
     }
 
-    .bar-fill.grip-bar {
+    .bar-fill.pointrix-bar {
       background: linear-gradient(90deg, rgba(0, 210, 255, 0.8), rgba(0, 210, 255, 0.5));
     }
 
@@ -363,7 +363,7 @@
     .summary-stat .value {
       font-size: 2.2rem;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--grip), var(--accent));
+      background: linear-gradient(135deg, var(--pointrix), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -395,8 +395,8 @@
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      background: var(--grip);
-      box-shadow: 0 0 12px var(--grip-glow);
+      background: var(--pointrix);
+      box-shadow: 0 0 12px var(--pointrix-glow);
       will-change: transform;
     }
 
@@ -433,7 +433,7 @@
 
     .anim-controls span {
       font-family: monospace;
-      color: var(--grip);
+      color: var(--pointrix);
       font-weight: 700;
     }
 
@@ -471,7 +471,7 @@
   <div class="page-bg"></div>
   <div class="container">
     <header>
-      <h1>Grip vs interact.js</h1>
+      <h1>pointrix vs interact.js</h1>
       <p>Real browser performance benchmarks &mdash; see who wins</p>
     </header>
 
@@ -647,38 +647,38 @@
       let html = ''
 
       for (const row of rows) {
-        const hVal = row.grip
+        const pVal = row.pointrix
         const iVal = row.interact
-        const hIsOps = row.unit === 'ops/sec'
-        const gripBetter = hIsOps ? hVal > iVal : hVal < iVal
-        const ratio = gripBetter
-          ? (hIsOps ? hVal / iVal : iVal / hVal)
-          : (hIsOps ? iVal / hVal : hVal / iVal)
+        const pIsOps = row.unit === 'ops/sec'
+        const pointrixBetter = pIsOps ? pVal > iVal : pVal < iVal
+        const ratio = pointrixBetter
+          ? (pIsOps ? pVal / iVal : iVal / pVal)
+          : (pIsOps ? iVal / pVal : pVal / iVal)
         const ratioText = ratio.toFixed(1) + 'x'
         const winnerClass = Math.abs(ratio - 1) < 0.05
           ? 'tie'
-          : gripBetter ? 'grip-wins' : 'interact-wins'
+          : pointrixBetter ? 'pointrix-wins' : 'interact-wins'
         const winnerLabel = Math.abs(ratio - 1) < 0.05
           ? 'Tie'
-          : gripBetter ? `Grip ${ratioText}` : `interact.js ${ratioText}`
+          : pointrixBetter ? `pointrix ${ratioText}` : `interact.js ${ratioText}`
 
-        const maxVal = Math.max(hVal, iVal)
-        const hPct = (hVal / maxVal * 100).toFixed(1)
+        const maxVal = Math.max(pVal, iVal)
+        const pPct = (pVal / maxVal * 100).toFixed(1)
         const iPct = (iVal / maxVal * 100).toFixed(1)
 
-        const hDisplay = hIsOps ? formatNum(hVal) + ' ops/s' : hVal.toFixed(2) + ' ms'
-        const iDisplay = hIsOps ? formatNum(iVal) + ' ops/s' : iVal.toFixed(2) + ' ms'
+        const pDisplay = pIsOps ? formatNum(pVal) + ' ops/s' : pVal.toFixed(2) + ' ms'
+        const iDisplay = pIsOps ? formatNum(iVal) + ' ops/s' : iVal.toFixed(2) + ' ms'
 
         html += `
           <div class="result-row">
             <div class="label">${row.name}</div>
-            <div class="result-value grip">${hDisplay}</div>
+            <div class="result-value pointrix">${pDisplay}</div>
             <div class="result-value interact">${iDisplay}</div>
             <div><span class="winner-badge ${winnerClass}">${winnerLabel}</span></div>
           </div>
           <div class="bar-chart">
-            <div class="bar-label" style="color:var(--grip)">Grip</div>
-            <div class="bar-track"><div class="bar-fill grip-bar" style="width:${hPct}%">${hDisplay}</div></div>
+            <div class="bar-label" style="color:var(--pointrix)">pointrix</div>
+            <div class="bar-track"><div class="bar-fill pointrix-bar" style="width:${pPct}%">${pDisplay}</div></div>
           </div>
           <div class="bar-chart" style="margin-bottom:16px;">
             <div class="bar-label" style="color:var(--interact)">interact.js</div>
@@ -724,20 +724,20 @@
     }
 
     function showSummary() {
-      let gripWins = 0
+      let pointrixWins = 0
       let interactWins = 0
       let totalRatio = 0
       let count = 0
 
       for (const r of allResults) {
-        const hIsOps = r.unit === 'ops/sec'
-        const gripBetter = hIsOps ? r.grip > r.interact : r.grip < r.interact
-        const ratio = gripBetter
-          ? (hIsOps ? r.grip / r.interact : r.interact / r.grip)
-          : 1 / (hIsOps ? r.grip / r.interact : r.interact / r.grip)
+        const pIsOps = r.unit === 'ops/sec'
+        const pointrixBetter = pIsOps ? r.pointrix > r.interact : r.pointrix < r.interact
+        const ratio = pointrixBetter
+          ? (pIsOps ? r.pointrix / r.interact : r.interact / r.pointrix)
+          : 1 / (pIsOps ? r.pointrix / r.interact : r.interact / r.pointrix)
 
-        if (gripBetter) {
-          gripWins++
+        if (pointrixBetter) {
+          pointrixWins++
           totalRatio += ratio
         } else {
           interactWins++
@@ -751,12 +751,12 @@
       const container = document.getElementById('summary-stats')
       container.innerHTML = `
         <div class="summary-stat">
-          <div class="value">${gripWins}/${count}</div>
-          <div class="label">Benchmarks Won by Grip</div>
+          <div class="value">${pointrixWins}/${count}</div>
+          <div class="label">Benchmarks Won by pointrix</div>
         </div>
         <div class="summary-stat">
           <div class="value">${avgSpeedup}x</div>
-          <div class="label">Avg Speedup (Grip)</div>
+          <div class="label">Avg Speedup (pointrix)</div>
         </div>
         <div class="summary-stat">
           <div class="value">${count}</div>
@@ -778,7 +778,7 @@
       const elements = createElements(N)
 
       setProgress(id, 30)
-      const hResult = await runBenchmark('Grip create+destroy', () => {
+      const pResult = await runBenchmark('pointrix create+destroy', () => {
         const instances = elements.map(el => draggable(el))
         instances.forEach(inst => inst.destroy())
       }, 50)
@@ -797,7 +797,7 @@
 
       const rows = [{
         name: `Create + Destroy ${N} instances`,
-        pointrix: hResult.opsPerSec,
+        pointrix: pResult.opsPerSec,
         interact: iResult.opsPerSec,
         unit: 'ops/sec'
       }]
@@ -824,16 +824,16 @@
         setProgress(id, (ci / counts.length) * 100)
         setStatus(id, `<span class="spinner"></span>Testing ${count} elements...`)
 
-        // Grip
+        // pointrix
         let elements = createElements(count)
-        let startH = performance.now()
-        const hInstances = elements.map(el => draggable(el))
-        const hCreateTime = performance.now() - startH
+        let startP = performance.now()
+        const pInstances = elements.map(el => draggable(el))
+        const pCreateTime = performance.now() - startP
 
         await yieldFrame()
 
         // Simulate drag on all - fire pointer events
-        const hDragStart = performance.now()
+        const pDragStart = performance.now()
         for (const el of elements) {
           el.dispatchEvent(new PointerEvent('pointerdown', {
             clientX: 10, clientY: 10, pointerId: 1, isPrimary: true, bubbles: true
@@ -850,8 +850,8 @@
             clientX: 30, clientY: 30, pointerId: 1, isPrimary: true, bubbles: true
           }))
         }
-        const hDragTime = performance.now() - hDragStart
-        hInstances.forEach(inst => inst.destroy())
+        const pDragTime = performance.now() - pDragStart
+        pInstances.forEach(inst => inst.destroy())
         clearArena()
 
         await yieldFrame()
@@ -891,13 +891,13 @@
 
         rows.push({
           name: `${count} elements - Creation`,
-          pointrix: hCreateTime,
+          pointrix: pCreateTime,
           interact: iCreateTime,
           unit: 'ms'
         })
         rows.push({
           name: `${count} elements - Drag cycle`,
-          pointrix: hDragTime,
+          pointrix: pDragTime,
           interact: iDragTime,
           unit: 'ms'
         })
@@ -924,9 +924,9 @@
       const elements = createElements(1)
       const el = elements[0]
 
-      // Grip
+      // pointrix
       let moveCount = 0
-      const hInst = draggable(el, {
+      const pInst = draggable(el, {
         threshold: 0,
         onDragMove() { moveCount++ }
       })
@@ -937,7 +937,7 @@
       await yieldFrame()
 
       setProgress(id, 30)
-      const hStart = performance.now()
+      const pStart = performance.now()
       for (let i = 0; i < EVENT_COUNT; i++) {
         document.dispatchEvent(new PointerEvent('pointermove', {
           clientX: 100 + (i % 200), clientY: 100 + (i % 200), pointerId: 1, isPrimary: true, bubbles: true
@@ -946,11 +946,11 @@
       // Wait for RAF-batched updates to flush
       await yieldFrame()
       await yieldFrame()
-      const hTime = performance.now() - hStart
+      const pTime = performance.now() - pStart
       document.dispatchEvent(new PointerEvent('pointerup', {
         clientX: 200, clientY: 200, pointerId: 1, isPrimary: true, bubbles: true
       }))
-      hInst.destroy()
+      pInst.destroy()
 
       setProgress(id, 55)
 
@@ -986,13 +986,13 @@
       const rows = [
         {
           name: `${EVENT_COUNT} pointermove events`,
-          pointrix: 1000 / hTime * EVENT_COUNT,
+          pointrix: 1000 / pTime * EVENT_COUNT,
           interact: 1000 / iTime * EVENT_COUNT,
           unit: 'ops/sec'
         },
         {
           name: 'Total processing time',
-          pointrix: hTime,
+          pointrix: pTime,
           interact: iTime,
           unit: 'ms'
         }
@@ -1018,13 +1018,13 @@
       const dummyEl = document.createElement('div')
       document.body.appendChild(dummyEl)
 
-      // Grip modifiers
-      const hSnap = snapGrid({ x: 20, y: 20 })
-      const hRestrict = restrict({ bounds: { left: 0, top: 0, right: 800, bottom: 600 } })
-      const modifiers = [hSnap, hRestrict]
+      // pointrix modifiers
+      const pSnap = snapGrid({ x: 20, y: 20 })
+      const pRestrict = restrict({ bounds: { left: 0, top: 0, right: 800, bottom: 600 } })
+      const modifiers = [pSnap, pRestrict]
 
       setProgress(id, 30)
-      const hResult = await runBenchmark('Grip modifiers', () => {
+      const pResult = await runBenchmark('pointrix modifiers', () => {
         for (let i = 0; i < COUNT; i++) {
           applyModifiers(modifiers, {
             position: { x: Math.random() * 1000, y: Math.random() * 1000 },
@@ -1058,7 +1058,7 @@
 
       const rows = [{
         name: `${formatNum(COUNT)} modifier applications`,
-        pointrix: hResult.opsPerSec,
+        pointrix: pResult.opsPerSec,
         interact: iResult.opsPerSec,
         unit: 'ops/sec'
       }]
@@ -1094,20 +1094,20 @@
 
       const elements = createElements(N)
 
-      // Grip memory
+      // pointrix memory
       if (window.gc) window.gc()
       await yieldFrame()
-      const hBefore = mem.usedJSHeapSize
+      const pBefore = mem.usedJSHeapSize
 
-      const hInstances = elements.map(el => draggable(el))
+      const pInstances = elements.map(el => draggable(el))
       await yieldFrame()
-      const hAfter = mem.usedJSHeapSize
-      const hMemPerInstance = (hAfter - hBefore) / N
+      const pAfter = mem.usedJSHeapSize
+      const pMemPerInstance = (pAfter - pBefore) / N
 
-      hInstances.forEach(inst => inst.destroy())
+      pInstances.forEach(inst => inst.destroy())
       if (window.gc) window.gc()
       await yieldFrame()
-      const hAfterDestroy = mem.usedJSHeapSize
+      const pAfterDestroy = mem.usedJSHeapSize
 
       setProgress(id, 50)
       clearArena()
@@ -1133,25 +1133,25 @@
       setProgress(id, 100)
       clearArena()
 
-      const hTotal = (hAfter - hBefore) / 1024
+      const pTotal = (pAfter - pBefore) / 1024
       const iTotal = (iAfter - iBefore) / 1024
 
       const rows = [
         {
           name: `${N} instances - Total heap (KB)`,
-          pointrix: hTotal,
+          pointrix: pTotal,
           interact: iTotal,
           unit: 'ms' // use 'ms' so lower is better
         },
         {
           name: 'Per instance (bytes)',
-          pointrix: Math.max(0, hMemPerInstance),
+          pointrix: Math.max(0, pMemPerInstance),
           interact: Math.max(0, iMemPerInstance),
           unit: 'ms' // lower is better
         },
         {
           name: 'Heap reclaimed after destroy (KB)',
-          pointrix: Math.max(0, (hAfter - hAfterDestroy) / 1024),
+          pointrix: Math.max(0, (pAfter - pAfterDestroy) / 1024),
           interact: Math.max(0, (iAfter - iAfterDestroy) / 1024),
           unit: 'ops/sec' // higher is better
         }
