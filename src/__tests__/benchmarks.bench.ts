@@ -1,5 +1,5 @@
 import { bench, describe } from 'vitest'
-import { Grip } from '../nano'
+import { Pointrix } from '../nano'
 import { Draggable } from '../drag'
 import { Resizable } from '../resize'
 import { Gesturable } from '../gesture'
@@ -48,10 +48,10 @@ function randomItems(count: number, worldSize: number): SpatialItem[] {
 // ---------------------------------------------------------------------------
 
 describe('Instance Creation', () => {
-  bench('Grip: create 1000 instances', () => {
-    const instances: Grip[] = []
+  bench('Pointrix: create 1000 instances', () => {
+    const instances: Pointrix[] = []
     for (let i = 0; i < 1000; i++) {
-      instances.push(new Grip(createElement()))
+      instances.push(new Pointrix(createElement()))
     }
     for (const inst of instances) inst.destroy()
   })
@@ -146,26 +146,34 @@ describe('Pointer Event Processing', () => {
 // 3. Modifier Chain
 // ---------------------------------------------------------------------------
 
+// Modifier benches now reuse a single cached ModifierContext and call
+// modifiers in place (the v1 mutation-based contract). This models the
+// library's hot-path usage from drag.ts / resize.ts exactly.
 describe('Modifier Chain', () => {
-  const restrictMod = new RestrictModifier({
-    bounds: { left: 0, top: 0, right: 1000, bottom: 1000 },
-  })
+  const el = createElement()
+
+  function makeCtx() {
+    return {
+      position: { x: 0, y: 0 },
+      velocity: { x: 1, y: 1 },
+      element: el,
+      startPosition: { x: 0, y: 0 },
+      delta: { x: 1, y: 1 },
+    }
+  }
 
   bench('Apply 1 modifier to 10000 positions', () => {
-    const el = createElement()
+    const ctx = makeCtx()
+    const mod = new RestrictModifier({ bounds: { left: 0, top: 0, right: 1000, bottom: 1000 } })
     for (let i = 0; i < 10000; i++) {
-      applyModifiers([restrictMod], {
-        position: { x: i * 0.1, y: i * 0.1 },
-        velocity: { x: 1, y: 1 },
-        element: el,
-        startPosition: { x: 0, y: 0 },
-        delta: { x: 1, y: 1 },
-      })
+      ctx.position.x = i * 0.1
+      ctx.position.y = i * 0.1
+      applyModifiers([mod], ctx)
     }
   })
 
   bench('Apply 5 modifiers to 10000 positions', () => {
-    const el = createElement()
+    const ctx = makeCtx()
     const mods: Modifier[] = [
       new RestrictModifier({ bounds: { left: 0, top: 0, right: 2000, bottom: 2000 } }),
       new SnapGridModifier({ x: 20, y: 20 }),
@@ -175,46 +183,34 @@ describe('Modifier Chain', () => {
     ]
 
     for (let i = 0; i < 10000; i++) {
-      applyModifiers(mods, {
-        position: { x: i * 0.2, y: i * 0.2 },
-        velocity: { x: 1, y: 1 },
-        element: el,
-        startPosition: { x: 0, y: 0 },
-        delta: { x: 1, y: 1 },
-      })
+      ctx.position.x = i * 0.2
+      ctx.position.y = i * 0.2
+      applyModifiers(mods, ctx)
     }
   })
 
   bench('Restrict modifier: 10000 positions', () => {
-    const el = createElement()
+    const ctx = makeCtx()
     const mod = new RestrictModifier({ bounds: { left: 0, top: 0, right: 800, bottom: 800 } })
     for (let i = 0; i < 10000; i++) {
-      mod.modify({
-        position: { x: i * 0.1 - 200, y: i * 0.1 - 200 },
-        velocity: { x: 0, y: 0 },
-        element: el,
-        startPosition: { x: 0, y: 0 },
-        delta: { x: 1, y: 1 },
-      })
+      ctx.position.x = i * 0.1 - 200
+      ctx.position.y = i * 0.1 - 200
+      mod.modify(ctx)
     }
   })
 
   bench('SnapGrid modifier: 10000 positions', () => {
-    const el = createElement()
+    const ctx = makeCtx()
     const mod = new SnapGridModifier({ x: 25, y: 25 })
     for (let i = 0; i < 10000; i++) {
-      mod.modify({
-        position: { x: i * 0.13, y: i * 0.17 },
-        velocity: { x: 0, y: 0 },
-        element: el,
-        startPosition: { x: 0, y: 0 },
-        delta: { x: 1, y: 1 },
-      })
+      ctx.position.x = i * 0.13
+      ctx.position.y = i * 0.17
+      mod.modify(ctx)
     }
   })
 
   bench('SnapTargets modifier: 10000 positions', () => {
-    const el = createElement()
+    const ctx = makeCtx()
     const targets = Array.from({ length: 20 }, (_, i) => ({
       x: i * 50,
       y: i * 50,
@@ -222,18 +218,14 @@ describe('Modifier Chain', () => {
     }))
     const mod = new SnapTargetsModifier({ targets, range: 25 })
     for (let i = 0; i < 10000; i++) {
-      mod.modify({
-        position: { x: i * 0.1, y: i * 0.1 },
-        velocity: { x: 0, y: 0 },
-        element: el,
-        startPosition: { x: 0, y: 0 },
-        delta: { x: 1, y: 1 },
-      })
+      ctx.position.x = i * 0.1
+      ctx.position.y = i * 0.1
+      mod.modify(ctx)
     }
   })
 
   bench('MagneticSnap modifier: 10000 positions', () => {
-    const el = createElement()
+    const ctx = makeCtx()
     const targets = Array.from({ length: 20 }, (_, i) => ({
       id: `mag-${i}`,
       x: i * 50,
@@ -242,13 +234,9 @@ describe('Modifier Chain', () => {
     }))
     const mod = new MagneticSnapModifier({ targets, distance: 30 })
     for (let i = 0; i < 10000; i++) {
-      mod.modify({
-        position: { x: i * 0.1, y: i * 0.1 },
-        velocity: { x: 0, y: 0 },
-        element: el,
-        startPosition: { x: 0, y: 0 },
-        delta: { x: 1, y: 1 },
-      })
+      ctx.position.x = i * 0.1
+      ctx.position.y = i * 0.1
+      mod.modify(ctx)
     }
   })
 })

@@ -79,6 +79,7 @@
     "typecheck": "tsc --noEmit",
     "demo": "vite",
     "bench": "vitest bench",
+    "bench:browser": "BENCH=1 playwright test",
     "size": "bun run build && gzip -k dist/pointrix.mjs && ls -lh dist/pointrix.mjs dist/pointrix.mjs.gz && rm dist/pointrix.mjs.gz",
     "prepublishOnly": "bun run lint && bun run typecheck && bun run test && bun run build"
   },
@@ -126,6 +127,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
