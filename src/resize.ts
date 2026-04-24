@@ -1,9 +1,9 @@
 // Optimized resize addon for pointrix-nano (~3KB minified)
 
-import { Grip, InteractionEvent, GripOptions } from './nano'
+import { Pointrix, InteractionEvent, PointrixOptions } from './nano'
 import { Modifier, ModifierContext, applyModifiers } from './types'
 
-export interface ResizeOptions extends GripOptions {
+export interface ResizeOptions extends PointrixOptions {
   edges?: {
     top?: boolean
     right?: boolean
@@ -41,7 +41,7 @@ export interface ResizeEvent extends InteractionEvent {
 
 type Edge = 'top' | 'right' | 'bottom' | 'left' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null
 
-export class Resizable extends Grip {
+export class Resizable extends Pointrix {
   private resizeOptions: ResizeOptions
   private startSize = { width: 0, height: 0 }
   private startPos = { x: 0, y: 0 }
@@ -148,7 +148,7 @@ export class Resizable extends Grip {
   }
   
   private detectEdge(e: PointerEvent): Edge {
-    const rect = this.element.getBoundingClientRect()
+    const rect = this.getRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     const handleSize = this.resizeOptions.handleSize || 10
@@ -200,7 +200,7 @@ export class Resizable extends Grip {
       this.transformNormalized = true
     }
 
-    const rect = this.element.getBoundingClientRect()
+    const rect = this.getRect()
     const style = window.getComputedStyle(this.element)
 
     // Detect which edge is being dragged
@@ -245,12 +245,9 @@ export class Resizable extends Grip {
     // Set will-change for performance
     this.element.style.willChange = 'width, height, transform'
     
-    // Fire resize start event
-    const resizeStartEvent = this.createResizeEvent(e, 0, 0)
     if (this.resizeOptions.onResizeStart) {
-      this.resizeOptions.onResizeStart(resizeStartEvent)
+      this.resizeOptions.onResizeStart(this.createResizeEvent(e, 0, 0))
     }
-    this.emit('resizestart', resizeStartEvent)
   }
   
   private handleResizeMove(e: InteractionEvent) {
@@ -366,7 +363,7 @@ export class Resizable extends Grip {
       newHeight = Math.round(newHeight / this.resizeOptions.grid.height) * this.resizeOptions.grid.height
     }
     
-    // Apply modifiers if configured
+    // Apply modifiers if configured (mutate ctx in place)
     if (this.resizeOptions.modifiers?.length) {
       const ctx = this.modifierContext
       ctx.position.x = newX
@@ -386,13 +383,11 @@ export class Resizable extends Grip {
       ctx.size!.height = newHeight
       ctx.startSize!.width = this.startSize.width
       ctx.startSize!.height = this.startSize.height
-      const result = applyModifiers(this.resizeOptions.modifiers, ctx)
-      newX = result.position.x
-      newY = result.position.y
-      if (result.size) {
-        newWidth = result.size.width
-        newHeight = result.size.height
-      }
+      applyModifiers(this.resizeOptions.modifiers, ctx)
+      newX = ctx.position.x
+      newY = ctx.position.y
+      newWidth = ctx.size!.width
+      newHeight = ctx.size!.height
     }
 
     // Update size and position
@@ -407,28 +402,22 @@ export class Resizable extends Grip {
       this.element.style.transform = `translate3d(${newX}px, ${newY}px, 0)`
     }
     
-    // Fire resize move event
-    const deltaWidth = newWidth - this.startSize.width
-    const deltaHeight = newHeight - this.startSize.height
-    const resizeMoveEvent = this.createResizeEvent(e, deltaWidth, deltaHeight)
     if (this.resizeOptions.onResizeMove) {
-      this.resizeOptions.onResizeMove(resizeMoveEvent)
+      const deltaWidth = newWidth - this.startSize.width
+      const deltaHeight = newHeight - this.startSize.height
+      this.resizeOptions.onResizeMove(this.createResizeEvent(e, deltaWidth, deltaHeight))
     }
-    this.emit('resizemove', resizeMoveEvent)
   }
-  
+
   private handleResizeEnd(e: InteractionEvent) {
     this.element.style.willChange = ''
     this.activeEdge = null
 
-    // Fire resize end event
-    const deltaWidth = this.currentSize.width - this.startSize.width
-    const deltaHeight = this.currentSize.height - this.startSize.height
-    const resizeEndEvent = this.createResizeEvent(e, deltaWidth, deltaHeight)
     if (this.resizeOptions.onResizeEnd) {
-      this.resizeOptions.onResizeEnd(resizeEndEvent)
+      const deltaWidth = this.currentSize.width - this.startSize.width
+      const deltaHeight = this.currentSize.height - this.startSize.height
+      this.resizeOptions.onResizeEnd(this.createResizeEvent(e, deltaWidth, deltaHeight))
     }
-    this.emit('resizeend', resizeEndEvent)
   }
   
   private createResizeEvent(e: InteractionEvent, deltaWidth: number, deltaHeight: number): ResizeEvent {
@@ -453,9 +442,21 @@ export class Resizable extends Grip {
     this.element.style.width = `${width}px`
     this.element.style.height = `${height}px`
   }
-  
+
   getSize() {
     return { ...this.currentSize }
+  }
+
+  /**
+   * Update resize options in place. Safe mid-interaction — edge constraints
+   * and modifiers apply from the next move. Cursor is refreshed on next hover.
+   */
+  updateOptions(partial: Partial<ResizeOptions>): void {
+    super.updateOptions(partial)
+    Object.assign(this.resizeOptions, partial)
+    if ('square' in partial && this.resizeOptions.square) {
+      this.resizeOptions.aspectRatio = 1
+    }
   }
   
   destroy() {

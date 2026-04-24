@@ -51,18 +51,24 @@ function ensureLiveRegion(): HTMLElement {
   return liveRegion
 }
 
+// Track the last announced message. Screen readers skip re-announcing when
+// textContent is set to an identical value; appending an invisible space
+// forces a mutation that still reads the same to the user.
+let lastAnnouncement = ''
+
 export function announce(message: string): void {
   const region = ensureLiveRegion()
-  region.textContent = ''
-  requestAnimationFrame(() => {
-    region.textContent = message
-  })
+  // Avoid the prior requestAnimationFrame hop: screen readers pick up the
+  // change synchronously, and the 16ms delay was a guess against duplicate
+  // messages (handled below).
+  region.textContent = message === lastAnnouncement ? message + ' ' : message
+  lastAnnouncement = message
 }
 
 // ─── Instructions ───────────────────────────────────────────────────
 
 let instructionsEl: HTMLElement | null = null
-const INSTRUCTIONS_ID = 'grip-instructions'
+const INSTRUCTIONS_ID = 'pointrix-instructions'
 
 export function ensureInstructions(): string {
   if (instructionsEl && instructionsEl.isConnected) {

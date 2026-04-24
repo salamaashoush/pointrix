@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult, Point } from '../types'
+import type { Modifier, ModifierContext, Point } from '../types'
 
 export interface InertiaOptions {
   resistance?: number
@@ -35,14 +35,8 @@ export class InertiaModifier implements Modifier {
     this.state = null
   }
 
-  modify(context: ModifierContext): ModifierResult {
-    if (!this.state || !this.state.active) {
-      return {
-        position: context.position,
-        velocity: context.velocity,
-        size: context.size,
-      }
-    }
+  modify(context: ModifierContext): void {
+    if (!this.state || !this.state.active) return
 
     const { v0, lambda, startTime, startPosition } = this.state
     const elapsed = (performance.now() - startTime) / 1000
@@ -53,61 +47,44 @@ export class InertiaModifier implements Modifier {
     const vy = v0.y * decay
 
     // position(t) = start + v0/lambda * (1 - e^(-lambda * t))
-    const px = startPosition.x + (v0.x / lambda) * (1 - decay)
-    const py = startPosition.y + (v0.y / lambda) * (1 - decay)
+    context.position.x = startPosition.x + (v0.x / lambda) * (1 - decay)
+    context.position.y = startPosition.y + (v0.y / lambda) * (1 - decay)
+    context.velocity.x = vx
+    context.velocity.y = vy
 
-    const speed = Math.sqrt(vx * vx + vy * vy)
-
-    if (speed < this.options.minSpeed) {
+    if (Math.sqrt(vx * vx + vy * vy) < this.options.minSpeed) {
       this.state.active = false
-    }
-
-    return {
-      position: { x: px, y: py },
-      velocity: { x: vx, y: vy },
-      size: context.size,
     }
   }
 
-  onEnd(context: ModifierContext): ModifierResult | void {
+  onEnd(context: ModifierContext): void {
     const speed = Math.sqrt(context.velocity.x ** 2 + context.velocity.y ** 2)
 
     if (speed < this.options.endSpeed) {
       if (this.options.smoothEnd) {
-        return this.computeSmoothEnd(context)
+        // Smooth deceleration: stop in place with zero velocity.
+        context.velocity.x = 0
+        context.velocity.y = 0
       }
       return
     }
 
     const lambda = this.options.resistance
-    const v0 = { ...context.velocity }
-
+    // Allocate state ONCE per interaction (onEnd fires once per lift-off).
+    const v0: Point = { x: context.velocity.x, y: context.velocity.y }
     this.state = {
       v0,
       lambda,
       startTime: performance.now(),
       active: true,
-      startPosition: { ...context.position },
+      startPosition: { x: context.position.x, y: context.position.y },
     }
 
-    // Return the final resting position: start + v0 / lambda
-    return {
-      position: {
-        x: context.position.x + v0.x / lambda,
-        y: context.position.y + v0.y / lambda,
-      },
-      velocity: { x: 0, y: 0 },
-      size: context.size,
-    }
-  }
-
-  private computeSmoothEnd(context: ModifierContext): ModifierResult {
-    // Smooth deceleration to the current position (no inertia travel)
-    return {
-      position: context.position,
-      velocity: { x: 0, y: 0 },
-      size: context.size,
-    }
+    // Final resting position: start + v0/lambda. Mutate context in place.
+    context.position.x += v0.x / lambda
+    context.position.y += v0.y / lambda
+    context.velocity.x = 0
+    context.velocity.y = 0
   }
 
   isActive(): boolean {

@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult } from '../types'
+import type { Modifier, ModifierContext } from '../types'
 
 export interface RestrictSizeOptions {
   min?: { width?: number; height?: number }
@@ -13,21 +13,15 @@ export class RestrictSizeModifier implements Modifier {
     this.options = options
   }
 
-  modify(context: ModifierContext): ModifierResult {
-    if (context.size) {
-      const { min, max } = this.options
+  modify(context: ModifierContext): void {
+    const size = context.size
+    if (!size) return
+    const { min, max } = this.options
 
-      if (min?.width !== undefined) context.size.width = Math.max(context.size.width, min.width)
-      if (min?.height !== undefined) context.size.height = Math.max(context.size.height, min.height)
-      if (max?.width !== undefined) context.size.width = Math.min(context.size.width, max.width)
-      if (max?.height !== undefined) context.size.height = Math.min(context.size.height, max.height)
-    }
-
-    return {
-      position: context.position,
-      velocity: context.velocity,
-      size: context.size,
-    }
+    if (min?.width !== undefined) size.width = Math.max(size.width, min.width)
+    if (min?.height !== undefined) size.height = Math.max(size.height, min.height)
+    if (max?.width !== undefined) size.width = Math.min(size.width, max.width)
+    if (max?.height !== undefined) size.height = Math.min(size.height, max.height)
   }
 }
 

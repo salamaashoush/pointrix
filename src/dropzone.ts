@@ -17,6 +17,12 @@ export interface DropzoneOptions {
   hoverClass?: string
   /** Enable ARIA attributes (default: true) */
   aria?: boolean
+  /**
+   * Custom geometry resolver — replaces `getBoundingClientRect()` for the
+   * zone's own element. Pair with a draggable's own rectChecker to drive
+   * the full drag/drop cycle off custom geometry (SVG, canvas, virtualized).
+   */
+  rectChecker?: (element: HTMLElement) => DOMRect
   onActivate?: (event: DropEvent) => void
   onDeactivate?: (event: DropEvent) => void
   onDragEnter?: (event: DropEvent) => void
@@ -55,25 +61,12 @@ export class Dropzone {
   private _isOver = false
   private _isActive = false
   private _enabled = true
-  private listeners = new Map<string, Set<Function>>()
-
-  on(event: string, handler: Function): this {
-    if (!this.listeners.has(event)) this.listeners.set(event, new Set())
-    this.listeners.get(event)!.add(handler)
-    return this
-  }
-
-  off(event: string, handler: Function): this {
-    this.listeners.get(event)?.delete(handler)
-    return this
-  }
-
-  private emit(event: string, data: any): void {
-    const handlers = this.listeners.get(event)
-    if (handlers) {
-      for (const handler of handlers) handler(data)
-    }
-  }
+  /**
+   * Cached dropzone rect while a drag is active. getBoundingClientRect is a
+   * forced-sync-layout operation; with N zones it dominates drag-frame cost.
+   * The manager refreshes this at drag-start and when the page scrolls/resizes.
+   */
+  private _cachedRect: DOMRect | null = null
 
   get enabled(): boolean { return this._enabled }
   set enabled(value: boolean) { this._enabled = value }
@@ -103,22 +96,41 @@ export class Dropzone {
     return draggableEl.matches(accept)
   }
 
-  checkOverlap(draggableEl: HTMLElement, pointerPos: Point): number {
-    const dropRect = this.element.getBoundingClientRect()
+  /** Cache/refresh the rect. Called by DropzoneManager at drag start and on scroll. */
+  refreshRect(): void {
+    this._cachedRect = this.options.rectChecker
+      ? this.options.rectChecker(this.element)
+      : this.element.getBoundingClientRect()
+  }
+
+  /** Clear the cached rect after a drag ends. */
+  clearRect(): void {
+    this._cachedRect = null
+  }
+
+  /**
+   * Compute overlap with a draggable. Uses the cached dropzone rect when set
+   * (during drag). Accepts an optional pre-measured draggable rect to avoid
+   * duplicate getBoundingClientRect calls when multiple zones need it.
+   */
+  checkOverlap(draggableEl: HTMLElement, pointerPos: Point, draggableRect?: DOMRect): number {
+    const dropRect = this._cachedRect ?? (this.options.rectChecker
+      ? this.options.rectChecker(this.element)
+      : this.element.getBoundingClientRect())
     const mode = this.options.overlap ?? 'pointer'
 
     if (mode === 'pointer') {
       return rectContainsPoint(dropRect, pointerPos) ? 1 : 0
     }
 
-    const dragRect = draggableEl.getBoundingClientRect()
+    // If the caller supplied a rect (Draggable does via its own rectChecker),
+    // use it. Otherwise fall back to measuring the draggable directly.
+    const dragRect = draggableRect ?? draggableEl.getBoundingClientRect()
 
     if (mode === 'center') {
-      const center: Point = {
-        x: dragRect.left + dragRect.width / 2,
-        y: dragRect.top + dragRect.height / 2,
-      }
-      return rectContainsPoint(dropRect, center) ? 1 : 0
+      const cx = dragRect.left + dragRect.width / 2
+      const cy = dragRect.top + dragRect.height / 2
+      return rectContainsPoint(dropRect, { x: cx, y: cy }) ? 1 : 0
     }
 
     // Numeric threshold mode
@@ -137,9 +149,7 @@ export class Dropzone {
       setDropzoneActiveAttrs(this.element, true)
     }
 
-    const activateEvent = this.createEvent(draggableEl, 0)
-    this.options.onActivate?.(activateEvent)
-    this.emit('activate', activateEvent)
+    this.options.onActivate?.(this.createEvent(draggableEl, 0))
   }
 
   deactivate(draggableEl: HTMLElement) {
@@ -158,9 +168,7 @@ export class Dropzone {
       setDropzoneActiveAttrs(this.element, false)
     }
 
-    const deactivateEvent = this.createEvent(draggableEl, 0)
-    this.options.onDeactivate?.(deactivateEvent)
-    this.emit('deactivate', deactivateEvent)
+    this.options.onDeactivate?.(this.createEvent(draggableEl, 0))
   }
 
   enter(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent) {
@@ -171,9 +179,7 @@ export class Dropzone {
       this.element.classList.add(this.options.hoverClass)
     }
 
-    const enterEvent = this.createEvent(draggableEl, overlap, dragEvent)
-    this.options.onDragEnter?.(enterEvent)
-    this.emit('dragenter', enterEvent)
+    this.options.onDragEnter?.(this.createEvent(draggableEl, overlap, dragEvent))
   }
 
   leave(draggableEl: HTMLElement, dragEvent?: DragEvent) {
@@ -184,21 +190,15 @@ export class Dropzone {
       this.element.classList.remove(this.options.hoverClass)
     }
 
-    const leaveEvent = this.createEvent(draggableEl, 0, dragEvent)
-    this.options.onDragLeave?.(leaveEvent)
-    this.emit('dragleave', leaveEvent)
+    this.options.onDragLeave?.(this.createEvent(draggableEl, 0, dragEvent))
   }
 
   over(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent) {
-    const overEvent = this.createEvent(draggableEl, overlap, dragEvent)
-    this.options.onDragOver?.(overEvent)
-    this.emit('dragover', overEvent)
+    this.options.onDragOver?.(this.createEvent(draggableEl, overlap, dragEvent))
   }
 
   drop(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent) {
-    const dropEvent = this.createEvent(draggableEl, overlap, dragEvent)
-    this.options.onDrop?.(dropEvent)
-    this.emit('drop', dropEvent)
+    this.options.onDrop?.(this.createEvent(draggableEl, overlap, dragEvent))
   }
 
   private createEvent(draggableEl: HTMLElement, overlap: number, dragEvent?: DragEvent): DropEvent {
@@ -235,6 +235,8 @@ export class Dropzone {
 
 class DropzoneManagerSingleton {
   private zones = new Set<Dropzone>()
+  private _activeDragCount = 0
+  private _refreshBound = () => this.refreshRects()
 
   register(zone: Dropzone) {
     this.zones.add(zone)
@@ -244,19 +246,57 @@ class DropzoneManagerSingleton {
     this.zones.delete(zone)
   }
 
+  /** Re-measure every active zone's rect. Called on scroll/resize during a drag. */
+  private refreshRects(): void {
+    for (const zone of this.zones) {
+      if (zone.isActive) zone.refreshRect()
+    }
+  }
+
   onDragStart(draggableEl: HTMLElement) {
     for (const zone of this.zones) {
       if (zone.accepts(draggableEl)) {
         zone.activate(draggableEl)
+        zone.refreshRect()
       }
     }
+    // Start listening for scroll/resize only once per session, even with
+    // nested drags (e.g. multi-touch). Use capture + passive for perf.
+    if (this._activeDragCount === 0 && typeof window !== 'undefined') {
+      window.addEventListener('scroll', this._refreshBound, { passive: true, capture: true })
+      window.addEventListener('resize', this._refreshBound, { passive: true })
+    }
+    this._activeDragCount++
   }
 
-  onDragMove(draggableEl: HTMLElement, pointerPos: Point, dragEvent?: DragEvent) {
+  onDragMove(
+    draggableEl: HTMLElement,
+    pointerPos: Point,
+    dragEvent?: DragEvent,
+    /**
+     * Optional rect provider for the draggable. Draggables pass this so a
+     * `rectChecker` on the draggable side also governs dropzone hit testing.
+     */
+    getDraggableRect?: () => DOMRect,
+  ) {
+    // Measure the draggable's rect once for this frame — multiple zones in
+    // 'center' or ratio mode would otherwise each call getBoundingClientRect
+    // on the same element.
+    let dragRect: DOMRect | undefined
+    let needsDragRect = false
+    for (const zone of this.zones) {
+      if (!zone.isActive) continue
+      const mode = (zone as unknown as { options: DropzoneOptions }).options.overlap ?? 'pointer'
+      if (mode !== 'pointer') { needsDragRect = true; break }
+    }
+    if (needsDragRect) {
+      dragRect = getDraggableRect ? getDraggableRect() : draggableEl.getBoundingClientRect()
+    }
+
     for (const zone of this.zones) {
       if (!zone.isActive) continue
 
-      const overlap = zone.checkOverlap(draggableEl, pointerPos)
+      const overlap = zone.checkOverlap(draggableEl, pointerPos, dragRect)
 
       if (overlap > 0) {
         if (!zone.isOver) {
@@ -269,16 +309,28 @@ class DropzoneManagerSingleton {
     }
   }
 
-  onDragEnd(draggableEl: HTMLElement, pointerPos: Point, dragEvent?: DragEvent) {
+  onDragEnd(
+    draggableEl: HTMLElement,
+    pointerPos: Point,
+    dragEvent?: DragEvent,
+    getDraggableRect?: () => DOMRect,
+  ) {
     for (const zone of this.zones) {
       if (!zone.isActive) continue
 
       if (zone.isOver) {
-        const overlap = zone.checkOverlap(draggableEl, pointerPos)
+        const dragRect = getDraggableRect?.()
+        const overlap = zone.checkOverlap(draggableEl, pointerPos, dragRect)
         zone.drop(draggableEl, overlap > 0 ? overlap : 1, dragEvent)
       }
 
       zone.deactivate(draggableEl)
+      zone.clearRect()
+    }
+    if (this._activeDragCount > 0) this._activeDragCount--
+    if (this._activeDragCount === 0 && typeof window !== 'undefined') {
+      window.removeEventListener('scroll', this._refreshBound, { capture: true } as AddEventListenerOptions)
+      window.removeEventListener('resize', this._refreshBound)
     }
   }
 

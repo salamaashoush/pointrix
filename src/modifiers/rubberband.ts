@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult, Point } from '../types'
+import type { Modifier, ModifierContext, Point } from '../types'
 
 export interface RubberbandOptions {
   bounds: { left?: number; top?: number; right?: number; bottom?: number } | 'parent'
@@ -24,60 +24,47 @@ export class RubberbandModifier implements Modifier {
     this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition)
   }
 
-  modify(context: ModifierContext): ModifierResult {
+  modify(context: ModifierContext): void {
     if (!this.transformBounds) {
       this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition)
     }
     const bounds = this.transformBounds
+    if (!bounds) return
+
     const resistance = this.options.resistance ?? 0.15
     const maxOvershoot = this.options.maxOvershoot ?? 100
-    const pos = { ...context.position }
+    const pos = context.position
 
-    if (bounds) {
-      if (bounds.left !== undefined && pos.x < bounds.left) {
-        const overshoot = (pos.x - bounds.left) * resistance
-        pos.x = bounds.left + Math.max(overshoot, -maxOvershoot)
-      }
-      if (bounds.right !== undefined && pos.x > bounds.right) {
-        const overshoot = (pos.x - bounds.right) * resistance
-        pos.x = bounds.right + Math.min(overshoot, maxOvershoot)
-      }
-      if (bounds.top !== undefined && pos.y < bounds.top) {
-        const overshoot = (pos.y - bounds.top) * resistance
-        pos.y = bounds.top + Math.max(overshoot, -maxOvershoot)
-      }
-      if (bounds.bottom !== undefined && pos.y > bounds.bottom) {
-        const overshoot = (pos.y - bounds.bottom) * resistance
-        pos.y = bounds.bottom + Math.min(overshoot, maxOvershoot)
-      }
+    if (bounds.left !== undefined && pos.x < bounds.left) {
+      const overshoot = (pos.x - bounds.left) * resistance
+      pos.x = bounds.left + Math.max(overshoot, -maxOvershoot)
     }
-
-    return {
-      position: pos,
-      velocity: context.velocity,
-      size: context.size,
+    if (bounds.right !== undefined && pos.x > bounds.right) {
+      const overshoot = (pos.x - bounds.right) * resistance
+      pos.x = bounds.right + Math.min(overshoot, maxOvershoot)
+    }
+    if (bounds.top !== undefined && pos.y < bounds.top) {
+      const overshoot = (pos.y - bounds.top) * resistance
+      pos.y = bounds.top + Math.max(overshoot, -maxOvershoot)
+    }
+    if (bounds.bottom !== undefined && pos.y > bounds.bottom) {
+      const overshoot = (pos.y - bounds.bottom) * resistance
+      pos.y = bounds.bottom + Math.min(overshoot, maxOvershoot)
     }
   }
 
-  onEnd(context: ModifierContext): ModifierResult {
+  onEnd(context: ModifierContext): void {
     if (!this.transformBounds) {
       this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition)
     }
     const bounds = this.transformBounds
-    const pos = { ...context.position }
+    if (!bounds) return
 
-    if (bounds) {
-      if (bounds.left !== undefined) pos.x = Math.max(pos.x, bounds.left)
-      if (bounds.right !== undefined) pos.x = Math.min(pos.x, bounds.right)
-      if (bounds.top !== undefined) pos.y = Math.max(pos.y, bounds.top)
-      if (bounds.bottom !== undefined) pos.y = Math.min(pos.y, bounds.bottom)
-    }
-
-    return {
-      position: pos,
-      velocity: context.velocity,
-      size: context.size,
-    }
+    const pos = context.position
+    if (bounds.left !== undefined) pos.x = Math.max(pos.x, bounds.left)
+    if (bounds.right !== undefined) pos.x = Math.min(pos.x, bounds.right)
+    if (bounds.top !== undefined) pos.y = Math.max(pos.y, bounds.top)
+    if (bounds.bottom !== undefined) pos.y = Math.min(pos.y, bounds.bottom)
   }
 
   private resolveTransformBounds(

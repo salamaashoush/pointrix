@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult } from '../types'
+import type { Modifier, ModifierContext } from '../types'
 
 export interface SnapSizeOptions {
   width?: number
@@ -14,24 +14,18 @@ export class SnapSizeModifier implements Modifier {
     this.options = options
   }
 
-  modify(context: ModifierContext): ModifierResult {
-    if (context.size) {
-      const { width: gridW, height: gridH, offset } = this.options
-      const offsetW = offset?.width ?? 0
-      const offsetH = offset?.height ?? 0
+  modify(context: ModifierContext): void {
+    const size = context.size
+    if (!size) return
+    const { width: gridW, height: gridH, offset } = this.options
+    const offsetW = offset?.width ?? 0
+    const offsetH = offset?.height ?? 0
 
-      if (gridW && gridW > 0) {
-        context.size.width = Math.round((context.size.width - offsetW) / gridW) * gridW + offsetW
-      }
-      if (gridH && gridH > 0) {
-        context.size.height = Math.round((context.size.height - offsetH) / gridH) * gridH + offsetH
-      }
+    if (gridW && gridW > 0) {
+      size.width = Math.round((size.width - offsetW) / gridW) * gridW + offsetW
     }
-
-    return {
-      position: context.position,
-      velocity: context.velocity,
-      size: context.size,
+    if (gridH && gridH > 0) {
+      size.height = Math.round((size.height - offsetH) / gridH) * gridH + offsetH
     }
   }
 }

@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult, Point } from '../types'
+import type { Modifier, ModifierContext, Point } from '../types'
 
 export interface SnapTarget {
   /** X coordinate of the target */
@@ -105,13 +105,15 @@ export class SnapTargetsModifier implements Modifier {
     this._snappedIndex = -1
   }
 
-  modify(context: ModifierContext): ModifierResult {
+  modify(context: ModifierContext): void {
     const { targets, range: globalRange = 50 } = this.options
     const resolvedPoints = this.resolvedPivots
     const isParentMode = this.options.coordinateMode === 'parent'
 
     let bestDistance = Infinity
-    let bestOffset: Point = { x: 0, y: 0 }
+    // Track the winning offset as scalars — no Point allocation per frame.
+    let bestDx = 0
+    let bestDy = 0
     let bestTargetIndex = -1
 
     for (const rp of resolvedPoints) {
@@ -149,7 +151,8 @@ export class SnapTargetsModifier implements Modifier {
 
         if (dist <= range && dist < bestDistance) {
           bestDistance = dist
-          bestOffset = { x: dx, y: dy }
+          bestDx = dx
+          bestDy = dy
           bestTargetIndex = ti
         }
       }
@@ -158,22 +161,11 @@ export class SnapTargetsModifier implements Modifier {
     if (bestTargetIndex >= 0) {
       this._snappedTarget = targets[bestTargetIndex]
       this._snappedIndex = bestTargetIndex
-      return {
-        position: {
-          x: context.position.x + bestOffset.x,
-          y: context.position.y + bestOffset.y,
-        },
-        velocity: context.velocity,
-        size: context.size,
-      }
-    }
-
-    this._snappedTarget = null
-    this._snappedIndex = -1
-    return {
-      position: context.position,
-      velocity: context.velocity,
-      size: context.size,
+      context.position.x += bestDx
+      context.position.y += bestDy
+    } else {
+      this._snappedTarget = null
+      this._snappedIndex = -1
     }
   }
 }

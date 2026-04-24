@@ -1,7 +1,7 @@
 // Full pointrix bundle with all features
 
-export { grip, Grip } from './nano'
-export type { Point, PointerState, InteractionEvent, GripOptions } from './nano'
+export { pointrix, Pointrix, setMaxInteractions, getActiveInteractionCount } from './nano'
+export type { Point, PointerState, InteractionEvent, PointrixOptions } from './nano'
 
 export { draggable, Draggable } from './drag'
 export type { DragOptions, DragEvent } from './drag'
@@ -18,8 +18,8 @@ export type { DropzoneOptions, DropEvent } from './dropzone'
 export { sortable, Sortable } from './sortable'
 export type { SortableOptions, SortEvent, SortTransferEvent } from './sortable'
 
-export type { Modifier, ModifierContext, ModifierResult, ActiveEdges, Rect } from './types'
-export { applyModifiers } from './types'
+export type { Modifier, ModifierContext, ActiveEdges, Rect } from './types'
+export { applyModifiers, prefersReducedMotion } from './types'
 
 export * from './modifiers/index'
 

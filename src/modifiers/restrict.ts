@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult, Point } from '../types'
+import type { Modifier, ModifierContext, Point } from '../types'
 
 export interface RestrictOptions {
   bounds?: 'parent' | HTMLElement | { left?: number; top?: number; right?: number; bottom?: number }
@@ -19,28 +19,20 @@ export class RestrictModifier implements Modifier {
     this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition, context.size)
   }
 
-  modify(context: ModifierContext): ModifierResult {
-    // Lazy init: if onStart wasn't called (e.g., used standalone), resolve now
+  modify(context: ModifierContext): void {
+    // Lazy init: if onStart wasn't called (standalone use), resolve now.
     if (!this.transformBounds) {
       this.resolveAndCache(context)
     }
-
-    if (this.options.endOnly) {
-      return {
-        position: context.position,
-        velocity: context.velocity,
-        size: context.size,
-      }
-    }
-
-    return this.applyRestriction(context)
+    if (this.options.endOnly) return
+    this.applyRestriction(context)
   }
 
-  onEnd(context: ModifierContext): ModifierResult {
+  onEnd(context: ModifierContext): void {
     if (!this.transformBounds) {
       this.resolveAndCache(context)
     }
-    return this.applyRestriction(context)
+    this.applyRestriction(context)
   }
 
   private resolveAndCache(context: ModifierContext) {
@@ -49,16 +41,9 @@ export class RestrictModifier implements Modifier {
     )
   }
 
-  private applyRestriction(context: ModifierContext): ModifierResult {
+  private applyRestriction(context: ModifierContext): void {
     const bounds = this.transformBounds
-
-    if (!bounds) {
-      return {
-        position: context.position,
-        velocity: context.velocity,
-        size: context.size,
-      }
-    }
+    if (!bounds) return
 
     let x = context.position.x
     let y = context.position.y
@@ -68,11 +53,8 @@ export class RestrictModifier implements Modifier {
     if (bounds.right !== undefined) x = Math.min(x, bounds.right)
     if (bounds.bottom !== undefined) y = Math.min(y, bounds.bottom)
 
-    return {
-      position: { x, y },
-      velocity: context.velocity,
-      size: context.size,
-    }
+    context.position.x = x
+    context.position.y = y
   }
 
   private resolveTransformBounds(

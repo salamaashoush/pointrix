@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult } from '../types'
+import type { Modifier, ModifierContext } from '../types'
 
 export interface AutoScrollOptions {
   container?: HTMLElement | Window
@@ -39,7 +39,7 @@ export class AutoScrollModifier implements Modifier {
     }
   }
 
-  modify(context: ModifierContext): ModifierResult {
+  modify(context: ModifierContext): void {
     const container = this.cachedContainer ?? this.resolveContainer(context.element)
     const containerRect = this.cachedContainerRect ?? this.getContainerRect(container)
     const { margin, speed, acceleration } = this.options
@@ -81,12 +81,7 @@ export class AutoScrollModifier implements Modifier {
     if (scrollX !== 0 || scrollY !== 0) {
       this.performScroll(container, scrollX, scrollY)
     }
-
-    return {
-      position: context.position,
-      velocity: context.velocity,
-      size: context.size,
-    }
+    // auto-scroll doesn't modify context — it just side-effects the scroll.
   }
 
   onEnd(): void {

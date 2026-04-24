@@ -1,6 +1,6 @@
 // Multi-touch gesture system for pinch/rotate/pan
 
-import { Grip, type InteractionEvent, type Point, type GripOptions } from './nano'
+import { Pointrix, type InteractionEvent, type Point, type PointrixOptions, type PointerState } from './nano'
 
 export interface GestureEvent extends InteractionEvent {
   scale: number
@@ -12,14 +12,16 @@ export interface GestureEvent extends InteractionEvent {
   deltaAngle: number
 }
 
-export interface GestureOptions extends GripOptions {
+export interface GestureOptions extends PointrixOptions {
   minPointers?: number
   onGestureStart?: (event: GestureEvent) => void
   onGestureMove?: (event: GestureEvent) => void
   onGestureEnd?: (event: GestureEvent) => void
 }
 
-export class Gesturable extends Grip {
+const RAD_TO_DEG = 180 / Math.PI
+
+export class Gesturable extends Pointrix {
   private gestureOptions: GestureOptions
   private gestureActive = false
   private startDistance = 0
@@ -27,6 +29,25 @@ export class Gesturable extends Grip {
   private prevScale = 1
   private prevAngle = 0
   private minPointers: number
+
+  // Reused scratch pointers — avoids allocating [Point, Point] per frame.
+  private _p1: PointerState | null = null
+  private _p2: PointerState | null = null
+
+  // Cached gesture event — mutated in place, reused every frame.
+  private _cachedGestureEvent: GestureEvent = {
+    target: null as unknown as HTMLElement,
+    pointers: [],
+    isPrimary: false,
+    originalEvent: null as unknown as PointerEvent,
+    scale: 1,
+    rotation: 0,
+    distance: 0,
+    angle: 0,
+    center: { x: 0, y: 0 },
+    deltaScale: 0,
+    deltaAngle: 0,
+  }
 
   constructor(element: HTMLElement, options: GestureOptions = {}) {
     super(element, { ...options, threshold: 0 })
@@ -41,29 +62,26 @@ export class Gesturable extends Grip {
     return true
   }
 
-  private getTwoPointers(): [Point, Point] | null {
-    if (this.pointers.size < 2) return null
+  /** Populates _p1/_p2 from the first two pointers. Returns true if both present. */
+  private selectTwoPointers(): boolean {
+    if (this.pointers.size < 2) {
+      this._p1 = this._p2 = null
+      return false
+    }
     const iter = this.pointers.values()
-    const p1 = iter.next().value!
-    const p2 = iter.next().value!
-    return [p1.current, p2.current]
+    this._p1 = iter.next().value as PointerState
+    this._p2 = iter.next().value as PointerState
+    return true
   }
 
-  private computeDistance(p1: Point, p2: Point): number {
-    const dx = p2.x - p1.x
-    const dy = p2.y - p1.y
+  private distanceBetween(a: Point, b: Point): number {
+    const dx = b.x - a.x
+    const dy = b.y - a.y
     return Math.sqrt(dx * dx + dy * dy)
   }
 
-  private computeAngle(p1: Point, p2: Point): number {
-    return Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI
-  }
-
-  private computeCenter(p1: Point, p2: Point): Point {
-    return {
-      x: (p1.x + p2.x) / 2,
-      y: (p1.y + p2.y) / 2
-    }
+  private angleBetween(a: Point, b: Point): number {
+    return Math.atan2(b.y - a.y, b.x - a.x) * RAD_TO_DEG
   }
 
   private normalizeAngleDelta(delta: number): number {
@@ -73,52 +91,61 @@ export class Gesturable extends Grip {
     return delta
   }
 
-  private createGestureEvent(base: InteractionEvent, overrides: Partial<GestureEvent>): GestureEvent {
-    return {
-      ...base,
-      scale: overrides.scale ?? 1,
-      rotation: overrides.rotation ?? 0,
-      distance: overrides.distance ?? 0,
-      angle: overrides.angle ?? 0,
-      center: overrides.center ?? { x: 0, y: 0 },
-      deltaScale: overrides.deltaScale ?? 0,
-      deltaAngle: overrides.deltaAngle ?? 0
-    }
+  /** Populate the cached gesture event with the current state. */
+  private buildEvent(
+    distance: number,
+    angle: number,
+    scale: number,
+    rotation: number,
+    deltaScale: number,
+    deltaAngle: number,
+    cx: number,
+    cy: number,
+  ): GestureEvent {
+    const evt = this._cachedGestureEvent
+    evt.target = this.element
+    // Reuse base Pointrix's pointer cache — avoids Array.from() per frame.
+    evt.pointers = (this as unknown as { pointersCache: PointerState[] }).pointersCache
+    evt.isPrimary = false
+    // originalEvent is intentionally the sentinel — gestures are synthesized
+    // across multiple real pointer events and don't correspond to a single one.
+    evt.originalEvent = evt.originalEvent ?? ({} as PointerEvent)
+    evt.scale = scale
+    evt.rotation = rotation
+    evt.distance = distance
+    evt.angle = angle
+    evt.center.x = cx
+    evt.center.y = cy
+    evt.deltaScale = deltaScale
+    evt.deltaAngle = deltaAngle
+    return evt
   }
 
   update() {
     if (!this.isActive || this.pointers.size === 0) return
 
-    const pair = this.getTwoPointers()
+    const hasPair = this.selectTwoPointers()
 
     // Start gesture when we first reach enough pointers
-    if (!this.gestureActive && pair && this.pointers.size >= this.minPointers) {
+    if (!this.gestureActive && hasPair && this.pointers.size >= this.minPointers) {
       this.gestureActive = true
-      const [p1, p2] = pair
-      this.startDistance = this.computeDistance(p1, p2)
-      this.startAngle = this.computeAngle(p1, p2)
+      const c1 = this._p1!.current
+      const c2 = this._p2!.current
+      this.startDistance = this.distanceBetween(c1, c2)
+      this.startAngle = this.angleBetween(c1, c2)
       this.prevScale = 1
       this.prevAngle = 0
 
-      const baseEvent: InteractionEvent = {
-        target: this.element,
-        pointers: Array.from(this.pointers.values()),
-        isPrimary: false,
-        originalEvent: new PointerEvent('pointermove')
-      }
-      const gestureStartEvent = this.createGestureEvent(baseEvent, {
-        scale: 1,
-        rotation: 0,
-        distance: this.startDistance,
-        angle: this.startAngle,
-        center: this.computeCenter(p1, p2),
-        deltaScale: 0,
-        deltaAngle: 0
-      })
+      const gestureStartEvent = this.buildEvent(
+        this.startDistance,
+        this.startAngle,
+        1, 0, 0, 0,
+        (c1.x + c2.x) / 2,
+        (c1.y + c2.y) / 2,
+      )
       if (this.gestureOptions.onGestureStart) {
         this.gestureOptions.onGestureStart(gestureStartEvent)
       }
-      this.emit('gesturestart', gestureStartEvent)
       return
     }
 
@@ -131,11 +158,11 @@ export class Gesturable extends Grip {
     }
 
     // Fire gesture move when active with enough pointers
-    if (this.gestureActive && pair) {
-      const [p1, p2] = pair
-      const distance = this.computeDistance(p1, p2)
-      const angle = this.computeAngle(p1, p2)
-      const center = this.computeCenter(p1, p2)
+    if (this.gestureActive && hasPair) {
+      const c1 = this._p1!.current
+      const c2 = this._p2!.current
+      const distance = this.distanceBetween(c1, c2)
+      const angle = this.angleBetween(c1, c2)
       const scale = this.startDistance > 0 ? distance / this.startDistance : 1
       const rotation = this.normalizeAngleDelta(angle - this.startAngle)
       const deltaScale = scale - this.prevScale
@@ -144,25 +171,13 @@ export class Gesturable extends Grip {
       this.prevScale = scale
       this.prevAngle = rotation
 
-      const baseEvent: InteractionEvent = {
-        target: this.element,
-        pointers: Array.from(this.pointers.values()),
-        isPrimary: false,
-        originalEvent: new PointerEvent('pointermove')
-      }
-      const gestureMoveEvent = this.createGestureEvent(baseEvent, {
-        scale,
-        rotation,
-        distance,
-        angle,
-        center,
-        deltaScale,
-        deltaAngle
-      })
       if (this.gestureOptions.onGestureMove) {
-        this.gestureOptions.onGestureMove(gestureMoveEvent)
+        this.gestureOptions.onGestureMove(this.buildEvent(
+          distance, angle, scale, rotation, deltaScale, deltaAngle,
+          (c1.x + c2.x) / 2,
+          (c1.y + c2.y) / 2,
+        ))
       }
-      this.emit('gesturemove', gestureMoveEvent)
     }
 
     // Let the base class handle pointer state updates (velocity, delta, previous)
@@ -173,32 +188,28 @@ export class Gesturable extends Grip {
     if (!this.gestureActive) return
     this.gestureActive = false
 
-    const baseEvent: InteractionEvent = {
-      target: this.element,
-      pointers: Array.from(this.pointers.values()),
-      isPrimary: false,
-      originalEvent: new PointerEvent('pointerup')
-    }
-
-    const pair = this.getTwoPointers()
-    const distance = pair ? this.computeDistance(pair[0], pair[1]) : 0
-    const angle = pair ? this.computeAngle(pair[0], pair[1]) : 0
-    const center = pair ? this.computeCenter(pair[0], pair[1]) : { x: 0, y: 0 }
+    const hasPair = this.selectTwoPointers()
+    const c1 = hasPair ? this._p1!.current : null
+    const c2 = hasPair ? this._p2!.current : null
+    const distance = c1 && c2 ? this.distanceBetween(c1, c2) : 0
+    const angle = c1 && c2 ? this.angleBetween(c1, c2) : 0
+    const cx = c1 && c2 ? (c1.x + c2.x) / 2 : 0
+    const cy = c1 && c2 ? (c1.y + c2.y) / 2 : 0
     const scale = this.startDistance > 0 && distance > 0 ? distance / this.startDistance : this.prevScale
 
-    const gestureEndEvent = this.createGestureEvent(baseEvent, {
-      scale,
-      rotation: this.prevAngle,
-      distance,
-      angle,
-      center,
-      deltaScale: 0,
-      deltaAngle: 0
-    })
     if (this.gestureOptions.onGestureEnd) {
-      this.gestureOptions.onGestureEnd(gestureEndEvent)
+      this.gestureOptions.onGestureEnd(this.buildEvent(distance, angle, scale, this.prevAngle, 0, 0, cx, cy))
     }
-    this.emit('gestureend', gestureEndEvent)
+  }
+
+  /**
+   * Update gesture options in place. Safe mid-gesture — new callbacks fire
+   * from the next frame; `minPointers` change takes effect immediately.
+   */
+  updateOptions(partial: Partial<GestureOptions>): void {
+    super.updateOptions(partial)
+    Object.assign(this.gestureOptions, partial)
+    if (partial.minPointers !== undefined) this.minPointers = partial.minPointers
   }
 
   destroy() {

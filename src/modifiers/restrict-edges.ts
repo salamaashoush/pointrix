@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext, ModifierResult } from '../types'
+import type { Modifier, ModifierContext } from '../types'
 
 export interface RestrictEdgesOptions {
   /** Restriction bounds for each edge — edges can't go beyond these values */
@@ -15,7 +15,7 @@ export class RestrictEdgesModifier implements Modifier {
     this.options = options
   }
 
-  modify(context: ModifierContext): ModifierResult {
+  modify(context: ModifierContext): void {
     const pos = context.position
     const size = context.size
     const edges = context.edges
@@ -76,12 +76,6 @@ export class RestrictEdgesModifier implements Modifier {
       if (edges.bottom) {
         size.height = bottom - pos.y
       }
-    }
-
-    return {
-      position: pos,
-      velocity: context.velocity,
-      size,
     }
   }
 }
