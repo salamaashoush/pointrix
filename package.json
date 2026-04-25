@@ -1,6 +1,6 @@
 {
   "name": "pointrix",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Ultra-fast, minimal drag/resize/gesture library. The smallest and fastest interactable elements library.",
   "keywords": [
     "drag",
