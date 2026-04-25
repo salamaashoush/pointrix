@@ -22,7 +22,7 @@ bun run test:e2e       # playwright test (functional e2e only, skips benches)
 bun run typecheck      # tsc --noEmit
 bun run lint           # oxlint src/
 bun run format         # oxlint src/ --fix
-bun run demo           # vite (serves *.html at project root + bench-compare.html)
+bun run demo           # vite (serves *.html at project root)
 bun run bench          # vitest bench (headless, jsdom — comparison + micro)
 bun run bench:browser  # BENCH=1 playwright test (real Chromium)
 bun run size           # build + print gzipped main-bundle size
@@ -70,7 +70,7 @@ Flat `src/` — no nested `core/plugins/integrations`. One concept per file:
 
 ## Tests
 
-- Unit + integration: `src/__tests__/*.test.ts(x)`. ~253 tests.
+- Unit + integration: `src/__tests__/*.test.ts(x)`.
 - Vitest benches: `*.bench.ts(x)` — comparison vs interact.js, plus modifier/spatial-index microbenches.
 - Custom geometry coverage: `src/__tests__/custom-geometry.test.ts` — drives a full drag/drop/sortable cycle without any real `getBoundingClientRect`.
 - Functional e2e: `e2e/*.spec.ts` (excluding `browser-bench.spec.ts`). Runs across chromium/firefox/webkit.

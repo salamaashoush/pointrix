@@ -4,7 +4,7 @@ const TEST_PAGE = '/e2e/test-page.html'
 
 async function waitForReady(page: import('@playwright/test').Page) {
   await page.goto(TEST_PAGE)
-  await page.waitForFunction(() => (window as any).__gripReady === true, null, { timeout: 5000 })
+  await page.waitForFunction(() => (window as any).__pointrixReady === true, null, { timeout: 5000 })
 }
 
 async function drag(
