@@ -139,7 +139,10 @@ export class Gesturable extends Pointrix {
       const gestureStartEvent = this.buildEvent(
         this.startDistance,
         this.startAngle,
-        1, 0, 0, 0,
+        1,
+        0,
+        0,
+        0,
         (c1.x + c2.x) / 2,
         (c1.y + c2.y) / 2,
       )
@@ -172,11 +175,18 @@ export class Gesturable extends Pointrix {
       this.prevAngle = rotation
 
       if (this.gestureOptions.onGestureMove) {
-        this.gestureOptions.onGestureMove(this.buildEvent(
-          distance, angle, scale, rotation, deltaScale, deltaAngle,
-          (c1.x + c2.x) / 2,
-          (c1.y + c2.y) / 2,
-        ))
+        this.gestureOptions.onGestureMove(
+          this.buildEvent(
+            distance,
+            angle,
+            scale,
+            rotation,
+            deltaScale,
+            deltaAngle,
+            (c1.x + c2.x) / 2,
+            (c1.y + c2.y) / 2,
+          ),
+        )
       }
     }
 
@@ -221,9 +231,7 @@ export class Gesturable extends Pointrix {
 }
 
 export function gesturable(element: HTMLElement | string, options?: GestureOptions): Gesturable {
-  const el = typeof element === 'string'
-    ? document.querySelector<HTMLElement>(element)
-    : element
+  const el = typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element
 
   if (!el) throw new Error(`Element not found: ${element}`)
 

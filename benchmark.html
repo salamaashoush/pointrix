@@ -1,675 +1,716 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>pointrix vs interact.js — Browser Benchmarks</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --surface-2: #1a1a26;
-      --border: #2a2a3a;
-      --text: #e4e4ef;
-      --text-dim: #8888a0;
-      --accent: #6c5ce7;
-      --accent-glow: rgba(108, 92, 231, 0.3);
-      --pointrix: #00d2ff;
-      --pointrix-glow: rgba(0, 210, 255, 0.2);
-      --interact: #ff6b6b;
-      --interact-glow: rgba(255, 107, 107, 0.2);
-      --success: #00e676;
-      --radius: 12px;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.6;
-    }
-
-    .page-bg {
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 92, 231, 0.15), transparent),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(0, 210, 255, 0.08), transparent);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 40px 24px 80px;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    header h1 {
-      font-size: 2.8rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, var(--pointrix), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
-    }
-
-    header p {
-      color: var(--text-dim);
-      font-size: 1.05rem;
-    }
-
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      padding: 10px 22px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    button:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 20px var(--accent-glow);
-      transform: translateY(-1px);
-    }
-
-    button:active {
-      transform: translateY(0);
-    }
-
-    button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    button.primary {
-      background: linear-gradient(135deg, var(--accent), #8b5cf6);
-      border-color: transparent;
-      color: #fff;
-      padding: 12px 32px;
-      font-size: 1rem;
-    }
-
-    button.primary:hover {
-      box-shadow: 0 0 30px var(--accent-glow);
-    }
-
-    .benchmark-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
-      margin-bottom: 20px;
-      transition: border-color 0.3s ease;
-    }
-
-    .benchmark-card:hover {
-      border-color: rgba(108, 92, 231, 0.3);
-    }
-
-    .benchmark-card.running {
-      border-color: var(--accent);
-      box-shadow: 0 0 30px var(--accent-glow);
-    }
-
-    .benchmark-card.done {
-      border-color: var(--success);
-      box-shadow: 0 0 15px rgba(0, 230, 118, 0.1);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .card-header h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-header h2 .num {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: 800;
-    }
-
-    .card-desc {
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
-
-    .progress-bar {
-      height: 3px;
-      background: var(--surface-2);
-      border-radius: 2px;
-      margin-bottom: 20px;
-      overflow: hidden;
-      display: none;
-    }
-
-    .progress-bar.active {
-      display: block;
-    }
-
-    .progress-bar .fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--pointrix));
-      border-radius: 2px;
-      transition: width 0.3s ease;
-      width: 0%;
-    }
-
-    .results {
-      display: none;
-    }
-
-    .results.visible {
-      display: block;
-      animation: fadeIn 0.4s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .result-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 120px;
-      gap: 16px;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .result-row:last-child {
-      border-bottom: none;
-    }
-
-    .result-row .label {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .result-value {
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
-      font-size: 0.9rem;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 6px;
-    }
-
-    .result-value.pointrix {
-      background: var(--pointrix-glow);
-      color: var(--pointrix);
-    }
-
-    .result-value.interact {
-      background: var(--interact-glow);
-      color: var(--interact);
-    }
-
-    .winner-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
-    .winner-badge.pointrix-wins {
-      background: var(--pointrix-glow);
-      color: var(--pointrix);
-    }
-
-    .winner-badge.interact-wins {
-      background: var(--interact-glow);
-      color: var(--interact);
-    }
-
-    .winner-badge.tie {
-      background: rgba(136, 136, 160, 0.15);
-      color: var(--text-dim);
-    }
-
-    .bar-chart {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .bar-chart .bar-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      width: 70px;
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .bar-chart .bar-track {
-      flex: 1;
-      height: 28px;
-      background: var(--surface-2);
-      border-radius: 6px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .bar-chart .bar-fill {
-      height: 100%;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #fff;
-      white-space: nowrap;
-      transition: width 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-      min-width: fit-content;
-    }
-
-    .bar-fill.pointrix-bar {
-      background: linear-gradient(90deg, rgba(0, 210, 255, 0.8), rgba(0, 210, 255, 0.5));
-    }
-
-    .bar-fill.interact-bar {
-      background: linear-gradient(90deg, rgba(255, 107, 107, 0.8), rgba(255, 107, 107, 0.5));
-    }
-
-    .status-text {
-      color: var(--text-dim);
-      font-size: 0.85rem;
-      font-style: italic;
-      padding: 8px 0;
-    }
-
-    .summary-card {
-      background: linear-gradient(135deg, var(--surface), var(--surface-2));
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
-      margin-top: 32px;
-      text-align: center;
-      display: none;
-    }
-
-    .summary-card.visible {
-      display: block;
-      animation: fadeIn 0.6s ease;
-    }
-
-    .summary-card h2 {
-      font-size: 1.5rem;
-      margin-bottom: 16px;
-    }
-
-    .summary-stats {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-
-    .summary-stat {
-      text-align: center;
-    }
-
-    .summary-stat .value {
-      font-size: 2.2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--pointrix), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .summary-stat .label {
-      color: var(--text-dim);
-      font-size: 0.85rem;
-      margin-top: 2px;
-    }
-
-    #animation-arena {
-      position: relative;
-      width: 100%;
-      height: 300px;
-      background: var(--surface-2);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-top: 16px;
-      display: none;
-    }
-
-    #animation-arena.active {
-      display: block;
-    }
-
-    .anim-dot {
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--pointrix);
-      box-shadow: 0 0 12px var(--pointrix-glow);
-      will-change: transform;
-    }
-
-    .fps-display {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--success);
-      background: rgba(0, 0, 0, 0.6);
-      padding: 6px 14px;
-      border-radius: 8px;
-      z-index: 10;
-    }
-
-    .anim-controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .anim-controls label {
-      color: var(--text-dim);
-      font-size: 0.85rem;
-    }
-
-    .anim-controls input[type="range"] {
-      accent-color: var(--accent);
-    }
-
-    .anim-controls span {
-      font-family: monospace;
-      color: var(--pointrix);
-      font-weight: 700;
-    }
-
-    @media (max-width: 700px) {
-      header h1 { font-size: 1.8rem; }
-      .result-row { grid-template-columns: 1fr; gap: 8px; }
-      .container { padding: 24px 16px 60px; }
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--accent);
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-  </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div class="page-bg"></div>
-  <div class="container">
-    <header>
-      <h1>pointrix vs interact.js</h1>
-      <p>Real browser performance benchmarks &mdash; see who wins</p>
-    </header>
-
-    <div class="controls">
-      <button class="primary" id="run-all-btn" onclick="runAllBenchmarks()">Run All Benchmarks</button>
-    </div>
-
-    <!-- Benchmark 1: Instance Creation -->
-    <div class="benchmark-card" id="bench-1">
-      <div class="card-header">
-        <h2><span class="num">1</span> Instance Creation</h2>
-        <button onclick="runBench1()">Run</button>
-      </div>
-      <p class="card-desc">Create and destroy N draggable instances. Measures instantiation and teardown throughput.</p>
-      <div class="progress-bar" id="progress-1"><div class="fill"></div></div>
-      <div class="status-text" id="status-1"></div>
-      <div class="results" id="results-1"></div>
-    </div>
-
-    <!-- Benchmark 2: DOM Stress Test -->
-    <div class="benchmark-card" id="bench-2">
-      <div class="card-header">
-        <h2><span class="num">2</span> DOM Stress Test</h2>
-        <button onclick="runBench2()">Run</button>
-      </div>
-      <p class="card-desc">Create 500 / 1000 / 2000 draggable elements, measure creation time, then simulate drag on all of them.</p>
-      <div class="progress-bar" id="progress-2"><div class="fill"></div></div>
-      <div class="status-text" id="status-2"></div>
-      <div class="results" id="results-2"></div>
-    </div>
-
-    <!-- Benchmark 3: Event Throughput -->
-    <div class="benchmark-card" id="bench-3">
-      <div class="card-header">
-        <h2><span class="num">3</span> Event Throughput</h2>
-        <button onclick="runBench3()">Run</button>
-      </div>
-      <p class="card-desc">Fire thousands of pointermove events on a draggable and measure processing rate.</p>
-      <div class="progress-bar" id="progress-3"><div class="fill"></div></div>
-      <div class="status-text" id="status-3"></div>
-      <div class="results" id="results-3"></div>
-    </div>
-
-    <!-- Benchmark 4: Modifier Pipeline -->
-    <div class="benchmark-card" id="bench-4">
-      <div class="card-header">
-        <h2><span class="num">4</span> Modifier Pipeline</h2>
-        <button onclick="runBench4()">Run</button>
-      </div>
-      <p class="card-desc">Apply snap + restrict modifiers to 100K positions, measuring modifier chain throughput.</p>
-      <div class="progress-bar" id="progress-4"><div class="fill"></div></div>
-      <div class="status-text" id="status-4"></div>
-      <div class="results" id="results-4"></div>
-    </div>
-
-    <!-- Benchmark 5: Memory Usage -->
-    <div class="benchmark-card" id="bench-5">
-      <div class="card-header">
-        <h2><span class="num">5</span> Memory Usage</h2>
-        <button onclick="runBench5()">Run</button>
-      </div>
-      <p class="card-desc">Create N instances, measure heap with <code>performance.memory</code> (Chrome only), destroy and measure delta.</p>
-      <div class="progress-bar" id="progress-5"><div class="fill"></div></div>
-      <div class="status-text" id="status-5"></div>
-      <div class="results" id="results-5"></div>
-    </div>
-
-    <!-- Benchmark 6: Animation Smoothness -->
-    <div class="benchmark-card" id="bench-6">
-      <div class="card-header">
-        <h2><span class="num">6</span> Animation Smoothness</h2>
-        <button onclick="runBench6()">Run</button>
-      </div>
-      <p class="card-desc">Animate draggable elements in circles, measure FPS. Increase element count to stress-test.</p>
-      <div class="progress-bar" id="progress-6"><div class="fill"></div></div>
-      <div class="status-text" id="status-6"></div>
-      <div class="anim-controls" id="anim-controls" style="display:none;">
-        <label>Elements:</label>
-        <input type="range" id="anim-count" min="1" max="200" value="20" oninput="updateAnimCount(this.value)">
-        <span id="anim-count-label">20</span>
-        <button onclick="startAnimation()">Start Animation</button>
-        <button onclick="stopAnimation()">Stop</button>
-      </div>
-      <div id="animation-arena">
-        <div class="fps-display" id="fps-display">-- FPS</div>
-      </div>
-      <div class="results" id="results-6"></div>
-    </div>
-
-    <!-- Summary -->
-    <div class="summary-card" id="summary-card">
-      <h2>Benchmark Summary</h2>
-      <div class="summary-stats" id="summary-stats"></div>
-    </div>
-  </div>
-
-  <!-- Hidden container for benchmark DOM elements -->
-  <div id="bench-arena" style="position:fixed;left:-9999px;top:-9999px;width:800px;height:600px;overflow:hidden;"></div>
-
-  <script type="module">
-    import { draggable, applyModifiers, snapGrid, restrict } from './src/index.ts'
-    import interact from 'interactjs'
-
-    // ─── Utility ────────────────────────────────────────────────────────────────
-
-    async function runBenchmark(name, fn, iterations = 50) {
-      const times = []
-      // Warmup
-      for (let i = 0; i < 3; i++) await fn()
-      // Measure
-      for (let i = 0; i < iterations; i++) {
-        const start = performance.now()
-        await fn()
-        times.push(performance.now() - start)
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pointrix vs interact.js — Browser Benchmarks</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-      times.sort((a, b) => a - b)
-      const median = times[Math.floor(times.length / 2)]
-      const min = times[0]
-      const mean = times.reduce((a, b) => a + b) / times.length
-      return { median, min, mean, opsPerSec: 1000 / median }
-    }
 
-    function measureFPS(duration = 3000) {
-      return new Promise(resolve => {
-        const frameTimes = []
-        let lastTime = performance.now()
-        const start = lastTime
-        function tick(now) {
-          frameTimes.push(now - lastTime)
-          lastTime = now
-          if (now - start < duration) {
-            requestAnimationFrame(tick)
-          } else {
-            const fps = frameTimes.length / (duration / 1000)
-            const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length
-            const dropped = frameTimes.filter(t => t > 20).length
-            resolve({ fps: Math.round(fps * 10) / 10, avgFrameTime, dropped, total: frameTimes.length })
-          }
+      :root {
+        --bg: #0a0a0f;
+        --surface: #12121a;
+        --surface-2: #1a1a26;
+        --border: #2a2a3a;
+        --text: #e4e4ef;
+        --text-dim: #8888a0;
+        --accent: #6c5ce7;
+        --accent-glow: rgba(108, 92, 231, 0.3);
+        --pointrix: #00d2ff;
+        --pointrix-glow: rgba(0, 210, 255, 0.2);
+        --interact: #ff6b6b;
+        --interact-glow: rgba(255, 107, 107, 0.2);
+        --success: #00e676;
+        --radius: 12px;
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+
+      .page-bg {
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 92, 231, 0.15), transparent),
+          radial-gradient(ellipse 60% 40% at 80% 100%, rgba(0, 210, 255, 0.08), transparent);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 24px 80px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 48px;
+      }
+
+      header h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, var(--pointrix), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+      }
+
+      header p {
+        color: var(--text-dim);
+        font-size: 1.05rem;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        padding: 10px 22px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 20px var(--accent-glow);
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      button.primary {
+        background: linear-gradient(135deg, var(--accent), #8b5cf6);
+        border-color: transparent;
+        color: #fff;
+        padding: 12px 32px;
+        font-size: 1rem;
+      }
+
+      button.primary:hover {
+        box-shadow: 0 0 30px var(--accent-glow);
+      }
+
+      .benchmark-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+        margin-bottom: 20px;
+        transition: border-color 0.3s ease;
+      }
+
+      .benchmark-card:hover {
+        border-color: rgba(108, 92, 231, 0.3);
+      }
+
+      .benchmark-card.running {
+        border-color: var(--accent);
+        box-shadow: 0 0 30px var(--accent-glow);
+      }
+
+      .benchmark-card.done {
+        border-color: var(--success);
+        box-shadow: 0 0 15px rgba(0, 230, 118, 0.1);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .card-header h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .card-header h2 .num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 800;
+      }
+
+      .card-desc {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+      }
+
+      .progress-bar {
+        height: 3px;
+        background: var(--surface-2);
+        border-radius: 2px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        display: none;
+      }
+
+      .progress-bar.active {
+        display: block;
+      }
+
+      .progress-bar .fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--pointrix));
+        border-radius: 2px;
+        transition: width 0.3s ease;
+        width: 0%;
+      }
+
+      .results {
+        display: none;
+      }
+
+      .results.visible {
+        display: block;
+        animation: fadeIn 0.4s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
         }
-        requestAnimationFrame(tick)
-      })
-    }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    function setStatus(id, text) {
-      document.getElementById(`status-${id}`).innerHTML = text
-    }
+      .result-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 120px;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+      }
 
-    function setProgress(id, pct) {
-      const bar = document.getElementById(`progress-${id}`)
-      bar.classList.add('active')
-      bar.querySelector('.fill').style.width = pct + '%'
-    }
+      .result-row:last-child {
+        border-bottom: none;
+      }
 
-    function hideProgress(id) {
-      const bar = document.getElementById(`progress-${id}`)
-      bar.classList.remove('active')
-    }
+      .result-row .label {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
 
-    function setCardState(id, state) {
-      const card = document.getElementById(`bench-${id}`)
-      card.classList.remove('running', 'done')
-      if (state) card.classList.add(state)
-    }
+      .result-value {
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 6px;
+      }
 
-    function formatNum(n) {
-      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'
-      if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K'
-      return n.toFixed(1)
-    }
+      .result-value.pointrix {
+        background: var(--pointrix-glow);
+        color: var(--pointrix);
+      }
 
-    function renderResult(id, rows) {
-      const container = document.getElementById(`results-${id}`)
-      let html = ''
+      .result-value.interact {
+        background: var(--interact-glow);
+        color: var(--interact);
+      }
 
-      for (const row of rows) {
-        const pVal = row.pointrix
-        const iVal = row.interact
-        const pIsOps = row.unit === 'ops/sec'
-        const pointrixBetter = pIsOps ? pVal > iVal : pVal < iVal
-        const ratio = pointrixBetter
-          ? (pIsOps ? pVal / iVal : iVal / pVal)
-          : (pIsOps ? iVal / pVal : pVal / iVal)
-        const ratioText = ratio.toFixed(1) + 'x'
-        const winnerClass = Math.abs(ratio - 1) < 0.05
-          ? 'tie'
-          : pointrixBetter ? 'pointrix-wins' : 'interact-wins'
-        const winnerLabel = Math.abs(ratio - 1) < 0.05
-          ? 'Tie'
-          : pointrixBetter ? `pointrix ${ratioText}` : `interact.js ${ratioText}`
+      .winner-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
 
-        const maxVal = Math.max(pVal, iVal)
-        const pPct = (pVal / maxVal * 100).toFixed(1)
-        const iPct = (iVal / maxVal * 100).toFixed(1)
+      .winner-badge.pointrix-wins {
+        background: var(--pointrix-glow);
+        color: var(--pointrix);
+      }
 
-        const pDisplay = pIsOps ? formatNum(pVal) + ' ops/s' : pVal.toFixed(2) + ' ms'
-        const iDisplay = pIsOps ? formatNum(iVal) + ' ops/s' : iVal.toFixed(2) + ' ms'
+      .winner-badge.interact-wins {
+        background: var(--interact-glow);
+        color: var(--interact);
+      }
 
-        html += `
+      .winner-badge.tie {
+        background: rgba(136, 136, 160, 0.15);
+        color: var(--text-dim);
+      }
+
+      .bar-chart {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .bar-chart .bar-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        width: 70px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      .bar-chart .bar-track {
+        flex: 1;
+        height: 28px;
+        background: var(--surface-2);
+        border-radius: 6px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .bar-chart .bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #fff;
+        white-space: nowrap;
+        transition: width 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        min-width: fit-content;
+      }
+
+      .bar-fill.pointrix-bar {
+        background: linear-gradient(90deg, rgba(0, 210, 255, 0.8), rgba(0, 210, 255, 0.5));
+      }
+
+      .bar-fill.interact-bar {
+        background: linear-gradient(90deg, rgba(255, 107, 107, 0.8), rgba(255, 107, 107, 0.5));
+      }
+
+      .status-text {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-style: italic;
+        padding: 8px 0;
+      }
+
+      .summary-card {
+        background: linear-gradient(135deg, var(--surface), var(--surface-2));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 32px;
+        margin-top: 32px;
+        text-align: center;
+        display: none;
+      }
+
+      .summary-card.visible {
+        display: block;
+        animation: fadeIn 0.6s ease;
+      }
+
+      .summary-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+      }
+
+      .summary-stats {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+
+      .summary-stat {
+        text-align: center;
+      }
+
+      .summary-stat .value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--pointrix), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .summary-stat .label {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        margin-top: 2px;
+      }
+
+      #animation-arena {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        background: var(--surface-2);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-top: 16px;
+        display: none;
+      }
+
+      #animation-arena.active {
+        display: block;
+      }
+
+      .anim-dot {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--pointrix);
+        box-shadow: 0 0 12px var(--pointrix-glow);
+        will-change: transform;
+      }
+
+      .fps-display {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--success);
+        background: rgba(0, 0, 0, 0.6);
+        padding: 6px 14px;
+        border-radius: 8px;
+        z-index: 10;
+      }
+
+      .anim-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+
+      .anim-controls label {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+      }
+
+      .anim-controls input[type='range'] {
+        accent-color: var(--accent);
+      }
+
+      .anim-controls span {
+        font-family: monospace;
+        color: var(--pointrix);
+        font-weight: 700;
+      }
+
+      @media (max-width: 700px) {
+        header h1 {
+          font-size: 1.8rem;
+        }
+        .result-row {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .container {
+          padding: 24px 16px 60px;
+        }
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--accent);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="page-bg"></div>
+    <div class="container">
+      <header>
+        <h1>pointrix vs interact.js</h1>
+        <p>Real browser performance benchmarks &mdash; see who wins</p>
+      </header>
+
+      <div class="controls">
+        <button class="primary" id="run-all-btn" onclick="runAllBenchmarks()">Run All Benchmarks</button>
+      </div>
+
+      <!-- Benchmark 1: Instance Creation -->
+      <div class="benchmark-card" id="bench-1">
+        <div class="card-header">
+          <h2><span class="num">1</span> Instance Creation</h2>
+          <button onclick="runBench1()">Run</button>
+        </div>
+        <p class="card-desc">
+          Create and destroy N draggable instances. Measures instantiation and teardown throughput.
+        </p>
+        <div class="progress-bar" id="progress-1"><div class="fill"></div></div>
+        <div class="status-text" id="status-1"></div>
+        <div class="results" id="results-1"></div>
+      </div>
+
+      <!-- Benchmark 2: DOM Stress Test -->
+      <div class="benchmark-card" id="bench-2">
+        <div class="card-header">
+          <h2><span class="num">2</span> DOM Stress Test</h2>
+          <button onclick="runBench2()">Run</button>
+        </div>
+        <p class="card-desc">
+          Create 500 / 1000 / 2000 draggable elements, measure creation time, then simulate drag on all of them.
+        </p>
+        <div class="progress-bar" id="progress-2"><div class="fill"></div></div>
+        <div class="status-text" id="status-2"></div>
+        <div class="results" id="results-2"></div>
+      </div>
+
+      <!-- Benchmark 3: Event Throughput -->
+      <div class="benchmark-card" id="bench-3">
+        <div class="card-header">
+          <h2><span class="num">3</span> Event Throughput</h2>
+          <button onclick="runBench3()">Run</button>
+        </div>
+        <p class="card-desc">Fire thousands of pointermove events on a draggable and measure processing rate.</p>
+        <div class="progress-bar" id="progress-3"><div class="fill"></div></div>
+        <div class="status-text" id="status-3"></div>
+        <div class="results" id="results-3"></div>
+      </div>
+
+      <!-- Benchmark 4: Modifier Pipeline -->
+      <div class="benchmark-card" id="bench-4">
+        <div class="card-header">
+          <h2><span class="num">4</span> Modifier Pipeline</h2>
+          <button onclick="runBench4()">Run</button>
+        </div>
+        <p class="card-desc">Apply snap + restrict modifiers to 100K positions, measuring modifier chain throughput.</p>
+        <div class="progress-bar" id="progress-4"><div class="fill"></div></div>
+        <div class="status-text" id="status-4"></div>
+        <div class="results" id="results-4"></div>
+      </div>
+
+      <!-- Benchmark 5: Memory Usage -->
+      <div class="benchmark-card" id="bench-5">
+        <div class="card-header">
+          <h2><span class="num">5</span> Memory Usage</h2>
+          <button onclick="runBench5()">Run</button>
+        </div>
+        <p class="card-desc">
+          Create N instances, measure heap with <code>performance.memory</code> (Chrome only), destroy and measure
+          delta.
+        </p>
+        <div class="progress-bar" id="progress-5"><div class="fill"></div></div>
+        <div class="status-text" id="status-5"></div>
+        <div class="results" id="results-5"></div>
+      </div>
+
+      <!-- Benchmark 6: Animation Smoothness -->
+      <div class="benchmark-card" id="bench-6">
+        <div class="card-header">
+          <h2><span class="num">6</span> Animation Smoothness</h2>
+          <button onclick="runBench6()">Run</button>
+        </div>
+        <p class="card-desc">
+          Animate draggable elements in circles, measure FPS. Increase element count to stress-test.
+        </p>
+        <div class="progress-bar" id="progress-6"><div class="fill"></div></div>
+        <div class="status-text" id="status-6"></div>
+        <div class="anim-controls" id="anim-controls" style="display: none">
+          <label>Elements:</label>
+          <input type="range" id="anim-count" min="1" max="200" value="20" oninput="updateAnimCount(this.value)" />
+          <span id="anim-count-label">20</span>
+          <button onclick="startAnimation()">Start Animation</button>
+          <button onclick="stopAnimation()">Stop</button>
+        </div>
+        <div id="animation-arena">
+          <div class="fps-display" id="fps-display">-- FPS</div>
+        </div>
+        <div class="results" id="results-6"></div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-card" id="summary-card">
+        <h2>Benchmark Summary</h2>
+        <div class="summary-stats" id="summary-stats"></div>
+      </div>
+    </div>
+
+    <!-- Hidden container for benchmark DOM elements -->
+    <div
+      id="bench-arena"
+      style="position: fixed; left: -9999px; top: -9999px; width: 800px; height: 600px; overflow: hidden"
+    ></div>
+
+    <script type="module">
+      import { draggable, applyModifiers, snapGrid, restrict } from './src/index.ts'
+      import interact from 'interactjs'
+
+      // ─── Utility ────────────────────────────────────────────────────────────────
+
+      async function runBenchmark(name, fn, iterations = 50) {
+        const times = []
+        // Warmup
+        for (let i = 0; i < 3; i++) await fn()
+        // Measure
+        for (let i = 0; i < iterations; i++) {
+          const start = performance.now()
+          await fn()
+          times.push(performance.now() - start)
+        }
+        times.sort((a, b) => a - b)
+        const median = times[Math.floor(times.length / 2)]
+        const min = times[0]
+        const mean = times.reduce((a, b) => a + b) / times.length
+        return { median, min, mean, opsPerSec: 1000 / median }
+      }
+
+      function measureFPS(duration = 3000) {
+        return new Promise((resolve) => {
+          const frameTimes = []
+          let lastTime = performance.now()
+          const start = lastTime
+          function tick(now) {
+            frameTimes.push(now - lastTime)
+            lastTime = now
+            if (now - start < duration) {
+              requestAnimationFrame(tick)
+            } else {
+              const fps = frameTimes.length / (duration / 1000)
+              const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length
+              const dropped = frameTimes.filter((t) => t > 20).length
+              resolve({ fps: Math.round(fps * 10) / 10, avgFrameTime, dropped, total: frameTimes.length })
+            }
+          }
+          requestAnimationFrame(tick)
+        })
+      }
+
+      function setStatus(id, text) {
+        document.getElementById(`status-${id}`).innerHTML = text
+      }
+
+      function setProgress(id, pct) {
+        const bar = document.getElementById(`progress-${id}`)
+        bar.classList.add('active')
+        bar.querySelector('.fill').style.width = pct + '%'
+      }
+
+      function hideProgress(id) {
+        const bar = document.getElementById(`progress-${id}`)
+        bar.classList.remove('active')
+      }
+
+      function setCardState(id, state) {
+        const card = document.getElementById(`bench-${id}`)
+        card.classList.remove('running', 'done')
+        if (state) card.classList.add(state)
+      }
+
+      function formatNum(n) {
+        if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'
+        if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K'
+        return n.toFixed(1)
+      }
+
+      function renderResult(id, rows) {
+        const container = document.getElementById(`results-${id}`)
+        let html = ''
+
+        for (const row of rows) {
+          const pVal = row.pointrix
+          const iVal = row.interact
+          const pIsOps = row.unit === 'ops/sec'
+          const pointrixBetter = pIsOps ? pVal > iVal : pVal < iVal
+          const ratio = pointrixBetter ? (pIsOps ? pVal / iVal : iVal / pVal) : pIsOps ? iVal / pVal : pVal / iVal
+          const ratioText = ratio.toFixed(1) + 'x'
+          const winnerClass = Math.abs(ratio - 1) < 0.05 ? 'tie' : pointrixBetter ? 'pointrix-wins' : 'interact-wins'
+          const winnerLabel =
+            Math.abs(ratio - 1) < 0.05 ? 'Tie' : pointrixBetter ? `pointrix ${ratioText}` : `interact.js ${ratioText}`
+
+          const maxVal = Math.max(pVal, iVal)
+          const pPct = ((pVal / maxVal) * 100).toFixed(1)
+          const iPct = ((iVal / maxVal) * 100).toFixed(1)
+
+          const pDisplay = pIsOps ? formatNum(pVal) + ' ops/s' : pVal.toFixed(2) + ' ms'
+          const iDisplay = pIsOps ? formatNum(iVal) + ' ops/s' : iVal.toFixed(2) + ' ms'
+
+          html += `
           <div class="result-row">
             <div class="label">${row.name}</div>
             <div class="result-value pointrix">${pDisplay}</div>
@@ -685,71 +726,73 @@
             <div class="bar-track"><div class="bar-fill interact-bar" style="width:${iPct}%">${iDisplay}</div></div>
           </div>
         `
-      }
-
-      container.innerHTML = html
-      container.classList.add('visible')
-    }
-
-    function createElements(count) {
-      const arena = document.getElementById('bench-arena')
-      const els = []
-      for (let i = 0; i < count; i++) {
-        const el = document.createElement('div')
-        el.style.cssText = 'width:40px;height:40px;position:absolute;background:#333;'
-        el.style.left = (i % 40) * 42 + 'px'
-        el.style.top = Math.floor(i / 40) * 42 + 'px'
-        arena.appendChild(el)
-        els.push(el)
-      }
-      return els
-    }
-
-    function clearArena() {
-      document.getElementById('bench-arena').innerHTML = ''
-    }
-
-    async function yieldFrame() {
-      return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
-    }
-
-    // ─── Benchmark Results Tracking ─────────────────────────────────────────────
-
-    const allResults = []
-
-    function trackResult(rows) {
-      for (const r of rows) {
-        allResults.push(r)
-      }
-    }
-
-    function showSummary() {
-      let pointrixWins = 0
-      let interactWins = 0
-      let totalRatio = 0
-      let count = 0
-
-      for (const r of allResults) {
-        const pIsOps = r.unit === 'ops/sec'
-        const pointrixBetter = pIsOps ? r.pointrix > r.interact : r.pointrix < r.interact
-        const ratio = pointrixBetter
-          ? (pIsOps ? r.pointrix / r.interact : r.interact / r.pointrix)
-          : 1 / (pIsOps ? r.pointrix / r.interact : r.interact / r.pointrix)
-
-        if (pointrixBetter) {
-          pointrixWins++
-          totalRatio += ratio
-        } else {
-          interactWins++
-          totalRatio += ratio
         }
-        count++
+
+        container.innerHTML = html
+        container.classList.add('visible')
       }
 
-      const avgSpeedup = count > 0 ? (totalRatio / count).toFixed(1) : '-'
+      function createElements(count) {
+        const arena = document.getElementById('bench-arena')
+        const els = []
+        for (let i = 0; i < count; i++) {
+          const el = document.createElement('div')
+          el.style.cssText = 'width:40px;height:40px;position:absolute;background:#333;'
+          el.style.left = (i % 40) * 42 + 'px'
+          el.style.top = Math.floor(i / 40) * 42 + 'px'
+          arena.appendChild(el)
+          els.push(el)
+        }
+        return els
+      }
 
-      const container = document.getElementById('summary-stats')
-      container.innerHTML = `
+      function clearArena() {
+        document.getElementById('bench-arena').innerHTML = ''
+      }
+
+      async function yieldFrame() {
+        return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+      }
+
+      // ─── Benchmark Results Tracking ─────────────────────────────────────────────
+
+      const allResults = []
+
+      function trackResult(rows) {
+        for (const r of rows) {
+          allResults.push(r)
+        }
+      }
+
+      function showSummary() {
+        let pointrixWins = 0
+        let interactWins = 0
+        let totalRatio = 0
+        let count = 0
+
+        for (const r of allResults) {
+          const pIsOps = r.unit === 'ops/sec'
+          const pointrixBetter = pIsOps ? r.pointrix > r.interact : r.pointrix < r.interact
+          const ratio = pointrixBetter
+            ? pIsOps
+              ? r.pointrix / r.interact
+              : r.interact / r.pointrix
+            : 1 / (pIsOps ? r.pointrix / r.interact : r.interact / r.pointrix)
+
+          if (pointrixBetter) {
+            pointrixWins++
+            totalRatio += ratio
+          } else {
+            interactWins++
+            totalRatio += ratio
+          }
+          count++
+        }
+
+        const avgSpeedup = count > 0 ? (totalRatio / count).toFixed(1) : '-'
+
+        const container = document.getElementById('summary-stats')
+        container.innerHTML = `
         <div class="summary-stat">
           <div class="value">${pointrixWins}/${count}</div>
           <div class="label">Benchmarks Won by pointrix</div>
@@ -763,600 +806,697 @@
           <div class="label">Total Benchmarks</div>
         </div>
       `
-      document.getElementById('summary-card').classList.add('visible')
-    }
+        document.getElementById('summary-card').classList.add('visible')
+      }
 
-    // ─── Benchmark 1: Instance Creation ─────────────────────────────────────────
+      // ─── Benchmark 1: Instance Creation ─────────────────────────────────────────
 
-    async function runBench1() {
-      const id = 1
-      const N = 200
-      setCardState(id, 'running')
-      setStatus(id, '<span class="spinner"></span>Running instance creation benchmark...')
-      setProgress(id, 10)
+      async function runBench1() {
+        const id = 1
+        const N = 200
+        setCardState(id, 'running')
+        setStatus(id, '<span class="spinner"></span>Running instance creation benchmark...')
+        setProgress(id, 10)
 
-      const elements = createElements(N)
+        const elements = createElements(N)
 
-      setProgress(id, 30)
-      const pResult = await runBenchmark('pointrix create+destroy', () => {
-        const instances = elements.map(el => draggable(el))
-        instances.forEach(inst => inst.destroy())
-      }, 50)
-
-      setProgress(id, 65)
-      const iResult = await runBenchmark('interact.js create+destroy', () => {
-        const instances = elements.map(el => {
-          const inst = interact(el).draggable({ listeners: {} })
-          return inst
-        })
-        instances.forEach(inst => inst.unset())
-      }, 50)
-
-      setProgress(id, 100)
-      clearArena()
-
-      const rows = [{
-        name: `Create + Destroy ${N} instances`,
-        pointrix: pResult.opsPerSec,
-        interact: iResult.opsPerSec,
-        unit: 'ops/sec'
-      }]
-
-      renderResult(id, rows)
-      trackResult(rows)
-      setStatus(id, '')
-      hideProgress(id)
-      setCardState(id, 'done')
-      return rows
-    }
-
-    // ─── Benchmark 2: DOM Stress Test ───────────────────────────────────────────
-
-    async function runBench2() {
-      const id = 2
-      const counts = [500, 1000, 2000]
-      const rows = []
-      setCardState(id, 'running')
-      setStatus(id, '<span class="spinner"></span>Running DOM stress test...')
-
-      for (let ci = 0; ci < counts.length; ci++) {
-        const count = counts[ci]
-        setProgress(id, (ci / counts.length) * 100)
-        setStatus(id, `<span class="spinner"></span>Testing ${count} elements...`)
-
-        // pointrix
-        let elements = createElements(count)
-        let startP = performance.now()
-        const pInstances = elements.map(el => draggable(el))
-        const pCreateTime = performance.now() - startP
-
-        await yieldFrame()
-
-        // Simulate drag on all - fire pointer events
-        const pDragStart = performance.now()
-        for (const el of elements) {
-          el.dispatchEvent(new PointerEvent('pointerdown', {
-            clientX: 10, clientY: 10, pointerId: 1, isPrimary: true, bubbles: true
-          }))
-        }
-        for (let step = 0; step < 5; step++) {
-          document.dispatchEvent(new PointerEvent('pointermove', {
-            clientX: 15 + step * 3, clientY: 15 + step * 3, pointerId: 1, isPrimary: true, bubbles: true
-          }))
-          await yieldFrame()
-        }
-        for (const el of elements) {
-          document.dispatchEvent(new PointerEvent('pointerup', {
-            clientX: 30, clientY: 30, pointerId: 1, isPrimary: true, bubbles: true
-          }))
-        }
-        const pDragTime = performance.now() - pDragStart
-        pInstances.forEach(inst => inst.destroy())
-        clearArena()
-
-        await yieldFrame()
-
-        // interact.js
-        elements = createElements(count)
-        let startI = performance.now()
-        const iInstances = elements.map(el =>
-          interact(el).draggable({ listeners: { move() {} } })
+        setProgress(id, 30)
+        const pResult = await runBenchmark(
+          'pointrix create+destroy',
+          () => {
+            const instances = elements.map((el) => draggable(el))
+            instances.forEach((inst) => inst.destroy())
+          },
+          50,
         )
-        const iCreateTime = performance.now() - startI
 
-        await yieldFrame()
+        setProgress(id, 65)
+        const iResult = await runBenchmark(
+          'interact.js create+destroy',
+          () => {
+            const instances = elements.map((el) => {
+              const inst = interact(el).draggable({ listeners: {} })
+              return inst
+            })
+            instances.forEach((inst) => inst.unset())
+          },
+          50,
+        )
 
-        const iDragStart = performance.now()
-        for (const el of elements) {
-          el.dispatchEvent(new PointerEvent('pointerdown', {
-            clientX: 10, clientY: 10, pointerId: 1, isPrimary: true, bubbles: true
-          }))
-        }
-        for (let step = 0; step < 5; step++) {
-          document.dispatchEvent(new PointerEvent('pointermove', {
-            clientX: 15 + step * 3, clientY: 15 + step * 3, pointerId: 1, isPrimary: true, bubbles: true
-          }))
-          await yieldFrame()
-        }
-        for (const el of elements) {
-          document.dispatchEvent(new PointerEvent('pointerup', {
-            clientX: 30, clientY: 30, pointerId: 1, isPrimary: true, bubbles: true
-          }))
-        }
-        const iDragTime = performance.now() - iDragStart
-        iInstances.forEach(inst => inst.unset())
+        setProgress(id, 100)
         clearArena()
 
-        await yieldFrame()
+        const rows = [
+          {
+            name: `Create + Destroy ${N} instances`,
+            pointrix: pResult.opsPerSec,
+            interact: iResult.opsPerSec,
+            unit: 'ops/sec',
+          },
+        ]
 
-        rows.push({
-          name: `${count} elements - Creation`,
-          pointrix: pCreateTime,
-          interact: iCreateTime,
-          unit: 'ms'
-        })
-        rows.push({
-          name: `${count} elements - Drag cycle`,
-          pointrix: pDragTime,
-          interact: iDragTime,
-          unit: 'ms'
-        })
+        renderResult(id, rows)
+        trackResult(rows)
+        setStatus(id, '')
+        hideProgress(id)
+        setCardState(id, 'done')
+        return rows
       }
 
-      setProgress(id, 100)
-      renderResult(id, rows)
-      trackResult(rows)
-      setStatus(id, '')
-      hideProgress(id)
-      setCardState(id, 'done')
-      return rows
-    }
+      // ─── Benchmark 2: DOM Stress Test ───────────────────────────────────────────
 
-    // ─── Benchmark 3: Event Throughput ──────────────────────────────────────────
+      async function runBench2() {
+        const id = 2
+        const counts = [500, 1000, 2000]
+        const rows = []
+        setCardState(id, 'running')
+        setStatus(id, '<span class="spinner"></span>Running DOM stress test...')
 
-    async function runBench3() {
-      const id = 3
-      const EVENT_COUNT = 5000
-      setCardState(id, 'running')
-      setStatus(id, '<span class="spinner"></span>Measuring event throughput...')
-      setProgress(id, 10)
+        for (let ci = 0; ci < counts.length; ci++) {
+          const count = counts[ci]
+          setProgress(id, (ci / counts.length) * 100)
+          setStatus(id, `<span class="spinner"></span>Testing ${count} elements...`)
 
-      const elements = createElements(1)
-      const el = elements[0]
+          // pointrix
+          let elements = createElements(count)
+          let startP = performance.now()
+          const pInstances = elements.map((el) => draggable(el))
+          const pCreateTime = performance.now() - startP
 
-      // pointrix
-      let moveCount = 0
-      const pInst = draggable(el, {
-        threshold: 0,
-        onDragMove() { moveCount++ }
-      })
+          await yieldFrame()
 
-      el.dispatchEvent(new PointerEvent('pointerdown', {
-        clientX: 100, clientY: 100, pointerId: 1, isPrimary: true, bubbles: true
-      }))
-      await yieldFrame()
+          // Simulate drag on all - fire pointer events
+          const pDragStart = performance.now()
+          for (const el of elements) {
+            el.dispatchEvent(
+              new PointerEvent('pointerdown', {
+                clientX: 10,
+                clientY: 10,
+                pointerId: 1,
+                isPrimary: true,
+                bubbles: true,
+              }),
+            )
+          }
+          for (let step = 0; step < 5; step++) {
+            document.dispatchEvent(
+              new PointerEvent('pointermove', {
+                clientX: 15 + step * 3,
+                clientY: 15 + step * 3,
+                pointerId: 1,
+                isPrimary: true,
+                bubbles: true,
+              }),
+            )
+            await yieldFrame()
+          }
+          for (const el of elements) {
+            document.dispatchEvent(
+              new PointerEvent('pointerup', {
+                clientX: 30,
+                clientY: 30,
+                pointerId: 1,
+                isPrimary: true,
+                bubbles: true,
+              }),
+            )
+          }
+          const pDragTime = performance.now() - pDragStart
+          pInstances.forEach((inst) => inst.destroy())
+          clearArena()
 
-      setProgress(id, 30)
-      const pStart = performance.now()
-      for (let i = 0; i < EVENT_COUNT; i++) {
-        document.dispatchEvent(new PointerEvent('pointermove', {
-          clientX: 100 + (i % 200), clientY: 100 + (i % 200), pointerId: 1, isPrimary: true, bubbles: true
-        }))
-      }
-      // Wait for RAF-batched updates to flush
-      await yieldFrame()
-      await yieldFrame()
-      const pTime = performance.now() - pStart
-      document.dispatchEvent(new PointerEvent('pointerup', {
-        clientX: 200, clientY: 200, pointerId: 1, isPrimary: true, bubbles: true
-      }))
-      pInst.destroy()
+          await yieldFrame()
 
-      setProgress(id, 55)
+          // interact.js
+          elements = createElements(count)
+          let startI = performance.now()
+          const iInstances = elements.map((el) => interact(el).draggable({ listeners: { move() {} } }))
+          const iCreateTime = performance.now() - startI
 
-      // interact.js
-      let iMoveCount = 0
-      const iInst = interact(el).draggable({
-        listeners: { move() { iMoveCount++ } }
-      })
+          await yieldFrame()
 
-      el.dispatchEvent(new PointerEvent('pointerdown', {
-        clientX: 100, clientY: 100, pointerId: 2, isPrimary: true, bubbles: true
-      }))
-      await yieldFrame()
+          const iDragStart = performance.now()
+          for (const el of elements) {
+            el.dispatchEvent(
+              new PointerEvent('pointerdown', {
+                clientX: 10,
+                clientY: 10,
+                pointerId: 1,
+                isPrimary: true,
+                bubbles: true,
+              }),
+            )
+          }
+          for (let step = 0; step < 5; step++) {
+            document.dispatchEvent(
+              new PointerEvent('pointermove', {
+                clientX: 15 + step * 3,
+                clientY: 15 + step * 3,
+                pointerId: 1,
+                isPrimary: true,
+                bubbles: true,
+              }),
+            )
+            await yieldFrame()
+          }
+          for (const el of elements) {
+            document.dispatchEvent(
+              new PointerEvent('pointerup', {
+                clientX: 30,
+                clientY: 30,
+                pointerId: 1,
+                isPrimary: true,
+                bubbles: true,
+              }),
+            )
+          }
+          const iDragTime = performance.now() - iDragStart
+          iInstances.forEach((inst) => inst.unset())
+          clearArena()
 
-      setProgress(id, 70)
-      const iStart = performance.now()
-      for (let i = 0; i < EVENT_COUNT; i++) {
-        document.dispatchEvent(new PointerEvent('pointermove', {
-          clientX: 100 + (i % 200), clientY: 100 + (i % 200), pointerId: 2, isPrimary: true, bubbles: true
-        }))
-      }
-      await yieldFrame()
-      await yieldFrame()
-      const iTime = performance.now() - iStart
-      document.dispatchEvent(new PointerEvent('pointerup', {
-        clientX: 200, clientY: 200, pointerId: 2, isPrimary: true, bubbles: true
-      }))
-      iInst.unset()
+          await yieldFrame()
 
-      setProgress(id, 100)
-      clearArena()
-
-      const rows = [
-        {
-          name: `${EVENT_COUNT} pointermove events`,
-          pointrix: 1000 / pTime * EVENT_COUNT,
-          interact: 1000 / iTime * EVENT_COUNT,
-          unit: 'ops/sec'
-        },
-        {
-          name: 'Total processing time',
-          pointrix: pTime,
-          interact: iTime,
-          unit: 'ms'
-        }
-      ]
-
-      renderResult(id, rows)
-      trackResult(rows)
-      setStatus(id, '')
-      hideProgress(id)
-      setCardState(id, 'done')
-      return rows
-    }
-
-    // ─── Benchmark 4: Modifier Pipeline ─────────────────────────────────────────
-
-    async function runBench4() {
-      const id = 4
-      const COUNT = 100_000
-      setCardState(id, 'running')
-      setStatus(id, '<span class="spinner"></span>Running modifier pipeline benchmark...')
-      setProgress(id, 10)
-
-      const dummyEl = document.createElement('div')
-      document.body.appendChild(dummyEl)
-
-      // pointrix modifiers
-      const pSnap = snapGrid({ x: 20, y: 20 })
-      const pRestrict = restrict({ bounds: { left: 0, top: 0, right: 800, bottom: 600 } })
-      const modifiers = [pSnap, pRestrict]
-
-      setProgress(id, 30)
-      const pResult = await runBenchmark('pointrix modifiers', () => {
-        for (let i = 0; i < COUNT; i++) {
-          applyModifiers(modifiers, {
-            position: { x: Math.random() * 1000, y: Math.random() * 1000 },
-            velocity: { x: 0, y: 0 },
-            element: dummyEl,
-            startPosition: { x: 0, y: 0 },
-            delta: { x: 1, y: 1 }
+          rows.push({
+            name: `${count} elements - Creation`,
+            pointrix: pCreateTime,
+            interact: iCreateTime,
+            unit: 'ms',
+          })
+          rows.push({
+            name: `${count} elements - Drag cycle`,
+            pointrix: pDragTime,
+            interact: iDragTime,
+            unit: 'ms',
           })
         }
-      }, 20)
 
-      setProgress(id, 65)
-
-      // interact.js modifier equivalent - apply snap + restrict manually
-      // interact.js modifiers run internally; we approximate by using their snap/restrict API
-      const iResult = await runBenchmark('interact.js equivalent', () => {
-        for (let i = 0; i < COUNT; i++) {
-          const x = Math.random() * 1000
-          const y = Math.random() * 1000
-          // Simulate snap to grid
-          const sx = Math.round(x / 20) * 20
-          const sy = Math.round(y / 20) * 20
-          // Simulate restrict to bounds
-          const rx = Math.max(0, Math.min(sx, 800))
-          const ry = Math.max(0, Math.min(sy, 600))
-        }
-      }, 20)
-
-      setProgress(id, 100)
-      dummyEl.remove()
-
-      const rows = [{
-        name: `${formatNum(COUNT)} modifier applications`,
-        pointrix: pResult.opsPerSec,
-        interact: iResult.opsPerSec,
-        unit: 'ops/sec'
-      }]
-
-      renderResult(id, rows)
-      trackResult(rows)
-      setStatus(id, '')
-      hideProgress(id)
-      setCardState(id, 'done')
-      return rows
-    }
-
-    // ─── Benchmark 5: Memory Usage ──────────────────────────────────────────────
-
-    async function runBench5() {
-      const id = 5
-      const N = 1000
-      setCardState(id, 'running')
-      setStatus(id, '<span class="spinner"></span>Measuring memory usage...')
-      setProgress(id, 10)
-
-      const mem = performance.memory
-      if (!mem) {
-        setStatus(id, 'performance.memory not available. This benchmark requires Chrome with --enable-precise-memory-info flag.')
-        setCardState(id, 'done')
+        setProgress(id, 100)
+        renderResult(id, rows)
+        trackResult(rows)
+        setStatus(id, '')
         hideProgress(id)
-        return []
+        setCardState(id, 'done')
+        return rows
       }
 
-      // Force GC if available
-      if (window.gc) window.gc()
-      await yieldFrame()
+      // ─── Benchmark 3: Event Throughput ──────────────────────────────────────────
 
-      const elements = createElements(N)
+      async function runBench3() {
+        const id = 3
+        const EVENT_COUNT = 5000
+        setCardState(id, 'running')
+        setStatus(id, '<span class="spinner"></span>Measuring event throughput...')
+        setProgress(id, 10)
 
-      // pointrix memory
-      if (window.gc) window.gc()
-      await yieldFrame()
-      const pBefore = mem.usedJSHeapSize
+        const elements = createElements(1)
+        const el = elements[0]
 
-      const pInstances = elements.map(el => draggable(el))
-      await yieldFrame()
-      const pAfter = mem.usedJSHeapSize
-      const pMemPerInstance = (pAfter - pBefore) / N
+        // pointrix
+        let moveCount = 0
+        const pInst = draggable(el, {
+          threshold: 0,
+          onDragMove() {
+            moveCount++
+          },
+        })
 
-      pInstances.forEach(inst => inst.destroy())
-      if (window.gc) window.gc()
-      await yieldFrame()
-      const pAfterDestroy = mem.usedJSHeapSize
+        el.dispatchEvent(
+          new PointerEvent('pointerdown', {
+            clientX: 100,
+            clientY: 100,
+            pointerId: 1,
+            isPrimary: true,
+            bubbles: true,
+          }),
+        )
+        await yieldFrame()
 
-      setProgress(id, 50)
-      clearArena()
-
-      // interact.js memory
-      const elements2 = createElements(N)
-      if (window.gc) window.gc()
-      await yieldFrame()
-      const iBefore = mem.usedJSHeapSize
-
-      const iInstances = elements2.map(el =>
-        interact(el).draggable({ listeners: { move() {} } })
-      )
-      await yieldFrame()
-      const iAfter = mem.usedJSHeapSize
-      const iMemPerInstance = (iAfter - iBefore) / N
-
-      iInstances.forEach(inst => inst.unset())
-      if (window.gc) window.gc()
-      await yieldFrame()
-      const iAfterDestroy = mem.usedJSHeapSize
-
-      setProgress(id, 100)
-      clearArena()
-
-      const pTotal = (pAfter - pBefore) / 1024
-      const iTotal = (iAfter - iBefore) / 1024
-
-      const rows = [
-        {
-          name: `${N} instances - Total heap (KB)`,
-          pointrix: pTotal,
-          interact: iTotal,
-          unit: 'ms' // use 'ms' so lower is better
-        },
-        {
-          name: 'Per instance (bytes)',
-          pointrix: Math.max(0, pMemPerInstance),
-          interact: Math.max(0, iMemPerInstance),
-          unit: 'ms' // lower is better
-        },
-        {
-          name: 'Heap reclaimed after destroy (KB)',
-          pointrix: Math.max(0, (pAfter - pAfterDestroy) / 1024),
-          interact: Math.max(0, (iAfter - iAfterDestroy) / 1024),
-          unit: 'ops/sec' // higher is better
+        setProgress(id, 30)
+        const pStart = performance.now()
+        for (let i = 0; i < EVENT_COUNT; i++) {
+          document.dispatchEvent(
+            new PointerEvent('pointermove', {
+              clientX: 100 + (i % 200),
+              clientY: 100 + (i % 200),
+              pointerId: 1,
+              isPrimary: true,
+              bubbles: true,
+            }),
+          )
         }
-      ]
+        // Wait for RAF-batched updates to flush
+        await yieldFrame()
+        await yieldFrame()
+        const pTime = performance.now() - pStart
+        document.dispatchEvent(
+          new PointerEvent('pointerup', {
+            clientX: 200,
+            clientY: 200,
+            pointerId: 1,
+            isPrimary: true,
+            bubbles: true,
+          }),
+        )
+        pInst.destroy()
 
-      renderResult(id, rows)
-      trackResult(rows)
-      setStatus(id, '')
-      hideProgress(id)
-      setCardState(id, 'done')
-      return rows
-    }
+        setProgress(id, 55)
 
-    // ─── Benchmark 6: Animation Smoothness ──────────────────────────────────────
+        // interact.js
+        let iMoveCount = 0
+        const iInst = interact(el).draggable({
+          listeners: {
+            move() {
+              iMoveCount++
+            },
+          },
+        })
 
-    let animRunning = false
-    let animRafId = null
-    let animDots = []
-    let animInstances = []
+        el.dispatchEvent(
+          new PointerEvent('pointerdown', {
+            clientX: 100,
+            clientY: 100,
+            pointerId: 2,
+            isPrimary: true,
+            bubbles: true,
+          }),
+        )
+        await yieldFrame()
 
-    function updateAnimCount(val) {
-      document.getElementById('anim-count-label').textContent = val
-    }
+        setProgress(id, 70)
+        const iStart = performance.now()
+        for (let i = 0; i < EVENT_COUNT; i++) {
+          document.dispatchEvent(
+            new PointerEvent('pointermove', {
+              clientX: 100 + (i % 200),
+              clientY: 100 + (i % 200),
+              pointerId: 2,
+              isPrimary: true,
+              bubbles: true,
+            }),
+          )
+        }
+        await yieldFrame()
+        await yieldFrame()
+        const iTime = performance.now() - iStart
+        document.dispatchEvent(
+          new PointerEvent('pointerup', {
+            clientX: 200,
+            clientY: 200,
+            pointerId: 2,
+            isPrimary: true,
+            bubbles: true,
+          }),
+        )
+        iInst.unset()
 
-    function startAnimation() {
-      stopAnimation()
+        setProgress(id, 100)
+        clearArena()
 
-      const arena = document.getElementById('animation-arena')
-      arena.classList.add('active')
-      document.getElementById('anim-controls').style.display = 'flex'
+        const rows = [
+          {
+            name: `${EVENT_COUNT} pointermove events`,
+            pointrix: (1000 / pTime) * EVENT_COUNT,
+            interact: (1000 / iTime) * EVENT_COUNT,
+            unit: 'ops/sec',
+          },
+          {
+            name: 'Total processing time',
+            pointrix: pTime,
+            interact: iTime,
+            unit: 'ms',
+          },
+        ]
 
-      const count = parseInt(document.getElementById('anim-count').value)
-      const cx = arena.offsetWidth / 2
-      const cy = arena.offsetHeight / 2
-
-      for (let i = 0; i < count; i++) {
-        const dot = document.createElement('div')
-        dot.className = 'anim-dot'
-        dot.style.left = cx + 'px'
-        dot.style.top = cy + 'px'
-        arena.appendChild(dot)
-
-        const inst = draggable(dot, { threshold: 0 })
-        animDots.push(dot)
-        animInstances.push(inst)
+        renderResult(id, rows)
+        trackResult(rows)
+        setStatus(id, '')
+        hideProgress(id)
+        setCardState(id, 'done')
+        return rows
       }
 
-      animRunning = true
-      let lastTime = performance.now()
-      let frameCount = 0
-      let fpsAccum = 0
+      // ─── Benchmark 4: Modifier Pipeline ─────────────────────────────────────────
 
-      function animate(now) {
-        if (!animRunning) return
+      async function runBench4() {
+        const id = 4
+        const COUNT = 100_000
+        setCardState(id, 'running')
+        setStatus(id, '<span class="spinner"></span>Running modifier pipeline benchmark...')
+        setProgress(id, 10)
 
-        const dt = now - lastTime
-        lastTime = now
-        frameCount++
-        fpsAccum += dt
+        const dummyEl = document.createElement('div')
+        document.body.appendChild(dummyEl)
 
-        if (fpsAccum >= 500) {
-          const fps = (frameCount / fpsAccum * 1000).toFixed(1)
-          document.getElementById('fps-display').textContent = fps + ' FPS'
-          frameCount = 0
-          fpsAccum = 0
-        }
+        // pointrix modifiers
+        const pSnap = snapGrid({ x: 20, y: 20 })
+        const pRestrict = restrict({ bounds: { left: 0, top: 0, right: 800, bottom: 600 } })
+        const modifiers = [pSnap, pRestrict]
 
-        const t = now / 1000
-        for (let i = 0; i < animDots.length; i++) {
-          const angle = t * 2 + (i / animDots.length) * Math.PI * 2
-          const radius = 60 + i * 0.5
-          const x = Math.cos(angle) * radius
-          const y = Math.sin(angle) * radius
-          animDots[i].style.transform = `translate3d(${x}px, ${y}px, 0)`
-        }
+        setProgress(id, 30)
+        const pResult = await runBenchmark(
+          'pointrix modifiers',
+          () => {
+            for (let i = 0; i < COUNT; i++) {
+              applyModifiers(modifiers, {
+                position: { x: Math.random() * 1000, y: Math.random() * 1000 },
+                velocity: { x: 0, y: 0 },
+                element: dummyEl,
+                startPosition: { x: 0, y: 0 },
+                delta: { x: 1, y: 1 },
+              })
+            }
+          },
+          20,
+        )
 
-        animRafId = requestAnimationFrame(animate)
+        setProgress(id, 65)
+
+        // interact.js modifier equivalent - apply snap + restrict manually
+        // interact.js modifiers run internally; we approximate by using their snap/restrict API
+        const iResult = await runBenchmark(
+          'interact.js equivalent',
+          () => {
+            for (let i = 0; i < COUNT; i++) {
+              const x = Math.random() * 1000
+              const y = Math.random() * 1000
+              // Simulate snap to grid
+              const sx = Math.round(x / 20) * 20
+              const sy = Math.round(y / 20) * 20
+              // Simulate restrict to bounds
+              const rx = Math.max(0, Math.min(sx, 800))
+              const ry = Math.max(0, Math.min(sy, 600))
+            }
+          },
+          20,
+        )
+
+        setProgress(id, 100)
+        dummyEl.remove()
+
+        const rows = [
+          {
+            name: `${formatNum(COUNT)} modifier applications`,
+            pointrix: pResult.opsPerSec,
+            interact: iResult.opsPerSec,
+            unit: 'ops/sec',
+          },
+        ]
+
+        renderResult(id, rows)
+        trackResult(rows)
+        setStatus(id, '')
+        hideProgress(id)
+        setCardState(id, 'done')
+        return rows
       }
 
-      animRafId = requestAnimationFrame(animate)
-    }
+      // ─── Benchmark 5: Memory Usage ──────────────────────────────────────────────
 
-    function stopAnimation() {
-      animRunning = false
-      if (animRafId) cancelAnimationFrame(animRafId)
-      animRafId = null
-      animInstances.forEach(inst => inst.destroy())
-      animInstances = []
-      animDots.forEach(dot => dot.remove())
-      animDots = []
-    }
+      async function runBench5() {
+        const id = 5
+        const N = 1000
+        setCardState(id, 'running')
+        setStatus(id, '<span class="spinner"></span>Measuring memory usage...')
+        setProgress(id, 10)
 
-    async function runBench6() {
-      const id = 6
-      setCardState(id, 'running')
-      setStatus(id, '<span class="spinner"></span>Measuring animation smoothness...')
-      setProgress(id, 10)
+        const mem = performance.memory
+        if (!mem) {
+          setStatus(
+            id,
+            'performance.memory not available. This benchmark requires Chrome with --enable-precise-memory-info flag.',
+          )
+          setCardState(id, 'done')
+          hideProgress(id)
+          return []
+        }
 
-      document.getElementById('anim-controls').style.display = 'flex'
-      const arena = document.getElementById('animation-arena')
-      arena.classList.add('active')
+        // Force GC if available
+        if (window.gc) window.gc()
+        await yieldFrame()
 
-      const testCounts = [20, 50, 100]
-      const rows = []
+        const elements = createElements(N)
 
-      for (let ci = 0; ci < testCounts.length; ci++) {
-        const count = testCounts[ci]
-        setStatus(id, `<span class="spinner"></span>Testing ${count} animated elements...`)
-        setProgress(id, (ci / testCounts.length) * 100)
+        // pointrix memory
+        if (window.gc) window.gc()
+        await yieldFrame()
+        const pBefore = mem.usedJSHeapSize
 
-        // Create dots
+        const pInstances = elements.map((el) => draggable(el))
+        await yieldFrame()
+        const pAfter = mem.usedJSHeapSize
+        const pMemPerInstance = (pAfter - pBefore) / N
+
+        pInstances.forEach((inst) => inst.destroy())
+        if (window.gc) window.gc()
+        await yieldFrame()
+        const pAfterDestroy = mem.usedJSHeapSize
+
+        setProgress(id, 50)
+        clearArena()
+
+        // interact.js memory
+        const elements2 = createElements(N)
+        if (window.gc) window.gc()
+        await yieldFrame()
+        const iBefore = mem.usedJSHeapSize
+
+        const iInstances = elements2.map((el) => interact(el).draggable({ listeners: { move() {} } }))
+        await yieldFrame()
+        const iAfter = mem.usedJSHeapSize
+        const iMemPerInstance = (iAfter - iBefore) / N
+
+        iInstances.forEach((inst) => inst.unset())
+        if (window.gc) window.gc()
+        await yieldFrame()
+        const iAfterDestroy = mem.usedJSHeapSize
+
+        setProgress(id, 100)
+        clearArena()
+
+        const pTotal = (pAfter - pBefore) / 1024
+        const iTotal = (iAfter - iBefore) / 1024
+
+        const rows = [
+          {
+            name: `${N} instances - Total heap (KB)`,
+            pointrix: pTotal,
+            interact: iTotal,
+            unit: 'ms', // use 'ms' so lower is better
+          },
+          {
+            name: 'Per instance (bytes)',
+            pointrix: Math.max(0, pMemPerInstance),
+            interact: Math.max(0, iMemPerInstance),
+            unit: 'ms', // lower is better
+          },
+          {
+            name: 'Heap reclaimed after destroy (KB)',
+            pointrix: Math.max(0, (pAfter - pAfterDestroy) / 1024),
+            interact: Math.max(0, (iAfter - iAfterDestroy) / 1024),
+            unit: 'ops/sec', // higher is better
+          },
+        ]
+
+        renderResult(id, rows)
+        trackResult(rows)
+        setStatus(id, '')
+        hideProgress(id)
+        setCardState(id, 'done')
+        return rows
+      }
+
+      // ─── Benchmark 6: Animation Smoothness ──────────────────────────────────────
+
+      let animRunning = false
+      let animRafId = null
+      let animDots = []
+      let animInstances = []
+
+      function updateAnimCount(val) {
+        document.getElementById('anim-count-label').textContent = val
+      }
+
+      function startAnimation() {
+        stopAnimation()
+
+        const arena = document.getElementById('animation-arena')
+        arena.classList.add('active')
+        document.getElementById('anim-controls').style.display = 'flex'
+
+        const count = parseInt(document.getElementById('anim-count').value)
         const cx = arena.offsetWidth / 2
         const cy = arena.offsetHeight / 2
-        const dots = []
+
         for (let i = 0; i < count; i++) {
           const dot = document.createElement('div')
           dot.className = 'anim-dot'
           dot.style.left = cx + 'px'
           dot.style.top = cy + 'px'
           arena.appendChild(dot)
-          dots.push(dot)
+
+          const inst = draggable(dot, { threshold: 0 })
+          animDots.push(dot)
+          animInstances.push(inst)
         }
 
-        // Animate and measure FPS
-        let running = true
-        const frameTimes = []
-        let lt = performance.now()
+        animRunning = true
+        let lastTime = performance.now()
+        let frameCount = 0
+        let fpsAccum = 0
 
-        function tick(now) {
-          frameTimes.push(now - lt)
-          lt = now
-          const t = now / 1000
-          for (let i = 0; i < dots.length; i++) {
-            const angle = t * 2 + (i / dots.length) * Math.PI * 2
-            const radius = 50 + i * 0.4
-            dots[i].style.transform = `translate3d(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px, 0)`
+        function animate(now) {
+          if (!animRunning) return
+
+          const dt = now - lastTime
+          lastTime = now
+          frameCount++
+          fpsAccum += dt
+
+          if (fpsAccum >= 500) {
+            const fps = ((frameCount / fpsAccum) * 1000).toFixed(1)
+            document.getElementById('fps-display').textContent = fps + ' FPS'
+            frameCount = 0
+            fpsAccum = 0
           }
-          if (running) requestAnimationFrame(tick)
+
+          const t = now / 1000
+          for (let i = 0; i < animDots.length; i++) {
+            const angle = t * 2 + (i / animDots.length) * Math.PI * 2
+            const radius = 60 + i * 0.5
+            const x = Math.cos(angle) * radius
+            const y = Math.sin(angle) * radius
+            animDots[i].style.transform = `translate3d(${x}px, ${y}px, 0)`
+          }
+
+          animRafId = requestAnimationFrame(animate)
         }
-        requestAnimationFrame(tick)
 
-        await new Promise(r => setTimeout(r, 3000))
-        running = false
-        await yieldFrame()
-
-        const fps = frameTimes.length / 3
-        const avgFrame = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length
-        const dropped = frameTimes.filter(t => t > 20).length
-
-        dots.forEach(d => d.remove())
-
-        rows.push({
-          name: `${count} elements - FPS`,
-          pointrix: fps,
-          interact: fps, // Baseline FPS (no library overhead for raw animation)
-          unit: 'ops/sec'
-        })
+        animRafId = requestAnimationFrame(animate)
       }
 
-      setProgress(id, 100)
-      renderResult(id, rows)
-      trackResult(rows)
-      setStatus(id, 'Use the controls above to interactively test animation smoothness.')
-      hideProgress(id)
-      setCardState(id, 'done')
-      return rows
-    }
+      function stopAnimation() {
+        animRunning = false
+        if (animRafId) cancelAnimationFrame(animRafId)
+        animRafId = null
+        animInstances.forEach((inst) => inst.destroy())
+        animInstances = []
+        animDots.forEach((dot) => dot.remove())
+        animDots = []
+      }
 
-    // ─── Run All ────────────────────────────────────────────────────────────────
+      async function runBench6() {
+        const id = 6
+        setCardState(id, 'running')
+        setStatus(id, '<span class="spinner"></span>Measuring animation smoothness...')
+        setProgress(id, 10)
 
-    async function runAllBenchmarks() {
-      const btn = document.getElementById('run-all-btn')
-      btn.disabled = true
-      btn.textContent = 'Running...'
+        document.getElementById('anim-controls').style.display = 'flex'
+        const arena = document.getElementById('animation-arena')
+        arena.classList.add('active')
 
-      // Disable all individual buttons
-      document.querySelectorAll('.benchmark-card button').forEach(b => b.disabled = true)
+        const testCounts = [20, 50, 100]
+        const rows = []
 
-      allResults.length = 0
+        for (let ci = 0; ci < testCounts.length; ci++) {
+          const count = testCounts[ci]
+          setStatus(id, `<span class="spinner"></span>Testing ${count} animated elements...`)
+          setProgress(id, (ci / testCounts.length) * 100)
 
-      await runBench1()
-      await runBench2()
-      await runBench3()
-      await runBench4()
-      await runBench5()
-      await runBench6()
+          // Create dots
+          const cx = arena.offsetWidth / 2
+          const cy = arena.offsetHeight / 2
+          const dots = []
+          for (let i = 0; i < count; i++) {
+            const dot = document.createElement('div')
+            dot.className = 'anim-dot'
+            dot.style.left = cx + 'px'
+            dot.style.top = cy + 'px'
+            arena.appendChild(dot)
+            dots.push(dot)
+          }
 
-      showSummary()
+          // Animate and measure FPS
+          let running = true
+          const frameTimes = []
+          let lt = performance.now()
 
-      btn.disabled = false
-      btn.textContent = 'Run All Benchmarks'
-      document.querySelectorAll('.benchmark-card button').forEach(b => b.disabled = false)
-    }
+          function tick(now) {
+            frameTimes.push(now - lt)
+            lt = now
+            const t = now / 1000
+            for (let i = 0; i < dots.length; i++) {
+              const angle = t * 2 + (i / dots.length) * Math.PI * 2
+              const radius = 50 + i * 0.4
+              dots[i].style.transform = `translate3d(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px, 0)`
+            }
+            if (running) requestAnimationFrame(tick)
+          }
+          requestAnimationFrame(tick)
 
-    // Expose to global scope for onclick handlers
-    window.runBench1 = runBench1
-    window.runBench2 = runBench2
-    window.runBench3 = runBench3
-    window.runBench4 = runBench4
-    window.runBench5 = runBench5
-    window.runBench6 = runBench6
-    window.runAllBenchmarks = runAllBenchmarks
-    window.startAnimation = startAnimation
-    window.stopAnimation = stopAnimation
-    window.updateAnimCount = updateAnimCount
-  </script>
-</body>
+          await new Promise((r) => setTimeout(r, 3000))
+          running = false
+          await yieldFrame()
+
+          const fps = frameTimes.length / 3
+          const avgFrame = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length
+          const dropped = frameTimes.filter((t) => t > 20).length
+
+          dots.forEach((d) => d.remove())
+
+          rows.push({
+            name: `${count} elements - FPS`,
+            pointrix: fps,
+            interact: fps, // Baseline FPS (no library overhead for raw animation)
+            unit: 'ops/sec',
+          })
+        }
+
+        setProgress(id, 100)
+        renderResult(id, rows)
+        trackResult(rows)
+        setStatus(id, 'Use the controls above to interactively test animation smoothness.')
+        hideProgress(id)
+        setCardState(id, 'done')
+        return rows
+      }
+
+      // ─── Run All ────────────────────────────────────────────────────────────────
+
+      async function runAllBenchmarks() {
+        const btn = document.getElementById('run-all-btn')
+        btn.disabled = true
+        btn.textContent = 'Running...'
+
+        // Disable all individual buttons
+        document.querySelectorAll('.benchmark-card button').forEach((b) => (b.disabled = true))
+
+        allResults.length = 0
+
+        await runBench1()
+        await runBench2()
+        await runBench3()
+        await runBench4()
+        await runBench5()
+        await runBench6()
+
+        showSummary()
+
+        btn.disabled = false
+        btn.textContent = 'Run All Benchmarks'
+        document.querySelectorAll('.benchmark-card button').forEach((b) => (b.disabled = false))
+      }
+
+      // Expose to global scope for onclick handlers
+      window.runBench1 = runBench1
+      window.runBench2 = runBench2
+      window.runBench3 = runBench3
+      window.runBench4 = runBench4
+      window.runBench5 = runBench5
+      window.runBench6 = runBench6
+      window.runAllBenchmarks = runAllBenchmarks
+      window.startAnimation = startAnimation
+      window.stopAnimation = stopAnimation
+      window.updateAnimCount = updateAnimCount
+    </script>
+  </body>
 </html>

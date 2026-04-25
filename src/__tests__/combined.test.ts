@@ -4,7 +4,6 @@ import { Draggable } from '../drag'
 import { Resizable } from '../resize'
 import { interactable } from '../index'
 
-
 describe('Combined drag + resize interactions', () => {
   let el: HTMLElement
   let dragInstance: Draggable
@@ -191,8 +190,14 @@ describe('Sortable list pattern', () => {
     // Create 5 list items
     for (let i = 0; i < 5; i++) {
       const item = createMockElement({
-        x: 0, y: i * 50, width: 200, height: 40,
-        top: i * 50, left: 0, right: 200, bottom: i * 50 + 40
+        x: 0,
+        y: i * 50,
+        width: 200,
+        height: 40,
+        top: i * 50,
+        left: 0,
+        right: 200,
+        bottom: i * 50 + 40,
       })
       item.dataset.index = String(i)
       items.push(item)
@@ -201,12 +206,14 @@ describe('Sortable list pattern', () => {
     // Track positions for each item
     const positions: Array<{ x: number; y: number }> = []
     items.forEach((item, i) => {
-      instances.push(new Draggable(item, {
-        axis: 'y',
-        onDragMove: (e) => {
-          positions[i] = { x: e.totalX, y: e.totalY }
-        }
-      }))
+      instances.push(
+        new Draggable(item, {
+          axis: 'y',
+          onDragMove: (e) => {
+            positions[i] = { x: e.totalX, y: e.totalY }
+          },
+        }),
+      )
     })
 
     // Drag item 0 down by 100px (past item 1 and into item 2's position)
@@ -234,8 +241,8 @@ describe('Sortable list pattern', () => {
     firePointerUp(document, { clientX: 100, clientY: 120 })
 
     // Cleanup
-    instances.forEach(inst => inst.destroy())
-    items.forEach(item => item.remove())
+    instances.forEach((inst) => inst.destroy())
+    items.forEach((item) => item.remove())
   })
 
   it('multiple items can be dragged independently', () => {
@@ -244,8 +251,14 @@ describe('Sortable list pattern', () => {
 
     for (let i = 0; i < 3; i++) {
       const item = createMockElement({
-        x: 0, y: i * 50, width: 200, height: 40,
-        top: i * 50, left: 0, right: 200, bottom: i * 50 + 40
+        x: 0,
+        y: i * 50,
+        width: 200,
+        height: 40,
+        top: i * 50,
+        left: 0,
+        right: 200,
+        bottom: i * 50 + 40,
       })
       items.push(item)
       instances.push(new Draggable(item, { axis: 'y' }))
@@ -267,14 +280,20 @@ describe('Sortable list pattern', () => {
 
     firePointerUp(document, { clientX: 100, clientY: 170 })
 
-    instances.forEach(inst => inst.destroy())
-    items.forEach(item => item.remove())
+    instances.forEach((inst) => inst.destroy())
+    items.forEach((item) => item.remove())
   })
 
   it('sortable with bounds keeps items within container', () => {
     const container = createMockElement({
-      x: 0, y: 0, width: 200, height: 250,
-      top: 0, left: 0, right: 200, bottom: 250
+      x: 0,
+      y: 0,
+      width: 200,
+      height: 250,
+      top: 0,
+      left: 0,
+      right: 200,
+      bottom: 250,
     })
 
     const items: HTMLElement[] = []
@@ -285,14 +304,14 @@ describe('Sortable list pattern', () => {
       item.style.width = '200px'
       item.style.height = '40px'
       container.appendChild(item)
-      item.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(0, i * 50, 200, 40)
-      )
+      item.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, i * 50, 200, 40))
       items.push(item)
-      instances.push(new Draggable(item, {
-        axis: 'y',
-        bounds: 'parent'
-      }))
+      instances.push(
+        new Draggable(item, {
+          axis: 'y',
+          bounds: 'parent',
+        }),
+      )
     }
 
     // Try to drag item 0 way past the container bottom (250px)
@@ -310,8 +329,8 @@ describe('Sortable list pattern', () => {
 
     firePointerUp(document, { clientX: 100, clientY: 500 })
 
-    instances.forEach(inst => inst.destroy())
-    items.forEach(item => item.remove())
+    instances.forEach((inst) => inst.destroy())
+    items.forEach((item) => item.remove())
     container.remove()
   })
 })

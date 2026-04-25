@@ -240,9 +240,17 @@ describe('Sortable ARIA', () => {
 
       const top = i * 50
       const rect: DOMRect = {
-        x: 0, y: top, width: 200, height: 50,
-        top, right: 200, bottom: top + 50, left: 0,
-        toJSON() { return this },
+        x: 0,
+        y: top,
+        width: 200,
+        height: 50,
+        top,
+        right: 200,
+        bottom: top + 50,
+        left: 0,
+        toJSON() {
+          return this
+        },
       } as DOMRect
       item.getBoundingClientRect = vi.fn().mockReturnValue(rect)
 
@@ -251,9 +259,17 @@ describe('Sortable ARIA', () => {
     }
 
     container.getBoundingClientRect = vi.fn().mockReturnValue({
-      x: 0, y: 0, width: 200, height: itemCount * 50,
-      top: 0, right: 200, bottom: itemCount * 50, left: 0,
-      toJSON() { return this },
+      x: 0,
+      y: 0,
+      width: 200,
+      height: itemCount * 50,
+      top: 0,
+      right: 200,
+      bottom: itemCount * 50,
+      left: 0,
+      toJSON() {
+        return this
+      },
     } as DOMRect)
 
     return { container, items }

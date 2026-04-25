@@ -38,9 +38,17 @@ describe('restrict modifier', () => {
     const el = createMockElement({ x: 50, y: 50, width: 100, height: 100, top: 50, left: 50, right: 150, bottom: 150 })
     const parent = el.parentElement!
     vi.spyOn(parent, 'getBoundingClientRect').mockReturnValue({
-      x: 0, y: 0, width: 400, height: 400,
-      top: 0, left: 0, right: 400, bottom: 400,
-      toJSON() { return this },
+      x: 0,
+      y: 0,
+      width: 400,
+      height: 400,
+      top: 0,
+      left: 0,
+      right: 400,
+      bottom: 400,
+      toJSON() {
+        return this
+      },
     } as DOMRect)
 
     const mod = restrict({ bounds: 'parent' })
@@ -281,8 +289,14 @@ describe('inertia modifier', () => {
 describe('autoScroll modifier', () => {
   it('does not modify position (only scrolls container)', () => {
     const container = createMockElement({
-      x: 0, y: 0, width: 500, height: 500,
-      top: 0, left: 0, right: 500, bottom: 500,
+      x: 0,
+      y: 0,
+      width: 500,
+      height: 500,
+      top: 0,
+      left: 0,
+      right: 500,
+      bottom: 500,
     })
     container.scrollLeft = 0
     container.scrollTop = 0
@@ -302,18 +316,26 @@ describe('autoScroll modifier', () => {
 
   it('scrolls container when pointer is near edge', () => {
     const container = createMockElement({
-      x: 0, y: 0, width: 500, height: 500,
-      top: 0, left: 0, right: 500, bottom: 500,
+      x: 0,
+      y: 0,
+      width: 500,
+      height: 500,
+      top: 0,
+      left: 0,
+      right: 500,
+      bottom: 500,
     })
     container.scrollLeft = 0
     container.scrollTop = 0
 
     const mod = autoScroll({ container, margin: 50, speed: 10, acceleration: 5 })
 
-    mod.modify(makeContext({
-      position: { x: 480, y: 250 },
-      delta: { x: 10, y: 0 },
-    }))
+    mod.modify(
+      makeContext({
+        position: { x: 480, y: 250 },
+        delta: { x: 10, y: 0 },
+      }),
+    )
 
     expect(container.scrollLeft).toBeGreaterThan(0)
 

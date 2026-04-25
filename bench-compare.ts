@@ -107,8 +107,8 @@ function mountInteract(n: number): number {
         move: (e) => {
           // interact.js exposes dx/dy; we have to write the transform ourselves.
           const target = e.target as HTMLElement
-          const tx = (parseFloat(target.dataset.x || '0') + e.dx) || 0
-          const ty = (parseFloat(target.dataset.y || '0') + e.dy) || 0
+          const tx = parseFloat(target.dataset.x || '0') + e.dx || 0
+          const ty = parseFloat(target.dataset.y || '0') + e.dy || 0
           target.style.transform = `translate3d(${tx}px, ${ty}px, 0)`
           target.dataset.x = String(tx)
           target.dataset.y = String(ty)

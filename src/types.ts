@@ -76,7 +76,9 @@ export function prefersReducedMotion(): boolean {
   _rmCache = mql.matches
   // Follow OS-setting flips. `addEventListener` is broadly supported; older
   // WebKit needs `addListener`, but that's been fine since Safari 14.
-  const handler = (e: MediaQueryListEvent) => { _rmCache = e.matches }
+  const handler = (e: MediaQueryListEvent) => {
+    _rmCache = e.matches
+  }
   if (typeof mql.addEventListener === 'function') {
     mql.addEventListener('change', handler)
   }

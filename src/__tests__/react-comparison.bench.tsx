@@ -33,12 +33,16 @@ function mountRoot(ui: React.ReactElement): { container: HTMLElement; root: Root
   const container = document.createElement('div')
   document.body.appendChild(container)
   const root = createRoot(container)
-  act(() => { root.render(ui) })
+  act(() => {
+    root.render(ui)
+  })
   return { container, root }
 }
 
 function teardown(container: HTMLElement, root: Root) {
-  act(() => { root.unmount() })
+  act(() => {
+    root.unmount()
+  })
   container.remove()
 }
 
@@ -64,7 +68,9 @@ function useInteractJsDraggable(options: InteractDragOptions) {
         move: options.onDragMove ?? (() => {}),
       },
     })
-    return () => { iface.unset() }
+    return () => {
+      iface.unset()
+    }
   }, [options.axis, options.onDragMove])
   return ref as React.RefObject<HTMLDivElement>
 }
@@ -186,7 +192,9 @@ let _callbackSink = 0
 function PointrixItemWithCallback({ value }: { value: number }) {
   // Fresh inline callback every render — should NOT rebind.
   const ref = useDraggable({
-    onDragMove: () => { _callbackSink = value },
+    onDragMove: () => {
+      _callbackSink = value
+    },
   })
   return <div ref={ref as React.RefCallback<HTMLDivElement>} />
 }
@@ -195,7 +203,9 @@ function InteractItemWithCallback({ value }: { value: number }) {
   // Fresh inline callback every render — WILL rebind (destroy + recreate).
   const ref = useInteractJsDraggable({
     axis: 'x',
-    onDragMove: () => { _callbackSink = value },
+    onDragMove: () => {
+      _callbackSink = value
+    },
   })
   return <div ref={ref} />
 }

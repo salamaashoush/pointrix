@@ -29,15 +29,15 @@ export class MagneticSnapModifier implements Modifier {
       distance: options.distance ?? 30,
       strength: options.strength ?? 0.5,
       onSnap: options.onSnap ?? (() => {}),
-      onUnsnap: options.onUnsnap ?? (() => {})
+      onUnsnap: options.onUnsnap ?? (() => {}),
     }
-    
-    this.targetMap = new Map(options.targets.map(t => [t.id, t]))
+
+    this.targetMap = new Map(options.targets.map((t) => [t.id, t]))
   }
 
   updateTargets(targets: MagneticTarget[]): void {
     this.options.targets = targets
-    this.targetMap = new Map(targets.map(t => [t.id, t]))
+    this.targetMap = new Map(targets.map((t) => [t.id, t]))
   }
 
   addTarget(target: MagneticTarget): void {
@@ -46,9 +46,9 @@ export class MagneticSnapModifier implements Modifier {
   }
 
   removeTarget(id: string): void {
-    this.options.targets = this.options.targets.filter(t => t.id !== id)
+    this.options.targets = this.options.targets.filter((t) => t.id !== id)
     this.targetMap.delete(id)
-    
+
     if (this.currentTarget?.id === id) {
       if (this.options.onUnsnap) {
         this.options.onUnsnap(this.currentTarget)
@@ -88,7 +88,7 @@ export class MagneticSnapModifier implements Modifier {
 
     if (closestTarget) {
       const strength = closestTarget.strength ?? this.options.strength
-      const pullStrength = 1 - (closestDistance / this.options.distance)
+      const pullStrength = 1 - closestDistance / this.options.distance
       const effectiveStrength = strength * pullStrength
 
       if (closestDistance < this.options.distance * 0.3) {

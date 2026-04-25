@@ -34,8 +34,12 @@ if (typeof globalThis.PointerEvent === 'undefined') {
       this.isPrimary = params.isPrimary ?? false
     }
 
-    getCoalescedEvents(): PointerEvent[] { return [] }
-    getPredictedEvents(): PointerEvent[] { return [] }
+    getCoalescedEvents(): PointerEvent[] {
+      return []
+    }
+    getPredictedEvents(): PointerEvent[] {
+      return []
+    }
   }
 
   ;(globalThis as any).PointerEvent = PointerEventPolyfill
@@ -46,9 +50,17 @@ export function createMockElement(rect?: Partial<DOMRect>): HTMLElement {
   document.body.appendChild(el)
 
   const defaultRect: DOMRect = {
-    x: 0, y: 0, width: 200, height: 200,
-    top: 0, right: 200, bottom: 200, left: 0,
-    toJSON() { return this },
+    x: 0,
+    y: 0,
+    width: 200,
+    height: 200,
+    top: 0,
+    right: 200,
+    bottom: 200,
+    left: 0,
+    toJSON() {
+      return this
+    },
     ...rect,
   } as DOMRect
 
@@ -61,9 +73,12 @@ export function firePointerDown(
   opts: { clientX: number; clientY: number; pointerId?: number },
 ): PointerEvent {
   const e = new PointerEvent('pointerdown', {
-    clientX: opts.clientX, clientY: opts.clientY,
-    pointerId: opts.pointerId ?? 1, isPrimary: (opts.pointerId ?? 1) === 1,
-    bubbles: true, cancelable: true,
+    clientX: opts.clientX,
+    clientY: opts.clientY,
+    pointerId: opts.pointerId ?? 1,
+    isPrimary: (opts.pointerId ?? 1) === 1,
+    bubbles: true,
+    cancelable: true,
   })
   el.dispatchEvent(e)
   return e
@@ -74,9 +89,12 @@ export function firePointerMove(
   opts: { clientX: number; clientY: number; pointerId?: number },
 ): PointerEvent {
   const e = new PointerEvent('pointermove', {
-    clientX: opts.clientX, clientY: opts.clientY,
-    pointerId: opts.pointerId ?? 1, isPrimary: (opts.pointerId ?? 1) === 1,
-    bubbles: true, cancelable: true,
+    clientX: opts.clientX,
+    clientY: opts.clientY,
+    pointerId: opts.pointerId ?? 1,
+    isPrimary: (opts.pointerId ?? 1) === 1,
+    bubbles: true,
+    cancelable: true,
   })
   target.dispatchEvent(e)
   return e
@@ -87,9 +105,12 @@ export function firePointerUp(
   opts: { clientX: number; clientY: number; pointerId?: number },
 ): PointerEvent {
   const e = new PointerEvent('pointerup', {
-    clientX: opts.clientX, clientY: opts.clientY,
-    pointerId: opts.pointerId ?? 1, isPrimary: (opts.pointerId ?? 1) === 1,
-    bubbles: true, cancelable: true,
+    clientX: opts.clientX,
+    clientY: opts.clientY,
+    pointerId: opts.pointerId ?? 1,
+    isPrimary: (opts.pointerId ?? 1) === 1,
+    bubbles: true,
+    cancelable: true,
   })
   target.dispatchEvent(e)
   return e
@@ -99,15 +120,20 @@ export function firePointerSequence(
   el: HTMLElement,
   events: Array<{
     type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel'
-    clientX: number; clientY: number; pointerId?: number
+    clientX: number
+    clientY: number
+    pointerId?: number
   }>,
 ): void {
   for (const evt of events) {
     const target = evt.type === 'pointerdown' ? el : document
     const e = new PointerEvent(evt.type, {
-      clientX: evt.clientX, clientY: evt.clientY,
-      pointerId: evt.pointerId ?? 1, isPrimary: (evt.pointerId ?? 1) === 1,
-      bubbles: true, cancelable: true,
+      clientX: evt.clientX,
+      clientY: evt.clientY,
+      pointerId: evt.pointerId ?? 1,
+      isPrimary: (evt.pointerId ?? 1) === 1,
+      bubbles: true,
+      cancelable: true,
     })
     target.dispatchEvent(e)
   }

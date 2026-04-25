@@ -105,11 +105,13 @@ describe('Draggable setup with typical options (200 instances)', () => {
     for (let i = 0; i < 200; i++) {
       const el = createElement()
       els.push(el)
-      instances.push(new Draggable(el, {
-        axis: 'xy',
-        momentum: true,
-        onDragMove: () => {},
-      }))
+      instances.push(
+        new Draggable(el, {
+          axis: 'xy',
+          momentum: true,
+          onDragMove: () => {},
+        }),
+      )
     }
     for (const inst of instances) inst.destroy()
     for (const el of els) el.remove()
@@ -272,7 +274,10 @@ describe('Dropzone hit testing (50 zones × 1K frames)', () => {
       for (const z of zones) z.checkOverlap(dragEl, pt)
     }
 
-    for (const z of zones) { z.clearRect(); z.destroy() }
+    for (const z of zones) {
+      z.clearRect()
+      z.destroy()
+    }
     for (const el of zoneEls) el.remove()
     dragEl.remove()
   })

@@ -9,8 +9,18 @@
 //  - Directives do the same on their `updated` hook.
 
 import {
-  ref, shallowRef, onMounted, onBeforeUnmount, watch, unref, isRef,
-  type App, type Ref, type ShallowRef, type ObjectDirective, type WatchStopHandle,
+  ref,
+  shallowRef,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  unref,
+  isRef,
+  type App,
+  type Ref,
+  type ShallowRef,
+  type ObjectDirective,
+  type WatchStopHandle,
 } from 'vue'
 import { pointrix, Pointrix, type PointrixOptions } from './nano'
 import { draggable, Draggable, type DragOptions } from './drag'
@@ -70,10 +80,9 @@ function readOptions<O>(options: MaybeRef<O> | undefined): O {
 
 // ─── Generic composable factory ──────────────────────────────────────────
 
-function createComposable<
-  T extends { destroy(): void; updateOptions(partial: Partial<O>): void },
-  O extends object,
->(factory: (el: HTMLElement, opts: O) => T) {
+function createComposable<T extends { destroy(): void; updateOptions(partial: Partial<O>): void }, O extends object>(
+  factory: (el: HTMLElement, opts: O) => T,
+) {
   return function useComposable(options?: MaybeRef<O>): {
     elRef: Ref<HTMLElement | null>
     instance: ShallowRef<T | null>
@@ -108,7 +117,10 @@ function createComposable<
     }
 
     function stop() {
-      if (stopWatch) { stopWatch(); stopWatch = null }
+      if (stopWatch) {
+        stopWatch()
+        stopWatch = null
+      }
       if (instance.value) {
         instance.value.destroy()
         instance.value = null
@@ -124,12 +136,12 @@ function createComposable<
 
 // ─── Composables ─────────────────────────────────────────────────────────
 
-export const usePointrix    = createComposable<Pointrix,    PointrixOptions     >(pointrix)
-export const useDraggable   = createComposable<Draggable,   DragOptions     >(draggable)
-export const useResizable   = createComposable<Resizable,   ResizeOptions   >(resizable)
-export const useGesturable  = createComposable<Gesturable,  GestureOptions  >(gesturable)
-export const useDropzone    = createComposable<Dropzone,    DropzoneOptions >(dropzone)
-export const useSortable    = createComposable<Sortable,    SortableOptions >(sortable)
+export const usePointrix = createComposable<Pointrix, PointrixOptions>(pointrix)
+export const useDraggable = createComposable<Draggable, DragOptions>(draggable)
+export const useResizable = createComposable<Resizable, ResizeOptions>(resizable)
+export const useGesturable = createComposable<Gesturable, GestureOptions>(gesturable)
+export const useDropzone = createComposable<Dropzone, DropzoneOptions>(dropzone)
+export const useSortable = createComposable<Sortable, SortableOptions>(sortable)
 
 // ─── useInteractable ─────────────────────────────────────────────────────
 
@@ -186,10 +198,16 @@ export function useInteractable(options?: MaybeRef<InteractableOptions>): {
         ? new Draggable(el, (typeof current.drag === 'object' ? wrapSubOptions(latest, 'drag') : {}) as DragOptions)
         : null,
       resize: current.resize
-        ? new Resizable(el, (typeof current.resize === 'object' ? wrapSubOptions(latest, 'resize') : {}) as ResizeOptions)
+        ? new Resizable(
+            el,
+            (typeof current.resize === 'object' ? wrapSubOptions(latest, 'resize') : {}) as ResizeOptions,
+          )
         : null,
       gesture: current.gesture
-        ? new Gesturable(el, (typeof current.gesture === 'object' ? wrapSubOptions(latest, 'gesture') : {}) as GestureOptions)
+        ? new Gesturable(
+            el,
+            (typeof current.gesture === 'object' ? wrapSubOptions(latest, 'gesture') : {}) as GestureOptions,
+          )
         : null,
       destroy() {
         this.drag?.destroy()
@@ -223,7 +241,10 @@ export function useInteractable(options?: MaybeRef<InteractableOptions>): {
   }
 
   function stop() {
-    if (stopWatch) { stopWatch(); stopWatch = null }
+    if (stopWatch) {
+      stopWatch()
+      stopWatch = null
+    }
     if (instance.value) {
       instance.value.destroy()
       instance.value = null
@@ -243,10 +264,9 @@ export function useInteractable(options?: MaybeRef<InteractableOptions>): {
 // and recreating — identical perf win to the composable path, and means
 // `v-draggable="{ bounds: 'parent' }"` with an inline literal is safe.
 
-function createDirective<
-  T extends { destroy(): void; updateOptions(partial: Partial<O>): void },
-  O extends object,
->(factory: (el: HTMLElement, opts: O) => T): ObjectDirective<HTMLElement, O> {
+function createDirective<T extends { destroy(): void; updateOptions(partial: Partial<O>): void }, O extends object>(
+  factory: (el: HTMLElement, opts: O) => T,
+): ObjectDirective<HTMLElement, O> {
   return {
     mounted(el, binding) {
       const opts = (binding.value ?? {}) as O
@@ -272,19 +292,25 @@ function createDirective<
 
 // ─── Directives ──────────────────────────────────────────────────────────
 
-export const vDraggable:  ObjectDirective<HTMLElement, DragOptions>     = createDirective<Draggable,  DragOptions    >(draggable)
-export const vResizable:  ObjectDirective<HTMLElement, ResizeOptions>   = createDirective<Resizable,  ResizeOptions  >(resizable)
-export const vGesturable: ObjectDirective<HTMLElement, GestureOptions>  = createDirective<Gesturable, GestureOptions >(gesturable)
-export const vSortable:   ObjectDirective<HTMLElement, SortableOptions> = createDirective<Sortable,   SortableOptions>(sortable)
+export const vDraggable: ObjectDirective<HTMLElement, DragOptions> = createDirective<Draggable, DragOptions>(draggable)
+export const vResizable: ObjectDirective<HTMLElement, ResizeOptions> = createDirective<Resizable, ResizeOptions>(
+  resizable,
+)
+export const vGesturable: ObjectDirective<HTMLElement, GestureOptions> = createDirective<Gesturable, GestureOptions>(
+  gesturable,
+)
+export const vSortable: ObjectDirective<HTMLElement, SortableOptions> = createDirective<Sortable, SortableOptions>(
+  sortable,
+)
 
 // ─── Plugin installer ────────────────────────────────────────────────────
 
 export const PointrixPlugin = {
   install(app: App) {
-    app.directive('draggable',  vDraggable)
-    app.directive('resizable',  vResizable)
+    app.directive('draggable', vDraggable)
+    app.directive('resizable', vResizable)
     app.directive('gesturable', vGesturable)
-    app.directive('sortable',   vSortable)
+    app.directive('sortable', vSortable)
   },
 }
 

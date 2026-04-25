@@ -14,7 +14,8 @@ export interface AriaMessages {
 }
 
 const defaultMessages: AriaMessages = {
-  instructions: 'Press Space or Enter to pick up. Use arrow keys to move. Press Space or Enter to drop. Press Escape to cancel.',
+  instructions:
+    'Press Space or Enter to pick up. Use arrow keys to move. Press Space or Enter to drop. Press Escape to cancel.',
   pickedUp: (label, pos, total) => `Picked up ${label}, position ${pos} of ${total}`,
   movedTo: (pos, total) => `Moved to position ${pos} of ${total}`,
   dropped: (label, pos, total) => `Dropped ${label} in position ${pos} of ${total}`,

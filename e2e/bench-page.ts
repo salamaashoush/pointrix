@@ -19,8 +19,8 @@ import { draggable, type Draggable } from '../src/drag'
 import { sortable, type Sortable } from '../src/sortable'
 
 interface FrameSample {
-  dispatchMs: number  // sync cost of dispatchEvent('pointermove')
-  rafMs: number       // RAF-callback duration (how long after-move work took)
+  dispatchMs: number // sync cost of dispatchEvent('pointermove')
+  rafMs: number // RAF-callback duration (how long after-move work took)
 }
 
 interface BenchAPI {

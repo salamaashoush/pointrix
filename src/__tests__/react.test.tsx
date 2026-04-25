@@ -14,32 +14,36 @@ import { describe, it, expect, vi } from 'vitest'
 import React, { useRef } from 'react'
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-  useDraggable,
-  useResizable,
-  useDropzone,
-  useSortable,
-  useStableOptions,
-} from '../react'
+import { useDraggable, useResizable, useDropzone, useSortable, useStableOptions } from '../react'
 import type { Draggable } from '../drag'
 import type { Resizable } from '../resize'
 
 // Helper: mount a React tree into a fresh div, return the div + unmount fn.
-function mount(ui: React.ReactElement): { container: HTMLElement; unmount: () => void; rerender: (ui: React.ReactElement) => void } {
+function mount(ui: React.ReactElement): {
+  container: HTMLElement
+  unmount: () => void
+  rerender: (ui: React.ReactElement) => void
+} {
   const container = document.createElement('div')
   document.body.appendChild(container)
   const root = createRoot(container)
 
-  act(() => { root.render(ui) })
+  act(() => {
+    root.render(ui)
+  })
 
   return {
     container,
     unmount: () => {
-      act(() => { root.unmount() })
+      act(() => {
+        root.unmount()
+      })
       container.remove()
     },
     rerender: (next: React.ReactElement) => {
-      act(() => { root.render(next) })
+      act(() => {
+        root.render(next)
+      })
     },
   }
 }
@@ -96,9 +100,21 @@ describe('useDraggable', () => {
     rerender(<App onMove={second} />)
 
     const el = container.querySelector('[data-testid="target"]') as HTMLElement
-    const down = new PointerEvent('pointerdown', { pointerId: 1, clientX: 10, clientY: 10, bubbles: true, cancelable: true })
+    const down = new PointerEvent('pointerdown', {
+      pointerId: 1,
+      clientX: 10,
+      clientY: 10,
+      bubbles: true,
+      cancelable: true,
+    })
     el.dispatchEvent(down)
-    const move = new PointerEvent('pointermove', { pointerId: 1, clientX: 40, clientY: 40, bubbles: true, cancelable: true })
+    const move = new PointerEvent('pointermove', {
+      pointerId: 1,
+      clientX: 40,
+      clientY: 40,
+      bubbles: true,
+      cancelable: true,
+    })
     document.dispatchEvent(move)
 
     flushRAF()
@@ -239,9 +255,7 @@ describe('callback-ref element swap', () => {
   it('swapping the element destroys the first instance and creates a new one', () => {
     function App({ which }: { which: 'a' | 'b' }) {
       const ref = useDraggable({})
-      return which === 'a'
-        ? <div ref={ref} data-testid="a" />
-        : <div ref={ref} data-testid="b" />
+      return which === 'a' ? <div ref={ref} data-testid="a" /> : <div ref={ref} data-testid="b" />
     }
     const { container, rerender, unmount } = mount(<App which="a" />)
     const a = container.querySelector('[data-testid="a"]') as HTMLElement

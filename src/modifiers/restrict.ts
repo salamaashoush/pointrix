@@ -36,9 +36,7 @@ export class RestrictModifier implements Modifier {
   }
 
   private resolveAndCache(context: ModifierContext) {
-    this.transformBounds = this.resolveTransformBounds(
-      context.element, context.startPosition, context.size
-    )
+    this.transformBounds = this.resolveTransformBounds(context.element, context.startPosition, context.size)
   }
 
   private applyRestriction(context: ModifierContext): void {
@@ -60,7 +58,7 @@ export class RestrictModifier implements Modifier {
   private resolveTransformBounds(
     element: HTMLElement,
     startTransform: Point,
-    size?: { width: number; height: number }
+    size?: { width: number; height: number },
   ): { left?: number; top?: number; right?: number; bottom?: number } | null {
     const { bounds } = this.options
 

@@ -32,7 +32,7 @@ export class QuadTree<T extends SpatialItem> {
       bounds,
       items: [],
       children: null,
-      depth
+      depth,
     }
   }
 
@@ -73,7 +73,7 @@ export class QuadTree<T extends SpatialItem> {
       this.createNode({ x, y, width: halfWidth, height: halfHeight }, node.depth + 1),
       this.createNode({ x: x + halfWidth, y, width: halfWidth, height: halfHeight }, node.depth + 1),
       this.createNode({ x, y: y + halfHeight, width: halfWidth, height: halfHeight }, node.depth + 1),
-      this.createNode({ x: x + halfWidth, y: y + halfHeight, width: halfWidth, height: halfHeight }, node.depth + 1)
+      this.createNode({ x: x + halfWidth, y: y + halfHeight, width: halfWidth, height: halfHeight }, node.depth + 1),
     ]
 
     const items = node.items
@@ -99,7 +99,7 @@ export class QuadTree<T extends SpatialItem> {
       x: bounds.x - radius,
       y: bounds.y - radius,
       width: bounds.width + radius * 2,
-      height: bounds.height + radius * 2
+      height: bounds.height + radius * 2,
     }
     this.queryNode(this.root, expandedBounds, results)
     return results
@@ -128,7 +128,7 @@ export class QuadTree<T extends SpatialItem> {
       x: x - radius,
       y: y - radius,
       width: radius * 2,
-      height: radius * 2
+      height: radius * 2,
     })
   }
 
@@ -137,7 +137,7 @@ export class QuadTree<T extends SpatialItem> {
   }
 
   private removeFromNode(node: QuadTreeNode<T>, item: T): boolean {
-    const index = node.items.findIndex(i => i.id === item.id)
+    const index = node.items.findIndex((i) => i.id === item.id)
     if (index !== -1) {
       node.items.splice(index, 1)
       return true
@@ -164,19 +164,14 @@ export class QuadTree<T extends SpatialItem> {
   }
 
   private intersects(a: Bounds, b: Bounds): boolean {
-    return !(
-      a.x + a.width < b.x ||
-      b.x + b.width < a.x ||
-      a.y + a.height < b.y ||
-      b.y + b.height < a.y
-    )
+    return !(a.x + a.width < b.x || b.x + b.width < a.x || a.y + a.height < b.y || b.y + b.height < a.y)
   }
 
   getStats(): { totalItems: number; totalNodes: number; maxDepth: number } {
     const stats = {
       totalItems: 0,
       totalNodes: 0,
-      maxDepth: 0
+      maxDepth: 0,
     }
     this.collectStats(this.root, stats)
     return stats
@@ -184,7 +179,7 @@ export class QuadTree<T extends SpatialItem> {
 
   private collectStats(
     node: QuadTreeNode<T>,
-    stats: { totalItems: number; totalNodes: number; maxDepth: number }
+    stats: { totalItems: number; totalNodes: number; maxDepth: number },
   ): void {
     stats.totalItems += node.items.length
     stats.totalNodes++
@@ -259,7 +254,7 @@ export class SpatialHashGrid<T extends SpatialItem> {
     for (const key of keys) {
       const items = this.grid.get(key)
       if (items) {
-        const index = items.findIndex(i => i.id === item.id)
+        const index = items.findIndex((i) => i.id === item.id)
         if (index !== -1) {
           items.splice(index, 1)
           if (items.length === 0) {
@@ -280,11 +275,6 @@ export class SpatialHashGrid<T extends SpatialItem> {
   }
 
   private intersects(a: Bounds, b: Bounds): boolean {
-    return !(
-      a.x + a.width < b.x ||
-      b.x + b.width < a.x ||
-      a.y + a.height < b.y ||
-      b.y + b.height < a.y
-    )
+    return !(a.x + a.width < b.x || b.x + b.width < a.x || a.y + a.height < b.y || b.y + b.height < a.y)
   }
 }

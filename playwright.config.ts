@@ -11,8 +11,8 @@ export default defineConfig({
   fullyParallel: !IS_BENCH,
   forbidOnly: !!process.env.CI,
   // Benches: one worker, no retries — results must be deterministic.
-  retries: IS_BENCH ? 0 : (process.env.CI ? 2 : 0),
-  workers: IS_BENCH ? 1 : (process.env.CI ? 1 : undefined),
+  retries: IS_BENCH ? 0 : process.env.CI ? 2 : 0,
+  workers: IS_BENCH ? 1 : process.env.CI ? 1 : undefined,
   reporter: IS_BENCH ? 'list' : 'html',
   use: {
     baseURL: 'http://localhost:5173',

@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createMockElement, firePointerDown, firePointerMove, firePointerUp, flushRAF } from './helpers'
 import { Resizable, resizable, ResizeEvent } from '../resize'
 
-
 describe('Resizable', () => {
   let el: HTMLElement
   let instance: Resizable
@@ -20,7 +19,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 195, clientY: 100, bubbles: true,
+        clientX: 195,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -31,7 +32,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 100, clientY: 195, bubbles: true,
+        clientX: 100,
+        clientY: 195,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -42,7 +45,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 3, clientY: 100, bubbles: true,
+        clientX: 3,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -53,7 +58,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 100, clientY: 3, bubbles: true,
+        clientX: 100,
+        clientY: 3,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -64,7 +71,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 195, clientY: 195, bubbles: true,
+        clientX: 195,
+        clientY: 195,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -75,7 +84,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 3, clientY: 3, bubbles: true,
+        clientX: 3,
+        clientY: 3,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -86,7 +97,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 195, clientY: 3, bubbles: true,
+        clientX: 195,
+        clientY: 3,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -97,7 +110,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 3, clientY: 195, bubbles: true,
+        clientX: 3,
+        clientY: 195,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -108,7 +123,9 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 100, clientY: 100, bubbles: true,
+        clientX: 100,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
 
@@ -282,19 +299,25 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       let e = new PointerEvent('pointermove', {
-        clientX: 195, clientY: 100, bubbles: true,
+        clientX: 195,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
       expect(el.style.cursor).toBe('ew-resize')
 
       e = new PointerEvent('pointermove', {
-        clientX: 100, clientY: 195, bubbles: true,
+        clientX: 100,
+        clientY: 195,
+        bubbles: true,
       })
       el.dispatchEvent(e)
       expect(el.style.cursor).toBe('ns-resize')
 
       e = new PointerEvent('pointermove', {
-        clientX: 100, clientY: 100, bubbles: true,
+        clientX: 100,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
       expect(el.style.cursor).toBe('')
@@ -365,8 +388,12 @@ describe('Resizable', () => {
       instance = new Resizable(el)
 
       const downEvent = new PointerEvent('pointerdown', {
-        clientX: 100, clientY: 100, pointerId: 1,
-        isPrimary: true, bubbles: true, cancelable: true,
+        clientX: 100,
+        clientY: 100,
+        pointerId: 1,
+        isPrimary: true,
+        bubbles: true,
+        cancelable: true,
       })
       el.dispatchEvent(downEvent)
 
@@ -458,17 +485,16 @@ describe('Resizable', () => {
 
       instance.destroy()
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'pointermove',
-        expect.any(Function)
-      )
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('pointermove', expect.any(Function))
     })
 
     it('cleans up cursor style', () => {
       instance = new Resizable(el)
 
       const e = new PointerEvent('pointermove', {
-        clientX: 195, clientY: 100, bubbles: true,
+        clientX: 195,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
       expect(el.style.cursor).toBe('ew-resize')
@@ -514,13 +540,17 @@ describe('Resizable', () => {
       })
 
       let e = new PointerEvent('pointermove', {
-        clientX: 3, clientY: 100, bubbles: true,
+        clientX: 3,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
       expect(el.style.cursor).toBe('')
 
       e = new PointerEvent('pointermove', {
-        clientX: 195, clientY: 100, bubbles: true,
+        clientX: 195,
+        clientY: 100,
+        bubbles: true,
       })
       el.dispatchEvent(e)
       expect(el.style.cursor).toBe('ew-resize')

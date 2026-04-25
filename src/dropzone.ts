@@ -43,11 +43,11 @@ function rectContainsPoint(rect: DOMRect, point: Point): boolean {
 function computeOverlapRatio(draggableRect: DOMRect, dropzoneRect: DOMRect): number {
   const overlapX = Math.max(
     0,
-    Math.min(draggableRect.right, dropzoneRect.right) - Math.max(draggableRect.left, dropzoneRect.left)
+    Math.min(draggableRect.right, dropzoneRect.right) - Math.max(draggableRect.left, dropzoneRect.left),
   )
   const overlapY = Math.max(
     0,
-    Math.min(draggableRect.bottom, dropzoneRect.bottom) - Math.max(draggableRect.top, dropzoneRect.top)
+    Math.min(draggableRect.bottom, dropzoneRect.bottom) - Math.max(draggableRect.top, dropzoneRect.top),
   )
   const overlapArea = overlapX * overlapY
   const draggableArea = draggableRect.width * draggableRect.height
@@ -68,8 +68,12 @@ export class Dropzone {
    */
   private _cachedRect: DOMRect | null = null
 
-  get enabled(): boolean { return this._enabled }
-  set enabled(value: boolean) { this._enabled = value }
+  get enabled(): boolean {
+    return this._enabled
+  }
+  set enabled(value: boolean) {
+    this._enabled = value
+  }
 
   constructor(element: HTMLElement, options: DropzoneOptions = {}) {
     this.element = element
@@ -114,9 +118,9 @@ export class Dropzone {
    * duplicate getBoundingClientRect calls when multiple zones need it.
    */
   checkOverlap(draggableEl: HTMLElement, pointerPos: Point, draggableRect?: DOMRect): number {
-    const dropRect = this._cachedRect ?? (this.options.rectChecker
-      ? this.options.rectChecker(this.element)
-      : this.element.getBoundingClientRect())
+    const dropRect =
+      this._cachedRect ??
+      (this.options.rectChecker ? this.options.rectChecker(this.element) : this.element.getBoundingClientRect())
     const mode = this.options.overlap ?? 'pointer'
 
     if (mode === 'pointer') {
@@ -287,7 +291,10 @@ class DropzoneManagerSingleton {
     for (const zone of this.zones) {
       if (!zone.isActive) continue
       const mode = (zone as unknown as { options: DropzoneOptions }).options.overlap ?? 'pointer'
-      if (mode !== 'pointer') { needsDragRect = true; break }
+      if (mode !== 'pointer') {
+        needsDragRect = true
+        break
+      }
     }
     if (needsDragRect) {
       dragRect = getDraggableRect ? getDraggableRect() : draggableEl.getBoundingClientRect()
@@ -309,12 +316,7 @@ class DropzoneManagerSingleton {
     }
   }
 
-  onDragEnd(
-    draggableEl: HTMLElement,
-    pointerPos: Point,
-    dragEvent?: DragEvent,
-    getDraggableRect?: () => DOMRect,
-  ) {
+  onDragEnd(draggableEl: HTMLElement, pointerPos: Point, dragEvent?: DragEvent, getDraggableRect?: () => DOMRect) {
     for (const zone of this.zones) {
       if (!zone.isActive) continue
 

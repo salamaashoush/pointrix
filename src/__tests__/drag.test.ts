@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createMockElement, firePointerDown, firePointerMove, firePointerUp, flushRAF } from './helpers'
 import { Draggable, draggable, DragEvent } from '../drag'
 
-
 describe('Draggable', () => {
   let el: HTMLElement
   let instance: Draggable
@@ -115,15 +114,11 @@ describe('Draggable', () => {
       // Element at (100, 80) inside a parent at (0, 0) 400x400
       const parent = document.createElement('div')
       document.body.appendChild(parent)
-      parent.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(0, 0, 400, 400)
-      )
+      parent.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 400, 400))
       Object.defineProperty(el, 'offsetParent', { value: parent, configurable: true })
 
       // Element is 200x200 at (100, 80) — not at the parent origin
-      el.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(100, 80, 200, 200)
-      )
+      el.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(100, 80, 200, 200))
 
       instance = new Draggable(el, { bounds: 'parent', threshold: 0 })
 
@@ -160,13 +155,9 @@ describe('Draggable', () => {
       // Element at (0, 0) inside parent at (0, 0) 400x400
       const parent = document.createElement('div')
       document.body.appendChild(parent)
-      parent.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(0, 0, 400, 400)
-      )
+      parent.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 400, 400))
       Object.defineProperty(el, 'offsetParent', { value: parent, configurable: true })
-      el.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(0, 0, 200, 200)
-      )
+      el.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 200, 200))
 
       instance = new Draggable(el, { bounds: 'parent', threshold: 0 })
 
@@ -236,8 +227,12 @@ describe('Draggable', () => {
 
       // Click on the element itself (not handle) - should not start
       const downEvent = new PointerEvent('pointerdown', {
-        clientX: 50, clientY: 50, pointerId: 1,
-        isPrimary: true, bubbles: true, cancelable: true,
+        clientX: 50,
+        clientY: 50,
+        pointerId: 1,
+        isPrimary: true,
+        bubbles: true,
+        cancelable: true,
       })
       Object.defineProperty(downEvent, 'target', { value: el })
       el.dispatchEvent(downEvent)
@@ -254,8 +249,12 @@ describe('Draggable', () => {
       instance = new Draggable(el, { handle: '.handle', threshold: 0 })
 
       const downEvent = new PointerEvent('pointerdown', {
-        clientX: 50, clientY: 50, pointerId: 1,
-        isPrimary: true, bubbles: true, cancelable: true,
+        clientX: 50,
+        clientY: 50,
+        pointerId: 1,
+        isPrimary: true,
+        bubbles: true,
+        cancelable: true,
       })
       Object.defineProperty(downEvent, 'target', { value: handle })
       el.dispatchEvent(downEvent)
@@ -270,8 +269,12 @@ describe('Draggable', () => {
       instance = new Draggable(el, { handle: handle, threshold: 0 })
 
       const downEvent = new PointerEvent('pointerdown', {
-        clientX: 50, clientY: 50, pointerId: 1,
-        isPrimary: true, bubbles: true, cancelable: true,
+        clientX: 50,
+        clientY: 50,
+        pointerId: 1,
+        isPrimary: true,
+        bubbles: true,
+        cancelable: true,
       })
       Object.defineProperty(downEvent, 'target', { value: handle })
       el.dispatchEvent(downEvent)

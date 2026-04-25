@@ -69,7 +69,7 @@ export class RubberbandModifier implements Modifier {
 
   private resolveTransformBounds(
     element: HTMLElement,
-    startTransform: Point
+    startTransform: Point,
   ): { left?: number; top?: number; right?: number; bottom?: number } | null {
     const { bounds } = this.options
 

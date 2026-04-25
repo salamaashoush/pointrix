@@ -149,7 +149,9 @@ export class Pointrix {
   private lastTapTime = 0
   private lastTapTarget: EventTarget | null = null
 
-  get enabled(): boolean { return this._enabled }
+  get enabled(): boolean {
+    return this._enabled
+  }
   set enabled(value: boolean) {
     this._enabled = value
     if (!value && this.isActive) {
@@ -186,8 +188,14 @@ export class Pointrix {
   }
 
   private clearHoldTimers(): void {
-    if (this.holdTimer) { clearTimeout(this.holdTimer); this.holdTimer = null }
-    if (this.holdEventTimer) { clearTimeout(this.holdEventTimer); this.holdEventTimer = null }
+    if (this.holdTimer) {
+      clearTimeout(this.holdTimer)
+      this.holdTimer = null
+    }
+    if (this.holdEventTimer) {
+      clearTimeout(this.holdEventTimer)
+      this.holdEventTimer = null
+    }
   }
 
   private removeDocumentListeners(): void {
@@ -203,9 +211,7 @@ export class Pointrix {
    * applies to parent / bounds / related elements too.
    */
   getRect(el: HTMLElement = this.element): DOMRect {
-    return this.options.rectChecker
-      ? this.options.rectChecker(el)
-      : el.getBoundingClientRect()
+    return this.options.rectChecker ? this.options.rectChecker(el) : el.getBoundingClientRect()
   }
 
   /**
@@ -226,10 +232,18 @@ export class Pointrix {
   /** Write the current origin offset into `out`. Zero-allocation. */
   private resolveOriginInto(out: { x: number; y: number }): void {
     const origin = this.options.origin
-    if (!origin) { out.x = 0; out.y = 0; return }
+    if (!origin) {
+      out.x = 0
+      out.y = 0
+      return
+    }
     if (origin === 'parent') {
       const parent = this.element.offsetParent as HTMLElement | null
-      if (!parent) { out.x = 0; out.y = 0; return }
+      if (!parent) {
+        out.x = 0
+        out.y = 0
+        return
+      }
       const r = this.getRect(parent)
       out.x = r.left
       out.y = r.top
@@ -278,14 +292,14 @@ export class Pointrix {
   private static elementInstances = new WeakMap<HTMLElement, Pointrix[]>()
   private static activeInstance = new WeakMap<HTMLElement, Pointrix | null>()
   private static elementListeners = new WeakMap<HTMLElement, (e: PointerEvent) => void>()
-  
+
   constructor(element: HTMLElement, options: PointrixOptions = {}) {
     this.element = element
     this.options = {
       threshold: 3,
       preventScroll: true,
       styleCursor: true,
-      ...options
+      ...options,
     }
 
     // Register this instance
@@ -311,7 +325,7 @@ export class Pointrix {
       element.addEventListener('pointerdown', listener)
     }
   }
-  
+
   private registerInstance() {
     const existing = Pointrix.elementInstances.get(this.element)
     if (existing) {
@@ -320,7 +334,7 @@ export class Pointrix {
       Pointrix.elementInstances.set(this.element, [this])
     }
   }
-  
+
   private unregisterInstance() {
     const instances = Pointrix.elementInstances.get(this.element)
     if (!instances) return
@@ -336,7 +350,7 @@ export class Pointrix {
       }
     }
   }
-  
+
   // Virtual method for subclasses to decide if they should handle an event
   protected shouldHandleEvent(_e: PointerEvent): boolean {
     return true
@@ -349,23 +363,23 @@ export class Pointrix {
     if (this.options.allowFrom && !target.closest(this.options.allowFrom)) return false
     return true
   }
-  
+
   // Static method to handle pointer events for all instances on an element
   private static handleElementPointerDown(element: HTMLElement, e: PointerEvent) {
     const instances = Pointrix.elementInstances.get(element)
     if (!instances) return
     const activeInstance = Pointrix.activeInstance.get(element)
-    
+
     // If there's already an active instance, let it continue
     if (activeInstance) {
       activeInstance.onPointerDown(e)
       return
     }
-    
+
     // Check all instances to see which should handle this event
     let handlingInstance: Pointrix | null = null
     let highestPriority = -1
-    
+
     for (const instance of instances) {
       const shouldHandle = instance.checkEventFilters(e) && instance.shouldHandleEvent(e)
 
@@ -374,19 +388,19 @@ export class Pointrix {
         highestPriority = instance.priority
       }
     }
-    
+
     // If we found an instance to handle the event
     if (handlingInstance) {
       Pointrix.activeInstance.set(element, handlingInstance)
       handlingInstance.handlePointerDown(e)
     }
   }
-  
+
   // This is now called by the static handler when this instance is selected
   private onPointerDown(e: PointerEvent) {
     this.handlePointerDown(e)
   }
-  
+
   private handlePointerDown(e: PointerEvent) {
     // Mouse button filter
     if (this.options.mouseButtons && !(e.buttons & this.options.mouseButtons)) return
@@ -451,7 +465,7 @@ export class Pointrix {
       this.start(e)
     }
   }
-  
+
   private onPointerMove(e: PointerEvent) {
     const pointer = this.pointers.get(e.pointerId)
     if (!pointer) return
@@ -462,12 +476,12 @@ export class Pointrix {
     this.resolveOriginInto(this._originScratch)
     const newX = e.clientX - this._originScratch.x
     const newY = e.clientY - this._originScratch.y
-    
+
     // Only update if position actually changed
     if (pointer.current.x !== newX || pointer.current.y !== newY) {
       pointer.current.x = newX
       pointer.current.y = newY
-      
+
       // Check threshold
       if (!this.isActive) {
         const dx = pointer.current.x - pointer.start.x
@@ -488,7 +502,7 @@ export class Pointrix {
           this.start(e)
         }
       }
-      
+
       if (this.isActive) {
         if (this.options.preventScroll) e.preventDefault()
         dirtyInstances.add(this)
@@ -496,7 +510,7 @@ export class Pointrix {
       }
     }
   }
-  
+
   private onPointerUp(e: PointerEvent) {
     const pointer = this.pointers.get(e.pointerId)
     if (!pointer) return
@@ -533,7 +547,7 @@ export class Pointrix {
       }
     }
   }
-  
+
   private start(e: PointerEvent) {
     // Honor the global concurrent-interaction cap. If we're at the limit,
     // drop the pointer silently — the interaction will never activate. This
@@ -644,7 +658,7 @@ export class Pointrix {
     // is not an animation loop. Subsystems that want per-frame work after
     // lift-off (drag momentum, inertia modifier) manage their own RAF.
   }
-  
+
   // Cached InteractionEvent — reused across every frame for this instance.
   private _cachedEvent: InteractionEvent = {
     target: null as unknown as HTMLElement,
@@ -703,9 +717,7 @@ export class Pointrix {
 // Simple factory function — convenience wrapper around `new Pointrix(...)`
 // that accepts either an element reference or a CSS selector.
 export function pointrix(element: HTMLElement | string, options?: PointrixOptions): Pointrix {
-  const el = typeof element === 'string'
-    ? document.querySelector<HTMLElement>(element)
-    : element
+  const el = typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element
 
   if (!el) throw new Error(`Element not found: ${element}`)
 

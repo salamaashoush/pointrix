@@ -1,140 +1,268 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>pointrix vs interact.js — Live Comparison</title>
-  <style>
-    :root {
-      --bg: #0a0a0f;
-      --panel: #12121e;
-      --border: #1e1e2e;
-      --text: #e0e0e8;
-      --muted: #6668a0;
-      --pointrix: #22c55e;
-      --interact: #f97316;
-      --danger: #ef4444;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 24px;
-    }
-    header { text-align: center; margin-bottom: 24px; }
-    header h1 { margin: 0 0 4px; font-size: 28px; font-weight: 700; }
-    header p { margin: 0; color: var(--muted); font-size: 13px; }
-    .toolbar {
-      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
-      background: var(--panel); border: 1px solid var(--border);
-      padding: 12px; border-radius: 12px; margin-bottom: 16px;
-    }
-    button {
-      padding: 8px 14px; border: none; border-radius: 6px;
-      background: #1e1e2e; color: var(--text); font-weight: 500; font-size: 13px;
-      cursor: pointer; transition: background 0.15s;
-    }
-    button:hover { background: #2a2a3e; }
-    button.primary { background: #6366f1; color: white; }
-    button.danger { background: var(--danger); color: white; }
-    .metrics {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
-    }
-    .metric-side {
-      background: var(--panel); border: 1px solid var(--border);
-      padding: 16px; border-radius: 12px;
-    }
-    .metric-side.pointrix { border-color: var(--pointrix); }
-    .metric-side.interact { border-color: var(--interact); }
-    .metric-side h2 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
-    .metric-side.pointrix h2 { color: var(--pointrix); }
-    .metric-side.interact h2 { color: var(--interact); }
-    .metric-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .metric {
-      flex: 1; min-width: 80px; background: #0a0a14; padding: 8px; border-radius: 6px;
-      text-align: center;
-    }
-    .metric-value { font-family: monospace; font-size: 18px; font-weight: 700; }
-    .metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-    .stage {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-    }
-    .grid-panel {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 12px; padding: 12px;
-      height: 520px; overflow: auto; position: relative;
-    }
-    .grid-panel.pointrix { border-color: var(--pointrix); }
-    .grid-panel.interact { border-color: var(--interact); }
-    .grid-inner {
-      display: flex; flex-wrap: wrap; gap: 4px; padding: 4px;
-    }
-    .item {
-      width: 40px; height: 40px; border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 600; color: white;
-      touch-action: none; user-select: none; cursor: grab;
-      will-change: transform;
-    }
-    .item.p { background: var(--pointrix); }
-    .item.i { background: var(--interact); }
-    .hint { font-size: 11px; color: var(--muted); text-align: center; margin-top: 12px; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>pointrix vs interact.js</h1>
-    <p>Drag items on both sides simultaneously. Watch the per-side FPS and frame-time charts.</p>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pointrix vs interact.js — Live Comparison</title>
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --panel: #12121e;
+        --border: #1e1e2e;
+        --text: #e0e0e8;
+        --muted: #6668a0;
+        --pointrix: #22c55e;
+        --interact: #f97316;
+        --danger: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 24px;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      header h1 {
+        margin: 0 0 4px;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+      button {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        background: #1e1e2e;
+        color: var(--text);
+        font-weight: 500;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      button:hover {
+        background: #2a2a3e;
+      }
+      button.primary {
+        background: #6366f1;
+        color: white;
+      }
+      button.danger {
+        background: var(--danger);
+        color: white;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .metric-side {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 12px;
+      }
+      .metric-side.pointrix {
+        border-color: var(--pointrix);
+      }
+      .metric-side.interact {
+        border-color: var(--interact);
+      }
+      .metric-side h2 {
+        margin: 0 0 8px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .metric-side.pointrix h2 {
+        color: var(--pointrix);
+      }
+      .metric-side.interact h2 {
+        color: var(--interact);
+      }
+      .metric-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .metric {
+        flex: 1;
+        min-width: 80px;
+        background: #0a0a14;
+        padding: 8px;
+        border-radius: 6px;
+        text-align: center;
+      }
+      .metric-value {
+        font-family: monospace;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .metric-label {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 2px;
+      }
+      .stage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .grid-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        height: 520px;
+        overflow: auto;
+        position: relative;
+      }
+      .grid-panel.pointrix {
+        border-color: var(--pointrix);
+      }
+      .grid-panel.interact {
+        border-color: var(--interact);
+      }
+      .grid-inner {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 4px;
+      }
+      .item {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 600;
+        color: white;
+        touch-action: none;
+        user-select: none;
+        cursor: grab;
+        will-change: transform;
+      }
+      .item.p {
+        background: var(--pointrix);
+      }
+      .item.i {
+        background: var(--interact);
+      }
+      .hint {
+        font-size: 11px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>pointrix vs interact.js</h1>
+      <p>Drag items on both sides simultaneously. Watch the per-side FPS and frame-time charts.</p>
+    </header>
 
-  <div class="toolbar">
-    <button class="primary" data-n="50">50 items each</button>
-    <button class="primary" data-n="200">200 items each</button>
-    <button class="primary" data-n="500">500 items each</button>
-    <button class="primary" data-n="1000">1000 items each</button>
-    <button class="danger" id="clear">Clear</button>
-    <button id="reset-metrics">Reset metrics</button>
-  </div>
+    <div class="toolbar">
+      <button class="primary" data-n="50">50 items each</button>
+      <button class="primary" data-n="200">200 items each</button>
+      <button class="primary" data-n="500">500 items each</button>
+      <button class="primary" data-n="1000">1000 items each</button>
+      <button class="danger" id="clear">Clear</button>
+      <button id="reset-metrics">Reset metrics</button>
+    </div>
 
-  <div class="metrics">
-    <div class="metric-side pointrix">
-      <h2>pointrix</h2>
-      <div class="metric-row">
-        <div class="metric"><div class="metric-value" id="p-count">0</div><div class="metric-label">items</div></div>
-        <div class="metric"><div class="metric-value" id="p-fps">—</div><div class="metric-label">FPS</div></div>
-        <div class="metric"><div class="metric-value" id="p-mount">—</div><div class="metric-label">mount ms</div></div>
-        <div class="metric"><div class="metric-value" id="p-avgframe">—</div><div class="metric-label">avg frame ms</div></div>
-        <div class="metric"><div class="metric-value" id="p-p95frame">—</div><div class="metric-label">p95 ms</div></div>
+    <div class="metrics">
+      <div class="metric-side pointrix">
+        <h2>pointrix</h2>
+        <div class="metric-row">
+          <div class="metric">
+            <div class="metric-value" id="p-count">0</div>
+            <div class="metric-label">items</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="p-fps">—</div>
+            <div class="metric-label">FPS</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="p-mount">—</div>
+            <div class="metric-label">mount ms</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="p-avgframe">—</div>
+            <div class="metric-label">avg frame ms</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="p-p95frame">—</div>
+            <div class="metric-label">p95 ms</div>
+          </div>
+        </div>
+      </div>
+      <div class="metric-side interact">
+        <h2>interact.js</h2>
+        <div class="metric-row">
+          <div class="metric">
+            <div class="metric-value" id="i-count">0</div>
+            <div class="metric-label">items</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="i-fps">—</div>
+            <div class="metric-label">FPS</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="i-mount">—</div>
+            <div class="metric-label">mount ms</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="i-avgframe">—</div>
+            <div class="metric-label">avg frame ms</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="i-p95frame">—</div>
+            <div class="metric-label">p95 ms</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="metric-side interact">
-      <h2>interact.js</h2>
-      <div class="metric-row">
-        <div class="metric"><div class="metric-value" id="i-count">0</div><div class="metric-label">items</div></div>
-        <div class="metric"><div class="metric-value" id="i-fps">—</div><div class="metric-label">FPS</div></div>
-        <div class="metric"><div class="metric-value" id="i-mount">—</div><div class="metric-label">mount ms</div></div>
-        <div class="metric"><div class="metric-value" id="i-avgframe">—</div><div class="metric-label">avg frame ms</div></div>
-        <div class="metric"><div class="metric-value" id="i-p95frame">—</div><div class="metric-label">p95 ms</div></div>
+
+    <div class="stage">
+      <div class="grid-panel pointrix">
+        <div class="grid-inner" id="pointrix-stage"></div>
+      </div>
+      <div class="grid-panel interact">
+        <div class="grid-inner" id="interact-stage"></div>
       </div>
     </div>
-  </div>
 
-  <div class="stage">
-    <div class="grid-panel pointrix">
-      <div class="grid-inner" id="pointrix-stage"></div>
+    <div class="hint">
+      Mount time is measured synchronously around the setup loop. FPS and frame-time stats are sampled per side only
+      while that side has a pointer pressed.
     </div>
-    <div class="grid-panel interact">
-      <div class="grid-inner" id="interact-stage"></div>
-    </div>
-  </div>
 
-  <div class="hint">
-    Mount time is measured synchronously around the setup loop.
-    FPS and frame-time stats are sampled per side only while that side has a pointer pressed.
-  </div>
-
-  <script type="module" src="./bench-compare.ts"></script>
-</body>
+    <script type="module" src="./bench-compare.ts"></script>
+  </body>
 </html>

@@ -110,8 +110,7 @@ describe('useDraggable (Vue)', () => {
         holder.opts = opts
         const { elRef, instance } = useDraggable(opts)
         holder.instance = instance
-        return () =>
-          h('div', { ref: elRef, 'data-testid': 'target', style: 'width: 100px; height: 100px;' })
+        return () => h('div', { ref: elRef, 'data-testid': 'target', style: 'width: 100px; height: 100px;' })
       },
     })
 
@@ -185,12 +184,7 @@ describe('useSortable (Vue)', () => {
     const Comp = defineComponent({
       setup() {
         const { elRef } = useSortable({})
-        return () =>
-          h('ul', { ref: elRef }, [
-            h('li', 'a'),
-            h('li', 'b'),
-            h('li', 'c'),
-          ])
+        return () => h('ul', { ref: elRef }, [h('li', 'a'), h('li', 'b'), h('li', 'c')])
       },
     })
     const { container, unmount } = mount(Comp)

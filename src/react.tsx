@@ -35,10 +35,7 @@ type AnyFn = (...args: never[]) => unknown
  * The wrapper functions themselves are stable across renders — reassigning
  * the ref is enough to pick up new user callbacks.
  */
-function wrapCallbacks<T extends object>(
-  latest: RefObject<T>,
-  template: T,
-): T {
+function wrapCallbacks<T extends object>(latest: RefObject<T>, template: T): T {
   const out: Record<string, unknown> = {}
   for (const key in template) {
     const v = (template as Record<string, unknown>)[key]
@@ -74,10 +71,14 @@ function stripCallbacks<T extends object>(options: T): T {
  * pass a RefObject as the second argument — the hook populates its `.current`
  * when the element mounts and clears it on unmount.
  */
-function createHook<TInst extends { destroy(): void; updateOptions(partial: Partial<TOpts>): void }, TOpts extends object>(
-  factory: (element: HTMLElement, options: TOpts) => TInst,
-) {
-  return function useHook(options: TOpts = {} as TOpts, instanceRef?: RefObject<TInst | null>): RefCallback<HTMLElement> {
+function createHook<
+  TInst extends { destroy(): void; updateOptions(partial: Partial<TOpts>): void },
+  TOpts extends object,
+>(factory: (element: HTMLElement, options: TOpts) => TInst) {
+  return function useHook(
+    options: TOpts = {} as TOpts,
+    instanceRef?: RefObject<TInst | null>,
+  ): RefCallback<HTMLElement> {
     // Always-latest options, read by the wrapped callbacks.
     const latest = useRef(options)
     latest.current = options
@@ -131,29 +132,17 @@ function createHook<TInst extends { destroy(): void; updateOptions(partial: Part
 
 // ─── Specific hooks ────────────────────────────────────────────────────────
 
-export const usePointrix = createHook<Pointrix, PointrixOptions>(
-  (el, opts) => new Pointrix(el, opts),
-)
+export const usePointrix = createHook<Pointrix, PointrixOptions>((el, opts) => new Pointrix(el, opts))
 
-export const useDraggable = createHook<Draggable, DragOptions>(
-  (el, opts) => new Draggable(el, opts),
-)
+export const useDraggable = createHook<Draggable, DragOptions>((el, opts) => new Draggable(el, opts))
 
-export const useResizable = createHook<Resizable, ResizeOptions>(
-  (el, opts) => new Resizable(el, opts),
-)
+export const useResizable = createHook<Resizable, ResizeOptions>((el, opts) => new Resizable(el, opts))
 
-export const useGesturable = createHook<Gesturable, GestureOptions>(
-  (el, opts) => new Gesturable(el, opts),
-)
+export const useGesturable = createHook<Gesturable, GestureOptions>((el, opts) => new Gesturable(el, opts))
 
-export const useDropzone = createHook<Dropzone, DropzoneOptions>(
-  (el, opts) => new Dropzone(el, opts),
-)
+export const useDropzone = createHook<Dropzone, DropzoneOptions>((el, opts) => new Dropzone(el, opts))
 
-export const useSortable = createHook<Sortable, SortableOptions>(
-  (el, opts) => new Sortable(el, opts),
-)
+export const useSortable = createHook<Sortable, SortableOptions>((el, opts) => new Sortable(el, opts))
 
 // ─── Composite hook: useInteractable ───────────────────────────────────────
 
@@ -200,9 +189,21 @@ export function useInteractable(
     if (!el) return
     const current: UseInteractableOptions = latest.current
     const inst: InteractableInstance = {
-      drag: current.drag ? new Draggable(el, (typeof current.drag === 'object' ? wrapSubOptions(latest, 'drag') : {}) as DragOptions) : null,
-      resize: current.resize ? new Resizable(el, (typeof current.resize === 'object' ? wrapSubOptions(latest, 'resize') : {}) as ResizeOptions) : null,
-      gesture: current.gesture ? new Gesturable(el, (typeof current.gesture === 'object' ? wrapSubOptions(latest, 'gesture') : {}) as GestureOptions) : null,
+      drag: current.drag
+        ? new Draggable(el, (typeof current.drag === 'object' ? wrapSubOptions(latest, 'drag') : {}) as DragOptions)
+        : null,
+      resize: current.resize
+        ? new Resizable(
+            el,
+            (typeof current.resize === 'object' ? wrapSubOptions(latest, 'resize') : {}) as ResizeOptions,
+          )
+        : null,
+      gesture: current.gesture
+        ? new Gesturable(
+            el,
+            (typeof current.gesture === 'object' ? wrapSubOptions(latest, 'gesture') : {}) as GestureOptions,
+          )
+        : null,
     }
     internal.current = inst
     if (instanceRef) instanceRef.current = inst

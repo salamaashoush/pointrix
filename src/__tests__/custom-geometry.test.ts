@@ -22,14 +22,24 @@ function rawElement(): HTMLElement {
 
 function domRect(x: number, y: number, w: number, h: number): DOMRect {
   return {
-    x, y, width: w, height: h,
-    top: y, left: x, right: x + w, bottom: y + h,
-    toJSON() { return this },
+    x,
+    y,
+    width: w,
+    height: h,
+    top: y,
+    left: x,
+    right: x + w,
+    bottom: y + h,
+    toJSON() {
+      return this
+    },
   } as DOMRect
 }
 
 describe('Draggable with rectChecker', () => {
-  beforeEach(() => { resetRAF() })
+  beforeEach(() => {
+    resetRAF()
+  })
 
   it('computes bounds from rectChecker (not getBoundingClientRect)', () => {
     const el = rawElement()
@@ -90,7 +100,9 @@ describe('Draggable with rectChecker', () => {
 })
 
 describe('Dropzone with rectChecker', () => {
-  beforeEach(() => { resetRAF() })
+  beforeEach(() => {
+    resetRAF()
+  })
 
   it('uses zone rectChecker for hit testing', () => {
     const draggableEl = rawElement()
@@ -155,7 +167,9 @@ describe('Dropzone with rectChecker', () => {
 })
 
 describe('Sortable with rectChecker', () => {
-  beforeEach(() => { resetRAF() })
+  beforeEach(() => {
+    resetRAF()
+  })
 
   it('passes rectChecker to each child Draggable', () => {
     const container = rawElement()
@@ -193,7 +207,9 @@ describe('Sortable with rectChecker', () => {
 })
 
 describe('origin option', () => {
-  beforeEach(() => { resetRAF() })
+  beforeEach(() => {
+    resetRAF()
+  })
 
   it('translates pointer coords relative to a static offset origin', () => {
     const el = rawElement()

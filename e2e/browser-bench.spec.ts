@@ -49,7 +49,10 @@ const BURST_EVENTS = 2000
 const WARMUP_FRAMES = 30
 const MEASURED_PASSES = 3
 
-interface Sample { dispatchMs: number; rafMs: number }
+interface Sample {
+  dispatchMs: number
+  rafMs: number
+}
 interface Stats {
   lib: Lib
   mode: Mode
@@ -79,9 +82,11 @@ async function loadPage(page: Page, lib: Lib, mode: Mode, count: number) {
 async function runOnce(page: Page, frames: number): Promise<{ samples: Sample[]; totalMs: number }> {
   return page.evaluate(
     async (f) =>
-      (window as unknown as {
-        __bench: { run: (n: number) => Promise<{ samples: Sample[]; totalMs: number }> }
-      }).__bench.run(f),
+      (
+        window as unknown as {
+          __bench: { run: (n: number) => Promise<{ samples: Sample[]; totalMs: number }> }
+        }
+      ).__bench.run(f),
     frames,
   )
 }
@@ -89,9 +94,11 @@ async function runOnce(page: Page, frames: number): Promise<{ samples: Sample[];
 async function burstOnce(page: Page, events: number): Promise<{ totalMs: number; perEventMs: number }> {
   return page.evaluate(
     async (e) =>
-      (window as unknown as {
-        __bench: { burst: (n: number) => Promise<{ totalMs: number; perEventMs: number }> }
-      }).__bench.burst(e),
+      (
+        window as unknown as {
+          __bench: { burst: (n: number) => Promise<{ totalMs: number; perEventMs: number }> }
+        }
+      ).__bench.burst(e),
     events,
   )
 }

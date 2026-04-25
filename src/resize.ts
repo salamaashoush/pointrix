@@ -73,7 +73,7 @@ export class Resizable extends Pointrix {
     deltaHeight: 0,
     edges: { top: false, right: false, bottom: false, left: false },
   }
-  
+
   constructor(element: HTMLElement, options: ResizeOptions = {}) {
     // Default options
     const defaultOptions: ResizeOptions = {
@@ -81,9 +81,9 @@ export class Resizable extends Pointrix {
       handleSize: 10,
       minWidth: 50,
       minHeight: 50,
-      ...options
+      ...options,
     }
-    
+
     super(element, {
       ...defaultOptions,
       threshold: 0, // Start immediately for resize
@@ -98,9 +98,9 @@ export class Resizable extends Pointrix {
       onEnd: (e) => {
         this.handleResizeEnd(e)
         options.onEnd?.(e)
-      }
+      },
     })
-    
+
     this.resizeOptions = defaultOptions
 
     // Square is a convenience alias for aspectRatio: 1
@@ -114,7 +114,7 @@ export class Resizable extends Pointrix {
     element.addEventListener('pointermove', this.boundUpdateCursor)
     element.style.position = 'relative'
   }
-  
+
   private normalizeInitialTransform(element: HTMLElement) {
     const style = window.getComputedStyle(element)
     const matrix = style.transform
@@ -130,14 +130,14 @@ export class Resizable extends Pointrix {
       }
     }
   }
-  
+
   // Override shouldHandleEvent to only handle when near edges
   protected shouldHandleEvent(e: PointerEvent): boolean {
     const edge = this.detectEdge(e)
     const shouldHandle = edge !== null
     return shouldHandle
   }
-  
+
   private updateCursor(e: PointerEvent) {
     if (this.activeEdge) return // Don't update while resizing
 
@@ -146,34 +146,34 @@ export class Resizable extends Pointrix {
       ? this.resizeOptions.cursorChecker(edge)
       : this.getCursor(edge)
   }
-  
+
   private detectEdge(e: PointerEvent): Edge {
     const rect = this.getRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     const handleSize = this.resizeOptions.handleSize || 10
-    
+
     const edges = this.resizeOptions.edges || {}
     const nearTop = edges.top && y < handleSize
     const nearBottom = edges.bottom && y > rect.height - handleSize
     const nearLeft = edges.left && x < handleSize
     const nearRight = edges.right && x > rect.width - handleSize
-    
+
     // Corners take priority
     if (nearTop && nearLeft) return 'top-left'
     if (nearTop && nearRight) return 'top-right'
     if (nearBottom && nearLeft) return 'bottom-left'
     if (nearBottom && nearRight) return 'bottom-right'
-    
+
     // Then edges
     if (nearTop) return 'top'
     if (nearBottom) return 'bottom'
     if (nearLeft) return 'left'
     if (nearRight) return 'right'
-    
+
     return null
   }
-  
+
   private getCursor(edge: Edge): string {
     switch (edge) {
       case 'top':
@@ -192,7 +192,7 @@ export class Resizable extends Pointrix {
         return ''
     }
   }
-  
+
   private handleResizeStart(e: InteractionEvent) {
     // Defer transform parsing to first interaction (avoids getComputedStyle in constructor)
     if (!this.transformNormalized) {
@@ -216,10 +216,10 @@ export class Resizable extends Pointrix {
     // Store initial state
     this.startSize = {
       width: parseFloat(style.width) || rect.width,
-      height: parseFloat(style.height) || rect.height
+      height: parseFloat(style.height) || rect.height,
     }
     this.currentSize = { ...this.startSize }
-    
+
     // Use the normalized transform values (already parsed and applied during construction)
     const transform = style.transform
     if (transform && transform !== 'none') {
@@ -241,28 +241,28 @@ export class Resizable extends Pointrix {
     } else if (typeof this.resizeOptions.aspectRatio === 'number') {
       this.aspectRatio = this.resizeOptions.aspectRatio
     }
-    
+
     // Set will-change for performance
     this.element.style.willChange = 'width, height, transform'
-    
+
     if (this.resizeOptions.onResizeStart) {
       this.resizeOptions.onResizeStart(this.createResizeEvent(e, 0, 0))
     }
   }
-  
+
   private handleResizeMove(e: InteractionEvent) {
     if (!this.activeEdge) return
-    
+
     const pointer = e.pointers[0]
     let deltaX = pointer.total.x
     let deltaY = pointer.total.y
-    
+
     // Calculate new size based on edge
     let newWidth = this.startSize.width
     let newHeight = this.startSize.height
     let newX = this.startPos.x
     let newY = this.startPos.y
-    
+
     // Handle each edge/corner
     if (this.edgeFlags.right) {
       newWidth += deltaX
@@ -278,7 +278,7 @@ export class Resizable extends Pointrix {
       newHeight -= deltaY
       newY += deltaY
     }
-    
+
     // Apply invert mode
     const invertMode = this.resizeOptions.invert || 'none'
 
@@ -298,15 +298,15 @@ export class Resizable extends Pointrix {
     }
 
     // Constraints
-    const minWidth = invertMode === 'negate' ? -Infinity : (this.resizeOptions.minWidth || 0)
-    const minHeight = invertMode === 'negate' ? -Infinity : (this.resizeOptions.minHeight || 0)
+    const minWidth = invertMode === 'negate' ? -Infinity : this.resizeOptions.minWidth || 0
+    const minHeight = invertMode === 'negate' ? -Infinity : this.resizeOptions.minHeight || 0
     const maxWidth = this.resizeOptions.maxWidth || Infinity
     const maxHeight = this.resizeOptions.maxHeight || Infinity
 
     // For reposition mode, use a very small min (1px) instead of the default 50
     // so the flip feels smooth — the user can drag through zero without a "dead zone"
-    const effectiveMinW = invertMode === 'reposition' ? 1 : (minWidth || 50)
-    const effectiveMinH = invertMode === 'reposition' ? 1 : (minHeight || 50)
+    const effectiveMinW = invertMode === 'reposition' ? 1 : minWidth || 50
+    const effectiveMinH = invertMode === 'reposition' ? 1 : minHeight || 50
 
     // Maintain aspect ratio if needed
     if (this.aspectRatio) {
@@ -356,13 +356,13 @@ export class Resizable extends Pointrix {
       newHeight = maxHeight
       if (this.aspectRatio) newWidth = newHeight * this.aspectRatio
     }
-    
+
     // Apply grid snapping
     if (this.resizeOptions.grid) {
       newWidth = Math.round(newWidth / this.resizeOptions.grid.width) * this.resizeOptions.grid.width
       newHeight = Math.round(newHeight / this.resizeOptions.grid.height) * this.resizeOptions.grid.height
     }
-    
+
     // Apply modifiers if configured (mutate ctx in place)
     if (this.resizeOptions.modifiers?.length) {
       const ctx = this.modifierContext
@@ -401,7 +401,7 @@ export class Resizable extends Pointrix {
     if (newX !== this.startPos.x || newY !== this.startPos.y) {
       this.element.style.transform = `translate3d(${newX}px, ${newY}px, 0)`
     }
-    
+
     if (this.resizeOptions.onResizeMove) {
       const deltaWidth = newWidth - this.startSize.width
       const deltaHeight = newHeight - this.startSize.height
@@ -419,7 +419,7 @@ export class Resizable extends Pointrix {
       this.resizeOptions.onResizeEnd(this.createResizeEvent(e, deltaWidth, deltaHeight))
     }
   }
-  
+
   private createResizeEvent(e: InteractionEvent, deltaWidth: number, deltaHeight: number): ResizeEvent {
     const evt = this.cachedResizeEvent
     evt.target = e.target
@@ -436,7 +436,7 @@ export class Resizable extends Pointrix {
     evt.edges.left = this.edgeFlags.left
     return evt
   }
-  
+
   setSize(width: number, height: number) {
     this.currentSize = { width, height }
     this.element.style.width = `${width}px`
@@ -458,7 +458,7 @@ export class Resizable extends Pointrix {
       this.resizeOptions.aspectRatio = 1
     }
   }
-  
+
   destroy() {
     super.destroy()
     this.element.removeEventListener('pointermove', this.boundUpdateCursor)
@@ -469,12 +469,10 @@ export class Resizable extends Pointrix {
 
 // Factory function
 export function resizable(element: HTMLElement | string, options?: ResizeOptions): Resizable {
-  const el = typeof element === 'string' 
-    ? document.querySelector<HTMLElement>(element)
-    : element
-    
+  const el = typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element
+
   if (!el) throw new Error(`Element not found: ${element}`)
-  
+
   return new Resizable(el, options)
 }
 

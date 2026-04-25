@@ -4,9 +4,13 @@
 import { Draggable, DragEvent, DragOptions } from './drag'
 import { prefersReducedMotion } from './types'
 import {
-  setSortableItemAttrs, clearSortableItemAttrs,
-  setSortableContainerAttrs, clearSortableContainerAttrs,
-  setDraggingAttrs, announce, getMessages,
+  setSortableItemAttrs,
+  clearSortableItemAttrs,
+  setSortableContainerAttrs,
+  clearSortableContainerAttrs,
+  setDraggingAttrs,
+  announce,
+  getMessages,
 } from './aria'
 
 export interface SortableOptions {
@@ -180,13 +184,15 @@ export class Sortable {
 
   /** Resolve a rect for any element through this sortable's rectChecker. */
   private getRect(el: HTMLElement): DOMRect {
-    return this.options.rectChecker
-      ? this.options.rectChecker(el)
-      : el.getBoundingClientRect()
+    return this.options.rectChecker ? this.options.rectChecker(el) : el.getBoundingClientRect()
   }
 
-  get enabled(): boolean { return this._enabled }
-  set enabled(value: boolean) { this._enabled = value }
+  get enabled(): boolean {
+    return this._enabled
+  }
+  set enabled(value: boolean) {
+    this._enabled = value
+  }
 
   constructor(container: HTMLElement, options: SortableOptions = {}) {
     this.container = container
@@ -223,11 +229,9 @@ export class Sortable {
   getItems(): HTMLElement[] {
     if (this._itemsCache) return this._itemsCache
     const items = this.options.items
-      ? Array.from(this.container.querySelectorAll<HTMLElement>(
-          this.options.items + ':not(.sortable-placeholder)',
-        ))
+      ? Array.from(this.container.querySelectorAll<HTMLElement>(this.options.items + ':not(.sortable-placeholder)'))
       : (Array.from(this.container.children).filter(
-          el => !el.classList.contains('sortable-placeholder'),
+          (el) => !el.classList.contains('sortable-placeholder'),
         ) as HTMLElement[])
     this._itemsCache = items
     return items
@@ -406,9 +410,7 @@ export class Sortable {
     for (let i = 0; i < this.itemStates.length; i++) {
       if (i === this.dragIndex) continue
       const state = this.itemStates[i]
-      const mid = isVertical
-        ? state.rect.top + state.rect.height / 2
-        : state.rect.left + state.rect.width / 2
+      const mid = isVertical ? state.rect.top + state.rect.height / 2 : state.rect.left + state.rect.width / 2
       if (dragCenter > mid) {
         newIndex++
       }
@@ -473,9 +475,7 @@ export class Sortable {
       // Use the target's rectChecker so cross-group drops respect the
       // target's geometry world, which may differ from ours.
       const rect = target.getRect(targetItems[i])
-      const mid = isVertical
-        ? rect.top + rect.height / 2
-        : rect.left + rect.width / 2
+      const mid = isVertical ? rect.top + rect.height / 2 : rect.left + rect.width / 2
       const center = isVertical ? cy : cx
       if (center < mid) {
         insertIndex = i
@@ -689,21 +689,15 @@ export class Sortable {
       if (from < to && i > from && i <= to) {
         const target = this.itemStates[i - 1].rect
         const current = this.itemStates[i].rect
-        offset = isVertical
-          ? target.top - current.top
-          : target.left - current.left
+        offset = isVertical ? target.top - current.top : target.left - current.left
       } else if (from > to && i >= to && i < from) {
         const target = this.itemStates[i + 1].rect
         const current = this.itemStates[i].rect
-        offset = isVertical
-          ? target.top - current.top
-          : target.left - current.left
+        offset = isVertical ? target.top - current.top : target.left - current.left
       }
 
       el.style.transition = duration > 0 ? `transform ${duration}ms ease` : ''
-      el.style.transform = isVertical
-        ? `translateY(${offset}px)`
-        : `translateX(${offset}px)`
+      el.style.transform = isVertical ? `translateY(${offset}px)` : `translateX(${offset}px)`
     }
   }
 
@@ -731,10 +725,10 @@ export class Sortable {
     // Detect if the new options require tearing down and rebuilding the
     // per-item Draggables (because the Draggable constructor options changed).
     const needsRebind =
-      ('handle' in partial && partial.handle !== this.options.handle)
-      || ('axis' in partial && partial.axis !== this.options.axis && !this.options.group)
-      || ('items' in partial && partial.items !== this.options.items)
-      || ('rectChecker' in partial && partial.rectChecker !== (this.options.rectChecker ?? undefined))
+      ('handle' in partial && partial.handle !== this.options.handle) ||
+      ('axis' in partial && partial.axis !== this.options.axis && !this.options.group) ||
+      ('items' in partial && partial.items !== this.options.items) ||
+      ('rectChecker' in partial && partial.rectChecker !== (this.options.rectChecker ?? undefined))
 
     Object.assign(this.options, partial)
     // Allow explicit clearing.
@@ -800,9 +794,7 @@ export class Sortable {
 }
 
 export function sortable(container: HTMLElement | string, options?: SortableOptions): Sortable {
-  const el = typeof container === 'string'
-    ? document.querySelector<HTMLElement>(container)
-    : container
+  const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container) : container
 
   if (!el) throw new Error(`Container not found: ${container}`)
 

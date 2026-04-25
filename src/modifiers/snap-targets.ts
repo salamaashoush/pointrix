@@ -11,20 +11,26 @@ export interface SnapTarget {
 
 /** Preset pivot positions */
 export type PivotPreset =
-  | 'top-left' | 'top' | 'top-right'
-  | 'left' | 'center' | 'right'
-  | 'bottom-left' | 'bottom' | 'bottom-right'
+  | 'top-left'
+  | 'top'
+  | 'top-right'
+  | 'left'
+  | 'center'
+  | 'right'
+  | 'bottom-left'
+  | 'bottom'
+  | 'bottom-right'
 
 const PIVOT_PRESETS: Record<PivotPreset, { x: number; y: number }> = {
-  'top-left':     { x: 0,   y: 0   },
-  'top':          { x: 0.5, y: 0   },
-  'top-right':    { x: 1,   y: 0   },
-  'left':         { x: 0,   y: 0.5 },
-  'center':       { x: 0.5, y: 0.5 },
-  'right':        { x: 1,   y: 0.5 },
-  'bottom-left':  { x: 0,   y: 1   },
-  'bottom':       { x: 0.5, y: 1   },
-  'bottom-right': { x: 1,   y: 1   },
+  'top-left': { x: 0, y: 0 },
+  top: { x: 0.5, y: 0 },
+  'top-right': { x: 1, y: 0 },
+  left: { x: 0, y: 0.5 },
+  center: { x: 0.5, y: 0.5 },
+  right: { x: 1, y: 0.5 },
+  'bottom-left': { x: 0, y: 1 },
+  bottom: { x: 0.5, y: 1 },
+  'bottom-right': { x: 1, y: 1 },
 }
 
 /** Resolve a pivot value — accepts a preset string or {x,y} object */
@@ -66,9 +72,7 @@ export class SnapTargetsModifier implements Modifier {
 
   constructor(options: SnapTargetsOptions) {
     this.options = options
-    this.resolvedPivots = options.relativePoints?.length
-      ? options.relativePoints.map(resolvePivot)
-      : [{ x: 0, y: 0 }]
+    this.resolvedPivots = options.relativePoints?.length ? options.relativePoints.map(resolvePivot) : [{ x: 0, y: 0 }]
   }
 
   /** The target the element is currently snapped to, or null */

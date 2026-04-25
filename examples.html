@@ -1,842 +1,1115 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pointrix — Live Examples</title>
-  <style>
-    :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --surface-2: #1a1a26;
-      --border: #2a2a3a;
-      --text: #e4e4ef;
-      --text-dim: #8a8aa0;
-      --accent: #6c5ce7;
-      --accent-2: #00d2ff;
-      --code-bg: #0f0f17;
-      --radius: 10px;
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.55;
-      min-height: 100vh;
-    }
-
-    .shell {
-      display: grid;
-      grid-template-columns: 240px 1fr;
-      min-height: 100vh;
-    }
-
-    nav.toc {
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      padding: 24px 16px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-    }
-
-    nav.toc h1 {
-      font-size: 18px;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 4px;
-    }
-    nav.toc .tagline { color: var(--text-dim); font-size: 12px; margin-bottom: 24px; }
-
-    nav.toc a {
-      display: block;
-      color: var(--text-dim);
-      text-decoration: none;
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 13px;
-      transition: all 0.15s;
-    }
-    nav.toc a:hover { background: var(--surface-2); color: var(--text); }
-    nav.toc a.active { background: rgba(108, 92, 231, 0.15); color: var(--accent-2); }
-    nav.toc .toc-group {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-dim);
-      margin: 16px 0 6px;
-      padding: 0 8px;
-      opacity: 0.6;
-    }
-
-    main {
-      max-width: 960px;
-      width: 100%;
-      padding: 40px 48px 80px;
-    }
-
-    section.example { margin-bottom: 64px; scroll-margin-top: 24px; }
-    section.example > h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    section.example > .intro { color: var(--text-dim); margin-bottom: 20px; font-size: 14px; }
-
-    .playground {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      grid-template-rows: auto auto;
-      gap: 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-    .playground .controls { grid-column: 1; grid-row: 1 / span 2; }
-    .playground .demo     { grid-column: 2; grid-row: 1; }
-    .playground .code     { grid-column: 2; grid-row: 2; }
-
-    @media (max-width: 900px) {
-      .shell { grid-template-columns: 1fr; }
-      nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
-      main { padding: 24px 20px 60px; }
-      .playground { grid-template-columns: 1fr; }
-      .playground .controls { grid-column: 1; grid-row: 1; }
-      .playground .demo     { grid-column: 1; grid-row: 2; }
-      .playground .code     { grid-column: 1; grid-row: 3; }
-    }
-
-    .controls { background: var(--surface-2); border-radius: 8px; padding: 14px; font-size: 13px; }
-    .controls .group-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 10px; }
-    .controls label { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; color: var(--text); }
-    .controls label .label-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); }
-    .controls label .label-row .val { font-family: var(--font-mono); font-size: 11px; color: var(--accent-2); }
-    .controls input[type=range] { width: 100%; accent-color: var(--accent); }
-    .controls input[type=checkbox] { accent-color: var(--accent); }
-    .controls select {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 13px;
-      cursor: pointer;
-      width: 100%;
-    }
-    .controls .checkbox-row { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
-    .controls .divider { height: 1px; background: var(--border); margin: 10px 0; }
-
-    .demo {
-      background: var(--code-bg);
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      min-height: 240px;
-      position: relative;
-      overflow: hidden;
-    }
-    .demo .demo-readout {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      background: rgba(0,0,0,0.4);
-      padding: 4px 8px;
-      border-radius: 4px;
-      pointer-events: none;
-      user-select: none;
-    }
-
-    .code { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: relative; }
-    .code pre { margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55; color: var(--text); overflow-x: auto; }
-    .code .copy {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .code .copy:hover { color: var(--text); border-color: var(--accent); }
-    .code .kw  { color: #c792ea; }
-    .code .str { color: #a5e075; }
-    .code .num { color: #f78c6c; }
-    .code .fn  { color: #82aaff; }
-    .code .cmt { color: var(--text-dim); font-style: italic; }
-
-    .tile {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      border-radius: 8px;
-      touch-action: none;
-      user-select: none;
-      cursor: grab;
-      position: absolute;
-      top: 40px;
-      left: 40px;
-      will-change: transform;
-    }
-    .tile:active { cursor: grabbing; }
-
-    .panel {
-      width: 180px;
-      height: 120px;
-      background: linear-gradient(135deg, #f43f5e, #f97316);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      border-radius: 8px;
-      user-select: none;
-      position: absolute;
-      top: 40px;
-      left: 40px;
-    }
-
-    .sortable-list { list-style: none; padding: 16px; display: flex; flex-direction: column; gap: 6px; margin: 0; }
-    .sortable-list li {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 14px;
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-      font-size: 14px;
-    }
-    .sortable-list li:active { cursor: grabbing; }
-
-    .dropzone {
-      background: rgba(108, 92, 231, 0.08);
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      min-height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-dim);
-      font-size: 13px;
-      transition: all 0.15s;
-    }
-    .dropzone.dz-active { border-color: var(--accent); }
-    .dropzone.dz-hover  { background: rgba(108, 92, 231, 0.25); border-color: var(--accent-2); color: var(--text); }
-
-    .gesture-target {
-      width: 200px;
-      height: 200px;
-      background: linear-gradient(135deg, #10b981, #06b6d4);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 600;
-      user-select: none;
-      touch-action: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      transform-origin: center;
-      will-change: transform;
-    }
-
-    .intro-card {
-      background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(0, 210, 255, 0.08));
-      border: 1px solid var(--border);
-      padding: 24px;
-      border-radius: var(--radius);
-      margin-bottom: 40px;
-    }
-    .intro-card h2 {
-      font-size: 24px;
-      margin-bottom: 6px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .intro-card p { color: var(--text-dim); font-size: 14px; margin-bottom: 12px; }
-    .intro-card .pill {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--text);
-      margin-right: 6px;
-      margin-bottom: 6px;
-      font-family: var(--font-mono);
-    }
-    .intro-card .pill b { color: var(--accent-2); font-weight: 600; }
-  </style>
-</head>
-<body>
-  <div class="shell">
-    <nav class="toc" id="toc">
-      <h1>pointrix</h1>
-      <div class="tagline">Live examples</div>
-
-      <div class="toc-group">Core</div>
-      <a href="#draggable">Draggable</a>
-      <a href="#axis-bounds">Bounds</a>
-      <a href="#grid">Grid snap</a>
-      <a href="#momentum">Momentum</a>
-      <a href="#handle">Handle</a>
-
-      <div class="toc-group">Advanced</div>
-      <a href="#modifiers">Modifiers</a>
-      <a href="#rubberband">Rubberband</a>
-      <a href="#resizable">Resizable</a>
-      <a href="#gesture">Gesture</a>
-
-      <div class="toc-group">Compose</div>
-      <a href="#dropzone">Dropzone</a>
-      <a href="#sortable">Sortable</a>
-      <a href="#sortable-groups">Cross-container</a>
-
-      <div class="toc-group">More</div>
-      <a href="index.html">Home</a>
-      <a href="benchmark.html">Benchmarks</a>
-      <a href="react-perf.html">React demo</a>
-      <a href="bench-compare.html">Side-by-side</a>
-    </nav>
-
-    <main>
-      <div class="intro-card">
-        <h2>Live examples</h2>
-        <p>Every example below runs live. Tweak the controls on the left of each playground; the demo updates in real time via <code>updateOptions</code>, and the code block on the right always reflects the current options — copy-paste into your app.</p>
-        <span class="pill"><b>npm:</b> pointrix</span>
-        <span class="pill"><b>import:</b> pointrix/drag</span>
-        <span class="pill"><b>gzip:</b> 14.4 KB full</span>
-        <span class="pill"><b>vs interact.js:</b> 13–15× faster/event</span>
-      </div>
-
-      <!-- ─── DRAGGABLE ──────────────────────────────────────── -->
-      <section id="draggable" class="example">
-        <h2>Draggable</h2>
-        <p class="intro">The core primitive. Auto-applies transforms via <code>translate3d</code>. Option changes update in place — no teardown or listener churn.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="drag">
-            <div class="group-title">Options</div>
-
-            <label>
-              <span class="label-row"><span>axis</span><span class="val" data-val="axis">xy</span></span>
-              <select data-opt="axis">
-                <option value="xy" selected>xy</option>
-                <option value="x">x</option>
-                <option value="y">y</option>
-                <option value="auto">auto (lock to first-moved)</option>
-              </select>
-            </label>
-
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="preventScroll" checked />
-              preventScroll
-            </label>
-
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="styleCursor" checked />
-              styleCursor
-            </label>
-
-            <label>
-              <span class="label-row"><span>threshold</span><span class="val" data-val="threshold">3</span></span>
-              <input type="range" data-opt="threshold" min="0" max="50" step="1" value="3" />
-            </label>
-
-            <div class="divider"></div>
-            <div class="group-title">Callbacks</div>
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="onTap" />
-              onTap
-            </label>
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="onDoubleTap" />
-              onDoubleTap
-            </label>
-          </div>
-
-          <div class="demo" data-demo="drag">
-            <div class="tile" data-target>Drag</div>
-            <div class="demo-readout" data-readout>—</div>
-          </div>
-
-          <div class="code" data-code="drag">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── BOUNDS ──────────────────────────────────── -->
-      <section id="axis-bounds" class="example">
-        <h2>Bounds</h2>
-        <p class="intro">Restrict movement to a rect. <code>'parent'</code> uses <code>offsetParent</code>; an HTMLElement uses that element's rect; a literal <code>{left, top, right, bottom}</code> uses page-space coords.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="bounds">
-            <div class="group-title">bounds</div>
-            <label>
-              <select data-opt="bounds">
-                <option value="parent" selected>'parent'</option>
-                <option value="none">(disabled)</option>
-                <option value="region">custom region</option>
-              </select>
-            </label>
-            <label>
-              <span class="label-row"><span>axis</span><span class="val" data-val="axis">xy</span></span>
-              <select data-opt="axis">
-                <option value="xy" selected>xy</option>
-                <option value="x">x</option>
-                <option value="y">y</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="demo" data-demo="bounds">
-            <div class="tile" data-target>Bound</div>
-          </div>
-
-          <div class="code" data-code="bounds">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── GRID SNAP ──────────────────────────────────────── -->
-      <section id="grid" class="example">
-        <h2>Grid snap</h2>
-        <p class="intro">The built-in <code>grid</code> option snaps to a regular grid each frame. For irregular targets use the <code>snapTargets</code> modifier.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="grid">
-            <label>
-              <span class="label-row"><span>grid.x</span><span class="val" data-val="gx">20</span></span>
-              <input type="range" data-opt="gx" min="0" max="80" step="1" value="20" />
-            </label>
-            <label>
-              <span class="label-row"><span>grid.y</span><span class="val" data-val="gy">20</span></span>
-              <input type="range" data-opt="gy" min="0" max="80" step="1" value="20" />
-            </label>
-          </div>
-
-          <div class="demo" data-demo="grid">
-            <div class="tile" data-target>Snap</div>
-          </div>
-
-          <div class="code" data-code="grid">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── MOMENTUM ──────────────────────────────────────── -->
-      <section id="momentum" class="example">
-        <h2>Momentum</h2>
-        <p class="intro"><code>friction</code> is 0–1 remaining-velocity-per-second (0.95 = 5 % loss/sec). Frame-rate-independent — 60 Hz and 120 Hz monitors land the same distance.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="momentum">
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="momentum" checked />
-              momentum
-            </label>
-            <label>
-              <span class="label-row"><span>friction</span><span class="val" data-val="friction">0.92</span></span>
-              <input type="range" data-opt="friction" min="0.5" max="0.99" step="0.01" value="0.92" />
-            </label>
-            <label>
-              <span class="label-row"><span>minVelocity</span><span class="val" data-val="minVelocity">10</span></span>
-              <input type="range" data-opt="minVelocity" min="0" max="200" step="1" value="10" />
-            </label>
-          </div>
-
-          <div class="demo" data-demo="momentum">
-            <div class="tile" data-target>Fling</div>
-            <div class="demo-readout" data-readout>flick me →</div>
-          </div>
-
-          <div class="code" data-code="momentum">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── HANDLE ────────────────────────────────────────── -->
-      <section id="handle" class="example">
-        <h2>Handle</h2>
-        <p class="intro">Restrict drag-start to a specific region within the element. Pointer events outside the handle selector are ignored.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="handle">
-            <div class="group-title">handle</div>
-            <label>
-              <select data-opt="handle">
-                <option value="handle" selected>'.handle'</option>
-                <option value="none">(whole element)</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="demo" data-demo="handle">
-            <div class="panel" data-target style="flex-direction:column;gap:6px;font-size:13px;">
-              <div class="handle" style="padding:2px 10px;background:rgba(0,0,0,0.35);border-radius:4px;cursor:grab;">⋮⋮ drag here</div>
-              <div style="opacity:.8;">(body is ignored)</div>
-            </div>
-          </div>
-
-          <div class="code" data-code="handle">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── MODIFIERS ──────────────────────────────────────── -->
-      <section id="modifiers" class="example">
-        <h2>Modifiers</h2>
-        <p class="intro">Composable transforms applied each frame. Order matters — each one sees the context mutated by the previous.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="modifiers">
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="restrict" checked />
-              restrict({ bounds: 'parent' })
-            </label>
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="snap" checked />
-              snapGrid({ x: 25, y: 25 })
-            </label>
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="snapTargets" />
-              snapTargets({ x: 120, y: 80 })
-            </label>
-          </div>
-
-          <div class="demo" data-demo="modifiers">
-            <div class="tile" data-target>Mod</div>
-          </div>
-
-          <div class="code" data-code="modifiers">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── RUBBERBAND ─────────────────────────────────────── -->
-      <section id="rubberband" class="example">
-        <h2>Rubberband</h2>
-        <p class="intro">iOS-style elastic overscroll. Drag past the bounds feels resistive; release snaps back.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="rubberband">
-            <label>
-              <span class="label-row"><span>resistance</span><span class="val" data-val="resistance">0.3</span></span>
-              <input type="range" data-opt="resistance" min="0.05" max="1" step="0.05" value="0.3" />
-            </label>
-            <label>
-              <span class="label-row"><span>maxOvershoot</span><span class="val" data-val="maxOvershoot">80</span></span>
-              <input type="range" data-opt="maxOvershoot" min="0" max="200" step="5" value="80" />
-            </label>
-          </div>
-
-          <div class="demo" data-demo="rubberband">
-            <div class="tile" data-target>Pull</div>
-          </div>
-
-          <div class="code" data-code="rubberband">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── RESIZABLE ──────────────────────────────────────── -->
-      <section id="resizable" class="example">
-        <h2>Resizable</h2>
-        <p class="intro">Drag any combination of edges or corners. Aspect-ratio lock, min/max, grid snapping.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="resize">
-            <div class="group-title">edges</div>
-            <label class="checkbox-row"><input type="checkbox" data-opt="top" checked /> top</label>
-            <label class="checkbox-row"><input type="checkbox" data-opt="right" checked /> right</label>
-            <label class="checkbox-row"><input type="checkbox" data-opt="bottom" checked /> bottom</label>
-            <label class="checkbox-row"><input type="checkbox" data-opt="left" checked /> left</label>
-            <div class="divider"></div>
-            <label class="checkbox-row">
-              <input type="checkbox" data-opt="aspect" />
-              aspectRatio: 'preserve'
-            </label>
-            <label>
-              <span class="label-row"><span>minWidth</span><span class="val" data-val="minWidth">80</span></span>
-              <input type="range" data-opt="minWidth" min="40" max="400" step="10" value="80" />
-            </label>
-          </div>
-
-          <div class="demo" data-demo="resize">
-            <div class="panel" data-target>Resize</div>
-            <div class="demo-readout" data-readout>—</div>
-          </div>
-
-          <div class="code" data-code="resize">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── GESTURE ────────────────────────────────────────── -->
-      <section id="gesture" class="example">
-        <h2>Gesture (pinch &amp; rotate)</h2>
-        <p class="intro">Multi-touch only. Two fingers down → <code>onGestureMove</code> fires with <code>scale</code>, <code>rotation</code>, <code>center</code>.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="gesture">
-            <p style="color:var(--text-dim);font-size:12px;">No configurable options for this demo — try it with two fingers on a trackpad or touch screen.</p>
-          </div>
-
-          <div class="demo" data-demo="gesture" style="min-height:300px;">
-            <div class="gesture-target" data-target>Pinch / Rotate</div>
-            <div class="demo-readout" data-readout>scale 1.00 · rotate 0°</div>
-          </div>
-
-          <div class="code" data-code="gesture">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── DROPZONE ───────────────────────────────────────── -->
-      <section id="dropzone" class="example">
-        <h2>Dropzone</h2>
-        <p class="intro">Drop targets that coordinate with <code>draggable({ droppable: true })</code>. Filter via <code>accept</code>, pick overlap semantics.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="dropzone">
-            <label>
-              <span class="label-row"><span>overlap</span><span class="val" data-val="overlap">pointer</span></span>
-              <select data-opt="overlap">
-                <option value="pointer" selected>'pointer'</option>
-                <option value="center">'center'</option>
-                <option value="0.5">0.5 (50% area)</option>
-                <option value="0.8">0.8 (80% area)</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="demo" data-demo="dropzone" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;">
-            <div style="position:relative;min-height:200px;background:rgba(255,255,255,0.02);border-radius:6px;">
-              <div class="tile" data-target style="top:20px;left:20px;width:60px;height:60px;font-size:12px;">Drop me</div>
-            </div>
-            <div class="dropzone" data-dropzone>drop here</div>
-          </div>
-
-          <div class="code" data-code="dropzone">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── SORTABLE ───────────────────────────────────────── -->
-      <section id="sortable" class="example">
-        <h2>Sortable</h2>
-        <p class="intro">Drag-to-reorder with animated neighbour displacement. Set <code>id</code> to get <code>order: string[]</code> in events — drop-in for framework state.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="sortable">
-            <label>
-              <span class="label-row"><span>axis</span><span class="val" data-val="axis">y</span></span>
-              <select data-opt="axis">
-                <option value="y" selected>y</option>
-                <option value="x">x</option>
-              </select>
-            </label>
-            <label>
-              <span class="label-row"><span>animationDuration</span><span class="val" data-val="animationDuration">200</span></span>
-              <input type="range" data-opt="animationDuration" min="0" max="600" step="10" value="200" />
-            </label>
-            <div class="divider"></div>
-            <div class="group-title">last order</div>
-            <pre data-last-order style="background:var(--bg);padding:8px;border-radius:4px;font-size:11px;color:var(--accent-2);margin:0;overflow-x:auto;">—</pre>
-          </div>
-
-          <div class="demo" data-demo="sortable" style="padding:0;min-height:auto;">
-            <ul class="sortable-list" data-list>
-              <li data-id="apples">🍎 Apples</li>
-              <li data-id="bananas">🍌 Bananas</li>
-              <li data-id="cherries">🍒 Cherries</li>
-              <li data-id="dates">🌴 Dates</li>
-              <li data-id="elderberries">🫐 Elderberries</li>
-            </ul>
-          </div>
-
-          <div class="code" data-code="sortable">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── CROSS-CONTAINER ─────────────────────────────────── -->
-      <section id="sortable-groups" class="example">
-        <h2>Cross-container sortable</h2>
-        <p class="intro">Share a <code>group</code> name and items move freely between lists. <code>onAdd</code> / <code>onRemove</code> fire on both sides.</p>
-
-        <div class="playground">
-          <div class="controls" data-ctl="groups">
-            <p style="color:var(--text-dim);font-size:12px;">Both lists use <code>group: 'kanban'</code>.</p>
-            <div class="divider"></div>
-            <div class="group-title">events</div>
-            <pre data-groups-log style="background:var(--bg);padding:8px;border-radius:4px;font-size:11px;color:var(--accent-2);margin:0;max-height:140px;overflow-y:auto;">—</pre>
-          </div>
-
-          <div class="demo" data-demo="groups" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;min-height:auto;">
-            <div>
-              <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);padding:6px 10px;">Todo</div>
-              <ul class="sortable-list" data-list-left style="padding:6px;">
-                <li data-id="g-1">📋 Write tests</li>
-                <li data-id="g-2">📋 Review PR</li>
-                <li data-id="g-3">📋 Update docs</li>
-              </ul>
-            </div>
-            <div>
-              <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);padding:6px 10px;">Done</div>
-              <ul class="sortable-list" data-list-right style="padding:6px;">
-                <li data-id="g-4">✅ Setup project</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="code" data-code="groups">
-            <button class="copy">copy</button>
-            <pre></pre>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script type="module">
-    import { draggable } from './src/drag.ts'
-    import { resizable } from './src/resize.ts'
-    import { gesturable } from './src/gesture.ts'
-    import { dropzone } from './src/dropzone.ts'
-    import { sortable } from './src/sortable.ts'
-    import { restrict, snapGrid, snapTargets, rubberband } from './src/modifiers/index.ts'
-
-    // Single-pass syntax highlighter. HTML-escapes the source first, then
-    // tokenizes with ONE regex where every alternative captures a named group
-    // — so each character is classified exactly once. This avoids the classic
-    // "successive .replace() chains escape each other's tags" bug.
-    function escapeHtml(s) {
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    }
-
-    const TOKEN_RE = new RegExp([
-      '(\\/\\/[^\\n]*)',                                              // 1: comment
-      '(\'[^\'\\n]*\'|"[^"\\n]*"|`[^`]*`)',                           // 2: string
-      '\\b(import|from|const|let|var|function|return|if|else|for|of|in|true|false|null|undefined|new)\\b', // 3: keyword
-      '\\b(\\d+(?:\\.\\d+)?)\\b',                                     // 4: number
-      '\\b(draggable|resizable|gesturable|dropzone|sortable|restrict|snapGrid|snapTargets|rubberband|pointrix)\\b', // 5: library fn
-    ].join('|'), 'g')
-
-    function highlight(src) {
-      let out = ''
-      let last = 0
-      for (const m of src.matchAll(TOKEN_RE)) {
-        if (m.index > last) out += escapeHtml(src.slice(last, m.index))
-        const [full, cmt, str, kw, num, fn] = m
-        if      (cmt) out += `<span class="cmt">${escapeHtml(cmt)}</span>`
-        else if (str) out += `<span class="str">${escapeHtml(str)}</span>`
-        else if (kw)  out += `<span class="kw">${escapeHtml(kw)}</span>`
-        else if (num) out += `<span class="num">${escapeHtml(num)}</span>`
-        else if (fn)  out += `<span class="fn">${escapeHtml(fn)}</span>`
-        else          out += escapeHtml(full)
-        last = m.index + full.length
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pointrix — Live Examples</title>
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #12121a;
+        --surface-2: #1a1a26;
+        --border: #2a2a3a;
+        --text: #e4e4ef;
+        --text-dim: #8a8aa0;
+        --accent: #6c5ce7;
+        --accent-2: #00d2ff;
+        --code-bg: #0f0f17;
+        --radius: 10px;
+        --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       }
-      if (last < src.length) out += escapeHtml(src.slice(last))
-      return out
-    }
 
-    function renderCode(section, src) {
-      const pre = document.querySelector(`[data-code="${section}"] pre`)
-      if (pre) pre.innerHTML = highlight(src)
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    document.querySelectorAll('[data-code]').forEach((wrap) => {
-      wrap.querySelector('.copy').addEventListener('click', () => {
-        const text = wrap.querySelector('pre').innerText
-        navigator.clipboard.writeText(text)
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.55;
+        min-height: 100vh;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 100vh;
+      }
+
+      nav.toc {
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        padding: 24px 16px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+      }
+
+      nav.toc h1 {
+        font-size: 18px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 4px;
+      }
+      nav.toc .tagline {
+        color: var(--text-dim);
+        font-size: 12px;
+        margin-bottom: 24px;
+      }
+
+      nav.toc a {
+        display: block;
+        color: var(--text-dim);
+        text-decoration: none;
+        padding: 6px 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        transition: all 0.15s;
+      }
+      nav.toc a:hover {
+        background: var(--surface-2);
+        color: var(--text);
+      }
+      nav.toc a.active {
+        background: rgba(108, 92, 231, 0.15);
+        color: var(--accent-2);
+      }
+      nav.toc .toc-group {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        margin: 16px 0 6px;
+        padding: 0 8px;
+        opacity: 0.6;
+      }
+
+      main {
+        max-width: 960px;
+        width: 100%;
+        padding: 40px 48px 80px;
+      }
+
+      section.example {
+        margin-bottom: 64px;
+        scroll-margin-top: 24px;
+      }
+      section.example > h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      section.example > .intro {
+        color: var(--text-dim);
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .playground {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: auto auto;
+        gap: 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+      }
+      .playground .controls {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+      }
+      .playground .demo {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      .playground .code {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
+      @media (max-width: 900px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+        nav.toc {
+          position: static;
+          height: auto;
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+        main {
+          padding: 24px 20px 60px;
+        }
+        .playground {
+          grid-template-columns: 1fr;
+        }
+        .playground .controls {
+          grid-column: 1;
+          grid-row: 1;
+        }
+        .playground .demo {
+          grid-column: 1;
+          grid-row: 2;
+        }
+        .playground .code {
+          grid-column: 1;
+          grid-row: 3;
+        }
+      }
+
+      .controls {
+        background: var(--surface-2);
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 13px;
+      }
+      .controls .group-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        margin-bottom: 10px;
+      }
+      .controls label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+        color: var(--text);
+      }
+      .controls label .label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text-dim);
+      }
+      .controls label .label-row .val {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--accent-2);
+      }
+      .controls input[type='range'] {
+        width: 100%;
+        accent-color: var(--accent);
+      }
+      .controls input[type='checkbox'] {
+        accent-color: var(--accent);
+      }
+      .controls select {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        width: 100%;
+      }
+      .controls .checkbox-row {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text);
+      }
+      .controls .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 10px 0;
+      }
+
+      .demo {
+        background: var(--code-bg);
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        min-height: 240px;
+        position: relative;
+        overflow: hidden;
+      }
+      .demo .demo-readout {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-dim);
+        background: rgba(0, 0, 0, 0.4);
+        padding: 4px 8px;
+        border-radius: 4px;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .code {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+      }
+      .code pre {
+        margin: 0;
+        padding: 14px 16px;
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: var(--text);
+        overflow-x: auto;
+      }
+      .code .copy {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .code .copy:hover {
+        color: var(--text);
+        border-color: var(--accent);
+      }
+      .code .kw {
+        color: #c792ea;
+      }
+      .code .str {
+        color: #a5e075;
+      }
+      .code .num {
+        color: #f78c6c;
+      }
+      .code .fn {
+        color: #82aaff;
+      }
+      .code .cmt {
+        color: var(--text-dim);
+        font-style: italic;
+      }
+
+      .tile {
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        border-radius: 8px;
+        touch-action: none;
+        user-select: none;
+        cursor: grab;
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        will-change: transform;
+      }
+      .tile:active {
+        cursor: grabbing;
+      }
+
+      .panel {
+        width: 180px;
+        height: 120px;
+        background: linear-gradient(135deg, #f43f5e, #f97316);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        border-radius: 8px;
+        user-select: none;
+        position: absolute;
+        top: 40px;
+        left: 40px;
+      }
+
+      .sortable-list {
+        list-style: none;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin: 0;
+      }
+      .sortable-list li {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 12px 14px;
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        font-size: 14px;
+      }
+      .sortable-list li:active {
+        cursor: grabbing;
+      }
+
+      .dropzone {
+        background: rgba(108, 92, 231, 0.08);
+        border: 2px dashed var(--border);
+        border-radius: 8px;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-dim);
+        font-size: 13px;
+        transition: all 0.15s;
+      }
+      .dropzone.dz-active {
+        border-color: var(--accent);
+      }
+      .dropzone.dz-hover {
+        background: rgba(108, 92, 231, 0.25);
+        border-color: var(--accent-2);
+        color: var(--text);
+      }
+
+      .gesture-target {
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, #10b981, #06b6d4);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        user-select: none;
+        touch-action: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transform-origin: center;
+        will-change: transform;
+      }
+
+      .intro-card {
+        background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(0, 210, 255, 0.08));
+        border: 1px solid var(--border);
+        padding: 24px;
+        border-radius: var(--radius);
+        margin-bottom: 40px;
+      }
+      .intro-card h2 {
+        font-size: 24px;
+        margin-bottom: 6px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .intro-card p {
+        color: var(--text-dim);
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+      .intro-card .pill {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--text);
+        margin-right: 6px;
+        margin-bottom: 6px;
+        font-family: var(--font-mono);
+      }
+      .intro-card .pill b {
+        color: var(--accent-2);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <nav class="toc" id="toc">
+        <h1>pointrix</h1>
+        <div class="tagline">Live examples</div>
+
+        <div class="toc-group">Core</div>
+        <a href="#draggable">Draggable</a>
+        <a href="#axis-bounds">Bounds</a>
+        <a href="#grid">Grid snap</a>
+        <a href="#momentum">Momentum</a>
+        <a href="#handle">Handle</a>
+
+        <div class="toc-group">Advanced</div>
+        <a href="#modifiers">Modifiers</a>
+        <a href="#rubberband">Rubberband</a>
+        <a href="#resizable">Resizable</a>
+        <a href="#gesture">Gesture</a>
+
+        <div class="toc-group">Compose</div>
+        <a href="#dropzone">Dropzone</a>
+        <a href="#sortable">Sortable</a>
+        <a href="#sortable-groups">Cross-container</a>
+
+        <div class="toc-group">More</div>
+        <a href="index.html">Home</a>
+        <a href="benchmark.html">Benchmarks</a>
+        <a href="react-perf.html">React demo</a>
+        <a href="bench-compare.html">Side-by-side</a>
+      </nav>
+
+      <main>
+        <div class="intro-card">
+          <h2>Live examples</h2>
+          <p>
+            Every example below runs live. Tweak the controls on the left of each playground; the demo updates in real
+            time via <code>updateOptions</code>, and the code block on the right always reflects the current options —
+            copy-paste into your app.
+          </p>
+          <span class="pill"><b>npm:</b> pointrix</span>
+          <span class="pill"><b>import:</b> pointrix/drag</span>
+          <span class="pill"><b>gzip:</b> 14.4 KB full</span>
+          <span class="pill"><b>vs interact.js:</b> 13–15× faster/event</span>
+        </div>
+
+        <!-- ─── DRAGGABLE ──────────────────────────────────────── -->
+        <section id="draggable" class="example">
+          <h2>Draggable</h2>
+          <p class="intro">
+            The core primitive. Auto-applies transforms via <code>translate3d</code>. Option changes update in place —
+            no teardown or listener churn.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="drag">
+              <div class="group-title">Options</div>
+
+              <label>
+                <span class="label-row"><span>axis</span><span class="val" data-val="axis">xy</span></span>
+                <select data-opt="axis">
+                  <option value="xy" selected>xy</option>
+                  <option value="x">x</option>
+                  <option value="y">y</option>
+                  <option value="auto">auto (lock to first-moved)</option>
+                </select>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="preventScroll" checked />
+                preventScroll
+              </label>
+
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="styleCursor" checked />
+                styleCursor
+              </label>
+
+              <label>
+                <span class="label-row"><span>threshold</span><span class="val" data-val="threshold">3</span></span>
+                <input type="range" data-opt="threshold" min="0" max="50" step="1" value="3" />
+              </label>
+
+              <div class="divider"></div>
+              <div class="group-title">Callbacks</div>
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="onTap" />
+                onTap
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="onDoubleTap" />
+                onDoubleTap
+              </label>
+            </div>
+
+            <div class="demo" data-demo="drag">
+              <div class="tile" data-target>Drag</div>
+              <div class="demo-readout" data-readout>—</div>
+            </div>
+
+            <div class="code" data-code="drag">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── BOUNDS ──────────────────────────────────── -->
+        <section id="axis-bounds" class="example">
+          <h2>Bounds</h2>
+          <p class="intro">
+            Restrict movement to a rect. <code>'parent'</code> uses <code>offsetParent</code>; an HTMLElement uses that
+            element's rect; a literal <code>{left, top, right, bottom}</code> uses page-space coords.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="bounds">
+              <div class="group-title">bounds</div>
+              <label>
+                <select data-opt="bounds">
+                  <option value="parent" selected>'parent'</option>
+                  <option value="none">(disabled)</option>
+                  <option value="region">custom region</option>
+                </select>
+              </label>
+              <label>
+                <span class="label-row"><span>axis</span><span class="val" data-val="axis">xy</span></span>
+                <select data-opt="axis">
+                  <option value="xy" selected>xy</option>
+                  <option value="x">x</option>
+                  <option value="y">y</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="demo" data-demo="bounds">
+              <div class="tile" data-target>Bound</div>
+            </div>
+
+            <div class="code" data-code="bounds">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── GRID SNAP ──────────────────────────────────────── -->
+        <section id="grid" class="example">
+          <h2>Grid snap</h2>
+          <p class="intro">
+            The built-in <code>grid</code> option snaps to a regular grid each frame. For irregular targets use the
+            <code>snapTargets</code> modifier.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="grid">
+              <label>
+                <span class="label-row"><span>grid.x</span><span class="val" data-val="gx">20</span></span>
+                <input type="range" data-opt="gx" min="0" max="80" step="1" value="20" />
+              </label>
+              <label>
+                <span class="label-row"><span>grid.y</span><span class="val" data-val="gy">20</span></span>
+                <input type="range" data-opt="gy" min="0" max="80" step="1" value="20" />
+              </label>
+            </div>
+
+            <div class="demo" data-demo="grid">
+              <div class="tile" data-target>Snap</div>
+            </div>
+
+            <div class="code" data-code="grid">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── MOMENTUM ──────────────────────────────────────── -->
+        <section id="momentum" class="example">
+          <h2>Momentum</h2>
+          <p class="intro">
+            <code>friction</code> is 0–1 remaining-velocity-per-second (0.95 = 5 % loss/sec). Frame-rate-independent —
+            60 Hz and 120 Hz monitors land the same distance.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="momentum">
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="momentum" checked />
+                momentum
+              </label>
+              <label>
+                <span class="label-row"><span>friction</span><span class="val" data-val="friction">0.92</span></span>
+                <input type="range" data-opt="friction" min="0.5" max="0.99" step="0.01" value="0.92" />
+              </label>
+              <label>
+                <span class="label-row"
+                  ><span>minVelocity</span><span class="val" data-val="minVelocity">10</span></span
+                >
+                <input type="range" data-opt="minVelocity" min="0" max="200" step="1" value="10" />
+              </label>
+            </div>
+
+            <div class="demo" data-demo="momentum">
+              <div class="tile" data-target>Fling</div>
+              <div class="demo-readout" data-readout>flick me →</div>
+            </div>
+
+            <div class="code" data-code="momentum">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── HANDLE ────────────────────────────────────────── -->
+        <section id="handle" class="example">
+          <h2>Handle</h2>
+          <p class="intro">
+            Restrict drag-start to a specific region within the element. Pointer events outside the handle selector are
+            ignored.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="handle">
+              <div class="group-title">handle</div>
+              <label>
+                <select data-opt="handle">
+                  <option value="handle" selected>'.handle'</option>
+                  <option value="none">(whole element)</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="demo" data-demo="handle">
+              <div class="panel" data-target style="flex-direction: column; gap: 6px; font-size: 13px">
+                <div
+                  class="handle"
+                  style="padding: 2px 10px; background: rgba(0, 0, 0, 0.35); border-radius: 4px; cursor: grab"
+                >
+                  ⋮⋮ drag here
+                </div>
+                <div style="opacity: 0.8">(body is ignored)</div>
+              </div>
+            </div>
+
+            <div class="code" data-code="handle">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── MODIFIERS ──────────────────────────────────────── -->
+        <section id="modifiers" class="example">
+          <h2>Modifiers</h2>
+          <p class="intro">
+            Composable transforms applied each frame. Order matters — each one sees the context mutated by the previous.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="modifiers">
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="restrict" checked />
+                restrict({ bounds: 'parent' })
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="snap" checked />
+                snapGrid({ x: 25, y: 25 })
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="snapTargets" />
+                snapTargets({ x: 120, y: 80 })
+              </label>
+            </div>
+
+            <div class="demo" data-demo="modifiers">
+              <div class="tile" data-target>Mod</div>
+            </div>
+
+            <div class="code" data-code="modifiers">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── RUBBERBAND ─────────────────────────────────────── -->
+        <section id="rubberband" class="example">
+          <h2>Rubberband</h2>
+          <p class="intro">iOS-style elastic overscroll. Drag past the bounds feels resistive; release snaps back.</p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="rubberband">
+              <label>
+                <span class="label-row"><span>resistance</span><span class="val" data-val="resistance">0.3</span></span>
+                <input type="range" data-opt="resistance" min="0.05" max="1" step="0.05" value="0.3" />
+              </label>
+              <label>
+                <span class="label-row"
+                  ><span>maxOvershoot</span><span class="val" data-val="maxOvershoot">80</span></span
+                >
+                <input type="range" data-opt="maxOvershoot" min="0" max="200" step="5" value="80" />
+              </label>
+            </div>
+
+            <div class="demo" data-demo="rubberband">
+              <div class="tile" data-target>Pull</div>
+            </div>
+
+            <div class="code" data-code="rubberband">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── RESIZABLE ──────────────────────────────────────── -->
+        <section id="resizable" class="example">
+          <h2>Resizable</h2>
+          <p class="intro">Drag any combination of edges or corners. Aspect-ratio lock, min/max, grid snapping.</p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="resize">
+              <div class="group-title">edges</div>
+              <label class="checkbox-row"><input type="checkbox" data-opt="top" checked /> top</label>
+              <label class="checkbox-row"><input type="checkbox" data-opt="right" checked /> right</label>
+              <label class="checkbox-row"><input type="checkbox" data-opt="bottom" checked /> bottom</label>
+              <label class="checkbox-row"><input type="checkbox" data-opt="left" checked /> left</label>
+              <div class="divider"></div>
+              <label class="checkbox-row">
+                <input type="checkbox" data-opt="aspect" />
+                aspectRatio: 'preserve'
+              </label>
+              <label>
+                <span class="label-row"><span>minWidth</span><span class="val" data-val="minWidth">80</span></span>
+                <input type="range" data-opt="minWidth" min="40" max="400" step="10" value="80" />
+              </label>
+            </div>
+
+            <div class="demo" data-demo="resize">
+              <div class="panel" data-target>Resize</div>
+              <div class="demo-readout" data-readout>—</div>
+            </div>
+
+            <div class="code" data-code="resize">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── GESTURE ────────────────────────────────────────── -->
+        <section id="gesture" class="example">
+          <h2>Gesture (pinch &amp; rotate)</h2>
+          <p class="intro">
+            Multi-touch only. Two fingers down → <code>onGestureMove</code> fires with <code>scale</code>,
+            <code>rotation</code>, <code>center</code>.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="gesture">
+              <p style="color: var(--text-dim); font-size: 12px">
+                No configurable options for this demo — try it with two fingers on a trackpad or touch screen.
+              </p>
+            </div>
+
+            <div class="demo" data-demo="gesture" style="min-height: 300px">
+              <div class="gesture-target" data-target>Pinch / Rotate</div>
+              <div class="demo-readout" data-readout>scale 1.00 · rotate 0°</div>
+            </div>
+
+            <div class="code" data-code="gesture">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── DROPZONE ───────────────────────────────────────── -->
+        <section id="dropzone" class="example">
+          <h2>Dropzone</h2>
+          <p class="intro">
+            Drop targets that coordinate with <code>draggable({ droppable: true })</code>. Filter via
+            <code>accept</code>, pick overlap semantics.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="dropzone">
+              <label>
+                <span class="label-row"><span>overlap</span><span class="val" data-val="overlap">pointer</span></span>
+                <select data-opt="overlap">
+                  <option value="pointer" selected>'pointer'</option>
+                  <option value="center">'center'</option>
+                  <option value="0.5">0.5 (50% area)</option>
+                  <option value="0.8">0.8 (80% area)</option>
+                </select>
+              </label>
+            </div>
+
+            <div
+              class="demo"
+              data-demo="dropzone"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px"
+            >
+              <div
+                style="position: relative; min-height: 200px; background: rgba(255, 255, 255, 0.02); border-radius: 6px"
+              >
+                <div class="tile" data-target style="top: 20px; left: 20px; width: 60px; height: 60px; font-size: 12px">
+                  Drop me
+                </div>
+              </div>
+              <div class="dropzone" data-dropzone>drop here</div>
+            </div>
+
+            <div class="code" data-code="dropzone">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── SORTABLE ───────────────────────────────────────── -->
+        <section id="sortable" class="example">
+          <h2>Sortable</h2>
+          <p class="intro">
+            Drag-to-reorder with animated neighbour displacement. Set <code>id</code> to get
+            <code>order: string[]</code> in events — drop-in for framework state.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="sortable">
+              <label>
+                <span class="label-row"><span>axis</span><span class="val" data-val="axis">y</span></span>
+                <select data-opt="axis">
+                  <option value="y" selected>y</option>
+                  <option value="x">x</option>
+                </select>
+              </label>
+              <label>
+                <span class="label-row"
+                  ><span>animationDuration</span><span class="val" data-val="animationDuration">200</span></span
+                >
+                <input type="range" data-opt="animationDuration" min="0" max="600" step="10" value="200" />
+              </label>
+              <div class="divider"></div>
+              <div class="group-title">last order</div>
+              <pre
+                data-last-order
+                style="
+                  background: var(--bg);
+                  padding: 8px;
+                  border-radius: 4px;
+                  font-size: 11px;
+                  color: var(--accent-2);
+                  margin: 0;
+                  overflow-x: auto;
+                "
+              >
+—</pre
+              >
+            </div>
+
+            <div class="demo" data-demo="sortable" style="padding: 0; min-height: auto">
+              <ul class="sortable-list" data-list>
+                <li data-id="apples">🍎 Apples</li>
+                <li data-id="bananas">🍌 Bananas</li>
+                <li data-id="cherries">🍒 Cherries</li>
+                <li data-id="dates">🌴 Dates</li>
+                <li data-id="elderberries">🫐 Elderberries</li>
+              </ul>
+            </div>
+
+            <div class="code" data-code="sortable">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── CROSS-CONTAINER ─────────────────────────────────── -->
+        <section id="sortable-groups" class="example">
+          <h2>Cross-container sortable</h2>
+          <p class="intro">
+            Share a <code>group</code> name and items move freely between lists. <code>onAdd</code> /
+            <code>onRemove</code> fire on both sides.
+          </p>
+
+          <div class="playground">
+            <div class="controls" data-ctl="groups">
+              <p style="color: var(--text-dim); font-size: 12px">Both lists use <code>group: 'kanban'</code>.</p>
+              <div class="divider"></div>
+              <div class="group-title">events</div>
+              <pre
+                data-groups-log
+                style="
+                  background: var(--bg);
+                  padding: 8px;
+                  border-radius: 4px;
+                  font-size: 11px;
+                  color: var(--accent-2);
+                  margin: 0;
+                  max-height: 140px;
+                  overflow-y: auto;
+                "
+              >
+—</pre
+              >
+            </div>
+
+            <div
+              class="demo"
+              data-demo="groups"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; min-height: auto"
+            >
+              <div>
+                <div
+                  style="
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    color: var(--text-dim);
+                    padding: 6px 10px;
+                  "
+                >
+                  Todo
+                </div>
+                <ul class="sortable-list" data-list-left style="padding: 6px">
+                  <li data-id="g-1">📋 Write tests</li>
+                  <li data-id="g-2">📋 Review PR</li>
+                  <li data-id="g-3">📋 Update docs</li>
+                </ul>
+              </div>
+              <div>
+                <div
+                  style="
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    color: var(--text-dim);
+                    padding: 6px 10px;
+                  "
+                >
+                  Done
+                </div>
+                <ul class="sortable-list" data-list-right style="padding: 6px">
+                  <li data-id="g-4">✅ Setup project</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="code" data-code="groups">
+              <button class="copy">copy</button>
+              <pre></pre>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import { draggable } from './src/drag.ts'
+      import { resizable } from './src/resize.ts'
+      import { gesturable } from './src/gesture.ts'
+      import { dropzone } from './src/dropzone.ts'
+      import { sortable } from './src/sortable.ts'
+      import { restrict, snapGrid, snapTargets, rubberband } from './src/modifiers/index.ts'
+
+      // Single-pass syntax highlighter. HTML-escapes the source first, then
+      // tokenizes with ONE regex where every alternative captures a named group
+      // — so each character is classified exactly once. This avoids the classic
+      // "successive .replace() chains escape each other's tags" bug.
+      function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+
+      const TOKEN_RE = new RegExp(
+        [
+          '(\\/\\/[^\\n]*)', // 1: comment
+          '(\'[^\'\\n]*\'|"[^"\\n]*"|`[^`]*`)', // 2: string
+          '\\b(import|from|const|let|var|function|return|if|else|for|of|in|true|false|null|undefined|new)\\b', // 3: keyword
+          '\\b(\\d+(?:\\.\\d+)?)\\b', // 4: number
+          '\\b(draggable|resizable|gesturable|dropzone|sortable|restrict|snapGrid|snapTargets|rubberband|pointrix)\\b', // 5: library fn
+        ].join('|'),
+        'g',
+      )
+
+      function highlight(src) {
+        let out = ''
+        let last = 0
+        for (const m of src.matchAll(TOKEN_RE)) {
+          if (m.index > last) out += escapeHtml(src.slice(last, m.index))
+          const [full, cmt, str, kw, num, fn] = m
+          if (cmt) out += `<span class="cmt">${escapeHtml(cmt)}</span>`
+          else if (str) out += `<span class="str">${escapeHtml(str)}</span>`
+          else if (kw) out += `<span class="kw">${escapeHtml(kw)}</span>`
+          else if (num) out += `<span class="num">${escapeHtml(num)}</span>`
+          else if (fn) out += `<span class="fn">${escapeHtml(fn)}</span>`
+          else out += escapeHtml(full)
+          last = m.index + full.length
+        }
+        if (last < src.length) out += escapeHtml(src.slice(last))
+        return out
+      }
+
+      function renderCode(section, src) {
+        const pre = document.querySelector(`[data-code="${section}"] pre`)
+        if (pre) pre.innerHTML = highlight(src)
+      }
+
+      document.querySelectorAll('[data-code]').forEach((wrap) => {
+        wrap.querySelector('.copy').addEventListener('click', () => {
+          const text = wrap.querySelector('pre').innerText
+          navigator.clipboard.writeText(text)
+        })
       })
-    })
 
-    // ─── Draggable ─────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="drag"]')
-      const demo = document.querySelector('[data-demo="drag"]')
-      const target = demo.querySelector('[data-target]')
-      const readout = demo.querySelector('[data-readout]')
-      let inst
+      // ─── Draggable ─────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="drag"]')
+        const demo = document.querySelector('[data-demo="drag"]')
+        const target = demo.querySelector('[data-target]')
+        const readout = demo.querySelector('[data-readout]')
+        let inst
 
-      function read() {
-        return {
-          axis: ctl.querySelector('[data-opt="axis"]').value,
-          preventScroll: ctl.querySelector('[data-opt="preventScroll"]').checked,
-          styleCursor: ctl.querySelector('[data-opt="styleCursor"]').checked,
-          threshold: Number(ctl.querySelector('[data-opt="threshold"]').value),
-          onTap: ctl.querySelector('[data-opt="onTap"]').checked,
-          onDoubleTap: ctl.querySelector('[data-opt="onDoubleTap"]').checked,
+        function read() {
+          return {
+            axis: ctl.querySelector('[data-opt="axis"]').value,
+            preventScroll: ctl.querySelector('[data-opt="preventScroll"]').checked,
+            styleCursor: ctl.querySelector('[data-opt="styleCursor"]').checked,
+            threshold: Number(ctl.querySelector('[data-opt="threshold"]').value),
+            onTap: ctl.querySelector('[data-opt="onTap"]').checked,
+            onDoubleTap: ctl.querySelector('[data-opt="onDoubleTap"]').checked,
+          }
         }
-      }
 
-      function sync() {
-        const o = read()
-        ctl.querySelector('[data-val="axis"]').textContent = o.axis
-        ctl.querySelector('[data-val="threshold"]').textContent = o.threshold
+        function sync() {
+          const o = read()
+          ctl.querySelector('[data-val="axis"]').textContent = o.axis
+          ctl.querySelector('[data-val="threshold"]').textContent = o.threshold
 
-        const opts = {
-          axis: o.axis,
-          preventScroll: o.preventScroll,
-          styleCursor: o.styleCursor,
-          threshold: o.threshold,
-          onDragMove: (e) => { readout.textContent = `x: ${Math.round(e.totalX)}  y: ${Math.round(e.totalY)}` },
-        }
-        if (o.onTap) opts.onTap = () => { readout.textContent = 'tap!' }
-        if (o.onDoubleTap) opts.onDoubleTap = () => { readout.textContent = 'double-tap!' }
+          const opts = {
+            axis: o.axis,
+            preventScroll: o.preventScroll,
+            styleCursor: o.styleCursor,
+            threshold: o.threshold,
+            onDragMove: (e) => {
+              readout.textContent = `x: ${Math.round(e.totalX)}  y: ${Math.round(e.totalY)}`
+            },
+          }
+          if (o.onTap)
+            opts.onTap = () => {
+              readout.textContent = 'tap!'
+            }
+          if (o.onDoubleTap)
+            opts.onDoubleTap = () => {
+              readout.textContent = 'double-tap!'
+            }
 
-        if (!inst) inst = draggable(target, opts)
-        else inst.updateOptions(opts)
+          if (!inst) inst = draggable(target, opts)
+          else inst.updateOptions(opts)
 
-        renderCode('drag', `import { draggable } from 'pointrix/drag'
+          renderCode(
+            'drag',
+            `import { draggable } from 'pointrix/drag'
 
 draggable(el, {
   axis: '${o.axis}',
@@ -844,300 +1117,350 @@ draggable(el, {
   styleCursor: ${o.styleCursor},
   threshold: ${o.threshold},${o.onTap ? `\n  onTap: (e) => console.log('tap'),` : ''}${o.onDoubleTap ? `\n  onDoubleTap: (e) => console.log('double'),` : ''}
   onDragMove: (e) => console.log(e.totalX, e.totalY),
-})`)
-      }
-
-      ctl.addEventListener('input', sync)
-      ctl.addEventListener('change', sync)
-      sync()
-    })()
-
-    // ─── Bounds ────────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="bounds"]')
-      const demo = document.querySelector('[data-demo="bounds"]')
-      const target = demo.querySelector('[data-target]')
-      let inst
-
-      function sync() {
-        const boundsSel = ctl.querySelector('[data-opt="bounds"]').value
-        const axis = ctl.querySelector('[data-opt="axis"]').value
-        ctl.querySelector('[data-val="axis"]').textContent = axis
-
-        let bounds, boundsCode
-        if (boundsSel === 'parent') { bounds = 'parent'; boundsCode = `'parent'` }
-        else if (boundsSel === 'region') {
-          bounds = { left: 20, top: 20, right: 220, bottom: 220 }
-          boundsCode = `{ left: 20, top: 20, right: 220, bottom: 220 }`
+})`,
+          )
         }
 
-        // Bounds requires recreation at drag-start (bounds rect is computed once).
-        if (inst) { inst.destroy(); target.style.transform = '' }
-        inst = draggable(target, { axis, bounds })
+        ctl.addEventListener('input', sync)
+        ctl.addEventListener('change', sync)
+        sync()
+      })()
 
-        renderCode('bounds', `import { draggable } from 'pointrix/drag'
+      // ─── Bounds ────────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="bounds"]')
+        const demo = document.querySelector('[data-demo="bounds"]')
+        const target = demo.querySelector('[data-target]')
+        let inst
+
+        function sync() {
+          const boundsSel = ctl.querySelector('[data-opt="bounds"]').value
+          const axis = ctl.querySelector('[data-opt="axis"]').value
+          ctl.querySelector('[data-val="axis"]').textContent = axis
+
+          let bounds, boundsCode
+          if (boundsSel === 'parent') {
+            bounds = 'parent'
+            boundsCode = `'parent'`
+          } else if (boundsSel === 'region') {
+            bounds = { left: 20, top: 20, right: 220, bottom: 220 }
+            boundsCode = `{ left: 20, top: 20, right: 220, bottom: 220 }`
+          }
+
+          // Bounds requires recreation at drag-start (bounds rect is computed once).
+          if (inst) {
+            inst.destroy()
+            target.style.transform = ''
+          }
+          inst = draggable(target, { axis, bounds })
+
+          renderCode(
+            'bounds',
+            `import { draggable } from 'pointrix/drag'
 
 draggable(el, {
   axis: '${axis}',
   bounds: ${boundsCode ?? 'undefined'},
-})`)
-      }
-      ctl.addEventListener('change', sync)
-      sync()
-    })()
+})`,
+          )
+        }
+        ctl.addEventListener('change', sync)
+        sync()
+      })()
 
-    // ─── Grid snap ────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="grid"]')
-      const demo = document.querySelector('[data-demo="grid"]')
-      const target = demo.querySelector('[data-target]')
-      let inst
+      // ─── Grid snap ────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="grid"]')
+        const demo = document.querySelector('[data-demo="grid"]')
+        const target = demo.querySelector('[data-target]')
+        let inst
 
-      function sync() {
-        const gx = Number(ctl.querySelector('[data-opt="gx"]').value)
-        const gy = Number(ctl.querySelector('[data-opt="gy"]').value)
-        ctl.querySelector('[data-val="gx"]').textContent = gx
-        ctl.querySelector('[data-val="gy"]').textContent = gy
+        function sync() {
+          const gx = Number(ctl.querySelector('[data-opt="gx"]').value)
+          const gy = Number(ctl.querySelector('[data-opt="gy"]').value)
+          ctl.querySelector('[data-val="gx"]').textContent = gx
+          ctl.querySelector('[data-val="gy"]').textContent = gy
 
-        const opts = { bounds: 'parent', grid: gx && gy ? { x: gx, y: gy } : undefined }
-        if (!inst) inst = draggable(target, opts)
-        else inst.updateOptions(opts)
+          const opts = { bounds: 'parent', grid: gx && gy ? { x: gx, y: gy } : undefined }
+          if (!inst) inst = draggable(target, opts)
+          else inst.updateOptions(opts)
 
-        renderCode('grid', `import { draggable } from 'pointrix/drag'
+          renderCode(
+            'grid',
+            `import { draggable } from 'pointrix/drag'
 
 draggable(el, {
   bounds: 'parent',
   grid: { x: ${gx}, y: ${gy} },
-})`)
-      }
-      ctl.addEventListener('input', sync)
-      sync()
-    })()
-
-    // ─── Momentum ─────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="momentum"]')
-      const demo = document.querySelector('[data-demo="momentum"]')
-      const target = demo.querySelector('[data-target]')
-      const readout = demo.querySelector('[data-readout]')
-      let inst
-
-      function sync() {
-        const enabled = ctl.querySelector('[data-opt="momentum"]').checked
-        const friction = Number(ctl.querySelector('[data-opt="friction"]').value)
-        const minVelocity = Number(ctl.querySelector('[data-opt="minVelocity"]').value)
-        ctl.querySelector('[data-val="friction"]').textContent = friction.toFixed(2)
-        ctl.querySelector('[data-val="minVelocity"]').textContent = minVelocity
-
-        const momentum = enabled ? { friction, minVelocity } : false
-        const opts = {
-          bounds: 'parent',
-          momentum,
-          onDragEnd: (e) => { readout.textContent = `vx: ${Math.round(e.velocityX)}  vy: ${Math.round(e.velocityY)}` },
+})`,
+          )
         }
-        if (!inst) inst = draggable(target, opts)
-        else inst.updateOptions(opts)
+        ctl.addEventListener('input', sync)
+        sync()
+      })()
 
-        renderCode('momentum', `import { draggable } from 'pointrix/drag'
+      // ─── Momentum ─────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="momentum"]')
+        const demo = document.querySelector('[data-demo="momentum"]')
+        const target = demo.querySelector('[data-target]')
+        const readout = demo.querySelector('[data-readout]')
+        let inst
+
+        function sync() {
+          const enabled = ctl.querySelector('[data-opt="momentum"]').checked
+          const friction = Number(ctl.querySelector('[data-opt="friction"]').value)
+          const minVelocity = Number(ctl.querySelector('[data-opt="minVelocity"]').value)
+          ctl.querySelector('[data-val="friction"]').textContent = friction.toFixed(2)
+          ctl.querySelector('[data-val="minVelocity"]').textContent = minVelocity
+
+          const momentum = enabled ? { friction, minVelocity } : false
+          const opts = {
+            bounds: 'parent',
+            momentum,
+            onDragEnd: (e) => {
+              readout.textContent = `vx: ${Math.round(e.velocityX)}  vy: ${Math.round(e.velocityY)}`
+            },
+          }
+          if (!inst) inst = draggable(target, opts)
+          else inst.updateOptions(opts)
+
+          renderCode(
+            'momentum',
+            `import { draggable } from 'pointrix/drag'
 
 draggable(el, {
   bounds: 'parent',
   momentum: ${enabled ? `{ friction: ${friction.toFixed(2)}, minVelocity: ${minVelocity} }` : 'false'},
-})`)
-      }
-      ctl.addEventListener('input', sync)
-      ctl.addEventListener('change', sync)
-      sync()
-    })()
+})`,
+          )
+        }
+        ctl.addEventListener('input', sync)
+        ctl.addEventListener('change', sync)
+        sync()
+      })()
 
-    // ─── Handle ────────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="handle"]')
-      const demo = document.querySelector('[data-demo="handle"]')
-      const target = demo.querySelector('[data-target]')
-      let inst
+      // ─── Handle ────────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="handle"]')
+        const demo = document.querySelector('[data-demo="handle"]')
+        const target = demo.querySelector('[data-target]')
+        let inst
 
-      function sync() {
-        const which = ctl.querySelector('[data-opt="handle"]').value
-        const handle = which === 'handle' ? '.handle' : undefined
-        const opts = { bounds: 'parent', handle }
-        if (!inst) inst = draggable(target, opts)
-        else inst.updateOptions(opts)
+        function sync() {
+          const which = ctl.querySelector('[data-opt="handle"]').value
+          const handle = which === 'handle' ? '.handle' : undefined
+          const opts = { bounds: 'parent', handle }
+          if (!inst) inst = draggable(target, opts)
+          else inst.updateOptions(opts)
 
-        renderCode('handle', `import { draggable } from 'pointrix/drag'
+          renderCode(
+            'handle',
+            `import { draggable } from 'pointrix/drag'
 
 draggable(el, {
   bounds: 'parent',
   ${handle ? `handle: '.handle',` : '// handle: undefined,'}
-})`)
-      }
-      ctl.addEventListener('change', sync)
-      sync()
-    })()
-
-    // ─── Modifiers ─────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="modifiers"]')
-      const demo = document.querySelector('[data-demo="modifiers"]')
-      const target = demo.querySelector('[data-target]')
-      let inst
-
-      function sync() {
-        const useRestrict = ctl.querySelector('[data-opt="restrict"]').checked
-        const useSnap = ctl.querySelector('[data-opt="snap"]').checked
-        const useTargets = ctl.querySelector('[data-opt="snapTargets"]').checked
-
-        const mods = []
-        const srcMods = []
-        if (useRestrict) { mods.push(restrict({ bounds: 'parent' })); srcMods.push(`restrict({ bounds: 'parent' })`) }
-        if (useSnap) { mods.push(snapGrid({ x: 25, y: 25 })); srcMods.push(`snapGrid({ x: 25, y: 25 })`) }
-        if (useTargets) {
-          mods.push(snapTargets({ targets: [{ x: 120, y: 80 }], range: 40 }))
-          srcMods.push(`snapTargets({ targets: [{ x: 120, y: 80 }], range: 40 })`)
+})`,
+          )
         }
+        ctl.addEventListener('change', sync)
+        sync()
+      })()
 
-        if (!inst) inst = draggable(target, { modifiers: mods })
-        else inst.updateOptions({ modifiers: mods })
+      // ─── Modifiers ─────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="modifiers"]')
+        const demo = document.querySelector('[data-demo="modifiers"]')
+        const target = demo.querySelector('[data-target]')
+        let inst
 
-        renderCode('modifiers', `import { draggable } from 'pointrix/drag'
+        function sync() {
+          const useRestrict = ctl.querySelector('[data-opt="restrict"]').checked
+          const useSnap = ctl.querySelector('[data-opt="snap"]').checked
+          const useTargets = ctl.querySelector('[data-opt="snapTargets"]').checked
+
+          const mods = []
+          const srcMods = []
+          if (useRestrict) {
+            mods.push(restrict({ bounds: 'parent' }))
+            srcMods.push(`restrict({ bounds: 'parent' })`)
+          }
+          if (useSnap) {
+            mods.push(snapGrid({ x: 25, y: 25 }))
+            srcMods.push(`snapGrid({ x: 25, y: 25 })`)
+          }
+          if (useTargets) {
+            mods.push(snapTargets({ targets: [{ x: 120, y: 80 }], range: 40 }))
+            srcMods.push(`snapTargets({ targets: [{ x: 120, y: 80 }], range: 40 })`)
+          }
+
+          if (!inst) inst = draggable(target, { modifiers: mods })
+          else inst.updateOptions({ modifiers: mods })
+
+          renderCode(
+            'modifiers',
+            `import { draggable } from 'pointrix/drag'
 import { restrict, snapGrid, snapTargets } from 'pointrix/modifiers'
 
 draggable(el, {
   modifiers: [
     ${srcMods.join(',\n    ')}
   ],
-})`)
-      }
-      ctl.addEventListener('change', sync)
-      sync()
-    })()
+})`,
+          )
+        }
+        ctl.addEventListener('change', sync)
+        sync()
+      })()
 
-    // ─── Rubberband ─────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="rubberband"]')
-      const demo = document.querySelector('[data-demo="rubberband"]')
-      const target = demo.querySelector('[data-target]')
-      let inst
+      // ─── Rubberband ─────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="rubberband"]')
+        const demo = document.querySelector('[data-demo="rubberband"]')
+        const target = demo.querySelector('[data-target]')
+        let inst
 
-      function sync() {
-        const resistance = Number(ctl.querySelector('[data-opt="resistance"]').value)
-        const maxOvershoot = Number(ctl.querySelector('[data-opt="maxOvershoot"]').value)
-        ctl.querySelector('[data-val="resistance"]').textContent = resistance.toFixed(2)
-        ctl.querySelector('[data-val="maxOvershoot"]').textContent = maxOvershoot
+        function sync() {
+          const resistance = Number(ctl.querySelector('[data-opt="resistance"]').value)
+          const maxOvershoot = Number(ctl.querySelector('[data-opt="maxOvershoot"]').value)
+          ctl.querySelector('[data-val="resistance"]').textContent = resistance.toFixed(2)
+          ctl.querySelector('[data-val="maxOvershoot"]').textContent = maxOvershoot
 
-        // Rubberband caches bounds at drag-start, so rebuild instance on change.
-        if (inst) { inst.destroy(); target.style.transform = '' }
-        inst = draggable(target, {
-          modifiers: [rubberband({ bounds: 'parent', resistance, maxOvershoot })],
-        })
+          // Rubberband caches bounds at drag-start, so rebuild instance on change.
+          if (inst) {
+            inst.destroy()
+            target.style.transform = ''
+          }
+          inst = draggable(target, {
+            modifiers: [rubberband({ bounds: 'parent', resistance, maxOvershoot })],
+          })
 
-        renderCode('rubberband', `import { draggable } from 'pointrix/drag'
+          renderCode(
+            'rubberband',
+            `import { draggable } from 'pointrix/drag'
 import { rubberband } from 'pointrix/modifiers'
 
 draggable(el, {
   modifiers: [
     rubberband({ bounds: 'parent', resistance: ${resistance.toFixed(2)}, maxOvershoot: ${maxOvershoot} }),
   ],
-})`)
-      }
-      ctl.addEventListener('input', sync)
-      sync()
-    })()
-
-    // ─── Resizable ─────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="resize"]')
-      const demo = document.querySelector('[data-demo="resize"]')
-      const target = demo.querySelector('[data-target]')
-      const readout = demo.querySelector('[data-readout]')
-      let inst
-
-      function sync() {
-        const edges = {
-          top: ctl.querySelector('[data-opt="top"]').checked,
-          right: ctl.querySelector('[data-opt="right"]').checked,
-          bottom: ctl.querySelector('[data-opt="bottom"]').checked,
-          left: ctl.querySelector('[data-opt="left"]').checked,
+})`,
+          )
         }
-        const aspect = ctl.querySelector('[data-opt="aspect"]').checked
-        const minWidth = Number(ctl.querySelector('[data-opt="minWidth"]').value)
-        ctl.querySelector('[data-val="minWidth"]').textContent = minWidth
+        ctl.addEventListener('input', sync)
+        sync()
+      })()
 
-        const opts = {
-          edges,
-          minWidth,
-          aspectRatio: aspect ? 'preserve' : undefined,
-          onResizeMove: (e) => { readout.textContent = `${Math.round(e.width)} × ${Math.round(e.height)}` },
-        }
-        if (!inst) inst = resizable(target, opts)
-        else inst.updateOptions(opts)
+      // ─── Resizable ─────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="resize"]')
+        const demo = document.querySelector('[data-demo="resize"]')
+        const target = demo.querySelector('[data-target]')
+        const readout = demo.querySelector('[data-readout]')
+        let inst
 
-        renderCode('resize', `import { resizable } from 'pointrix/resize'
+        function sync() {
+          const edges = {
+            top: ctl.querySelector('[data-opt="top"]').checked,
+            right: ctl.querySelector('[data-opt="right"]').checked,
+            bottom: ctl.querySelector('[data-opt="bottom"]').checked,
+            left: ctl.querySelector('[data-opt="left"]').checked,
+          }
+          const aspect = ctl.querySelector('[data-opt="aspect"]').checked
+          const minWidth = Number(ctl.querySelector('[data-opt="minWidth"]').value)
+          ctl.querySelector('[data-val="minWidth"]').textContent = minWidth
+
+          const opts = {
+            edges,
+            minWidth,
+            aspectRatio: aspect ? 'preserve' : undefined,
+            onResizeMove: (e) => {
+              readout.textContent = `${Math.round(e.width)} × ${Math.round(e.height)}`
+            },
+          }
+          if (!inst) inst = resizable(target, opts)
+          else inst.updateOptions(opts)
+
+          renderCode(
+            'resize',
+            `import { resizable } from 'pointrix/resize'
 
 resizable(el, {
   edges: { top: ${edges.top}, right: ${edges.right}, bottom: ${edges.bottom}, left: ${edges.left} },
   minWidth: ${minWidth},${aspect ? `\n  aspectRatio: 'preserve',` : ''}
   onResizeMove: (e) => console.log(e.width, e.height),
-})`)
-      }
-      ctl.addEventListener('input', sync)
-      ctl.addEventListener('change', sync)
-      sync()
-    })()
+})`,
+          )
+        }
+        ctl.addEventListener('input', sync)
+        ctl.addEventListener('change', sync)
+        sync()
+      })()
 
-    // ─── Gesture ────────────────────────────────────────
-    ;(() => {
-      const demo = document.querySelector('[data-demo="gesture"]')
-      const target = demo.querySelector('[data-target]')
-      const readout = demo.querySelector('[data-readout]')
+      // ─── Gesture ────────────────────────────────────────
+      ;(() => {
+        const demo = document.querySelector('[data-demo="gesture"]')
+        const target = demo.querySelector('[data-target]')
+        const readout = demo.querySelector('[data-readout]')
 
-      gesturable(target, {
-        onGestureMove: (e) => {
-          readout.textContent = `scale ${e.scale.toFixed(2)} · rotate ${Math.round(e.rotation)}°`
-          target.style.transform = `translate(-50%, -50%) scale(${e.scale}) rotate(${e.rotation}deg)`
-        },
-        onGestureEnd: () => {
-          setTimeout(() => {
-            target.style.transition = 'transform 400ms ease'
-            target.style.transform = 'translate(-50%, -50%) scale(1) rotate(0deg)'
-            setTimeout(() => { target.style.transition = '' }, 420)
-          }, 600)
-        },
-      })
+        gesturable(target, {
+          onGestureMove: (e) => {
+            readout.textContent = `scale ${e.scale.toFixed(2)} · rotate ${Math.round(e.rotation)}°`
+            target.style.transform = `translate(-50%, -50%) scale(${e.scale}) rotate(${e.rotation}deg)`
+          },
+          onGestureEnd: () => {
+            setTimeout(() => {
+              target.style.transition = 'transform 400ms ease'
+              target.style.transform = 'translate(-50%, -50%) scale(1) rotate(0deg)'
+              setTimeout(() => {
+                target.style.transition = ''
+              }, 420)
+            }, 600)
+          },
+        })
 
-      renderCode('gesture', `import { gesturable } from 'pointrix/gesture'
+        renderCode(
+          'gesture',
+          `import { gesturable } from 'pointrix/gesture'
 
 gesturable(el, {
   onGestureMove: (e) => {
     el.style.transform =
       \`scale(\${e.scale}) rotate(\${e.rotation}deg)\`
   },
-})`)
-    })()
+})`,
+        )
+      })()
 
-    // ─── Dropzone ───────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="dropzone"]')
-      const demo = document.querySelector('[data-demo="dropzone"]')
-      const target = demo.querySelector('[data-target]')
-      const zoneEl = demo.querySelector('[data-dropzone]')
-      let drag, zone
+      // ─── Dropzone ───────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="dropzone"]')
+        const demo = document.querySelector('[data-demo="dropzone"]')
+        const target = demo.querySelector('[data-target]')
+        const zoneEl = demo.querySelector('[data-dropzone]')
+        let drag, zone
 
-      function sync() {
-        const v = ctl.querySelector('[data-opt="overlap"]').value
-        ctl.querySelector('[data-val="overlap"]').textContent = v
-        const overlap = (v === 'pointer' || v === 'center') ? v : Number(v)
+        function sync() {
+          const v = ctl.querySelector('[data-opt="overlap"]').value
+          ctl.querySelector('[data-val="overlap"]').textContent = v
+          const overlap = v === 'pointer' || v === 'center' ? v : Number(v)
 
-        if (zone) zone.destroy()
-        zone = dropzone(zoneEl, {
-          overlap,
-          activeClass: 'dz-active',
-          hoverClass: 'dz-hover',
-          onDrop: () => { zoneEl.textContent = 'dropped!'; setTimeout(() => (zoneEl.textContent = 'drop here'), 800) },
-        })
-        if (!drag) drag = draggable(target, { droppable: true })
+          if (zone) zone.destroy()
+          zone = dropzone(zoneEl, {
+            overlap,
+            activeClass: 'dz-active',
+            hoverClass: 'dz-hover',
+            onDrop: () => {
+              zoneEl.textContent = 'dropped!'
+              setTimeout(() => (zoneEl.textContent = 'drop here'), 800)
+            },
+          })
+          if (!drag) drag = draggable(target, { droppable: true })
 
-        renderCode('dropzone', `import { draggable } from 'pointrix/drag'
+          renderCode(
+            'dropzone',
+            `import { draggable } from 'pointrix/drag'
 import { dropzone } from 'pointrix/dropzone'
 
 draggable(source, { droppable: true })
@@ -1147,36 +1470,41 @@ dropzone(zone, {
   activeClass: 'dz-active',
   hoverClass: 'dz-hover',
   onDrop: (e) => console.log('dropped', e.draggable),
-})`)
-      }
-      ctl.addEventListener('change', sync)
-      sync()
-    })()
-
-    // ─── Sortable ───────────────────────────────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="sortable"]')
-      const demo = document.querySelector('[data-demo="sortable"]')
-      const list = demo.querySelector('[data-list]')
-      const orderEl = ctl.querySelector('[data-last-order]')
-      let inst
-
-      function sync() {
-        const axis = ctl.querySelector('[data-opt="axis"]').value
-        const animationDuration = Number(ctl.querySelector('[data-opt="animationDuration"]').value)
-        ctl.querySelector('[data-val="axis"]').textContent = axis
-        ctl.querySelector('[data-val="animationDuration"]').textContent = animationDuration
-
-        const opts = {
-          axis,
-          animationDuration,
-          id: (el) => el.dataset.id,
-          onSortEnd: ({ order }) => { orderEl.textContent = JSON.stringify(order, null, 2) },
+})`,
+          )
         }
-        if (!inst) inst = sortable(list, opts)
-        else inst.updateOptions(opts)
+        ctl.addEventListener('change', sync)
+        sync()
+      })()
 
-        renderCode('sortable', `import { sortable } from 'pointrix/sortable'
+      // ─── Sortable ───────────────────────────────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="sortable"]')
+        const demo = document.querySelector('[data-demo="sortable"]')
+        const list = demo.querySelector('[data-list]')
+        const orderEl = ctl.querySelector('[data-last-order]')
+        let inst
+
+        function sync() {
+          const axis = ctl.querySelector('[data-opt="axis"]').value
+          const animationDuration = Number(ctl.querySelector('[data-opt="animationDuration"]').value)
+          ctl.querySelector('[data-val="axis"]').textContent = axis
+          ctl.querySelector('[data-val="animationDuration"]').textContent = animationDuration
+
+          const opts = {
+            axis,
+            animationDuration,
+            id: (el) => el.dataset.id,
+            onSortEnd: ({ order }) => {
+              orderEl.textContent = JSON.stringify(order, null, 2)
+            },
+          }
+          if (!inst) inst = sortable(list, opts)
+          else inst.updateOptions(opts)
+
+          renderCode(
+            'sortable',
+            `import { sortable } from 'pointrix/sortable'
 
 sortable(list, {
   axis: '${axis}',
@@ -1185,42 +1513,45 @@ sortable(list, {
   onSortEnd: ({ order }) => {
     console.log('new order:', order)
   },
-})`)
-      }
-      ctl.addEventListener('change', sync)
-      ctl.addEventListener('input', sync)
-      sync()
-    })()
+})`,
+          )
+        }
+        ctl.addEventListener('change', sync)
+        ctl.addEventListener('input', sync)
+        sync()
+      })()
 
-    // ─── Cross-container sortable ─────────────
-    ;(() => {
-      const ctl = document.querySelector('[data-ctl="groups"]')
-      const demo = document.querySelector('[data-demo="groups"]')
-      const left = demo.querySelector('[data-list-left]')
-      const right = demo.querySelector('[data-list-right]')
-      const log = ctl.querySelector('[data-groups-log]')
+      // ─── Cross-container sortable ─────────────
+      ;(() => {
+        const ctl = document.querySelector('[data-ctl="groups"]')
+        const demo = document.querySelector('[data-demo="groups"]')
+        const left = demo.querySelector('[data-list-left]')
+        const right = demo.querySelector('[data-list-right]')
+        const log = ctl.querySelector('[data-groups-log]')
 
-      function append(msg) {
-        const lines = log.textContent.split('\n')
-        lines.unshift(msg)
-        log.textContent = lines.slice(0, 6).join('\n')
-      }
+        function append(msg) {
+          const lines = log.textContent.split('\n')
+          lines.unshift(msg)
+          log.textContent = lines.slice(0, 6).join('\n')
+        }
 
-      sortable(left, {
-        group: 'kanban',
-        id: (el) => el.dataset.id,
-        onAdd:    (e) => append(`+ added ${e.itemId} to Todo`),
-        onRemove: (e) => append(`- removed ${e.itemId} from Todo`),
-      })
-      sortable(right, {
-        group: 'kanban',
-        id: (el) => el.dataset.id,
-        onAdd:    (e) => append(`+ added ${e.itemId} to Done`),
-        onRemove: (e) => append(`- removed ${e.itemId} from Done`),
-      })
-      log.textContent = '(drag between lists)'
+        sortable(left, {
+          group: 'kanban',
+          id: (el) => el.dataset.id,
+          onAdd: (e) => append(`+ added ${e.itemId} to Todo`),
+          onRemove: (e) => append(`- removed ${e.itemId} from Todo`),
+        })
+        sortable(right, {
+          group: 'kanban',
+          id: (el) => el.dataset.id,
+          onAdd: (e) => append(`+ added ${e.itemId} to Done`),
+          onRemove: (e) => append(`- removed ${e.itemId} from Done`),
+        })
+        log.textContent = '(drag between lists)'
 
-      renderCode('groups', `import { sortable } from 'pointrix/sortable'
+        renderCode(
+          'groups',
+          `import { sortable } from 'pointrix/sortable'
 
 sortable(todoListEl, {
   group: 'kanban',
@@ -1234,23 +1565,27 @@ sortable(doneListEl, {
   id: (el) => el.dataset.id,
   onAdd:    (e) => console.log('added', e.itemId),
   onRemove: (e) => console.log('removed', e.itemId),
-})`)
-    })()
+})`,
+        )
+      })()
 
-    // ─── TOC active-section tracking ─────────────────────
-    const sections = Array.from(document.querySelectorAll('section.example'))
-    const tocLinks = new Map(
-      Array.from(document.querySelectorAll('nav.toc a[href^="#"]')).map((a) => [a.getAttribute('href').slice(1), a]),
-    )
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue
-        tocLinks.forEach((a) => a.classList.remove('active'))
-        const link = tocLinks.get(e.target.id)
-        if (link) link.classList.add('active')
-      }
-    }, { rootMargin: '-30% 0px -60% 0px' })
-    sections.forEach((s) => io.observe(s))
-  </script>
-</body>
+      // ─── TOC active-section tracking ─────────────────────
+      const sections = Array.from(document.querySelectorAll('section.example'))
+      const tocLinks = new Map(
+        Array.from(document.querySelectorAll('nav.toc a[href^="#"]')).map((a) => [a.getAttribute('href').slice(1), a]),
+      )
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue
+            tocLinks.forEach((a) => a.classList.remove('active'))
+            const link = tocLinks.get(e.target.id)
+            if (link) link.classList.add('active')
+          }
+        },
+        { rootMargin: '-30% 0px -60% 0px' },
+      )
+      sections.forEach((s) => io.observe(s))
+    </script>
+  </body>
 </html>

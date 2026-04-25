@@ -1,13 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-  createMockElement,
-  firePointerDown,
-  firePointerMove,
-  firePointerUp,
-  flushRAF,
-} from './helpers'
+import { createMockElement, firePointerDown, firePointerMove, firePointerUp, flushRAF } from './helpers'
 import { Pointrix, pointrix } from '../nano'
-
 
 describe('Pointrix', () => {
   let el: HTMLElement

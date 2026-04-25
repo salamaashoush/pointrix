@@ -21,9 +21,17 @@ function createElement(): HTMLElement {
   const el = document.createElement('div')
   document.body.appendChild(el)
   const rect: DOMRect = {
-    x: 0, y: 0, width: 200, height: 200,
-    top: 0, right: 200, bottom: 200, left: 0,
-    toJSON() { return this },
+    x: 0,
+    y: 0,
+    width: 200,
+    height: 200,
+    top: 0,
+    right: 200,
+    bottom: 200,
+    left: 0,
+    toJSON() {
+      return this
+    },
   } as DOMRect
   el.getBoundingClientRect = () => rect
   return el
@@ -131,8 +139,8 @@ describe('Pointer Event Processing', () => {
       const dy = curY - prevY
       const dt = 16 // ~60fps
       if (dt > 0) {
-        const newVx = dx / dt * 1000
-        const newVy = dy / dt * 1000
+        const newVx = (dx / dt) * 1000
+        const newVy = (dy / dt) * 1000
         _vx = _vx * 0.7 + newVx * 0.3
         _vy = _vy * 0.7 + newVy * 0.3
       }
@@ -177,7 +185,13 @@ describe('Modifier Chain', () => {
     const mods: Modifier[] = [
       new RestrictModifier({ bounds: { left: 0, top: 0, right: 2000, bottom: 2000 } }),
       new SnapGridModifier({ x: 20, y: 20 }),
-      new SnapTargetsModifier({ targets: [{ x: 100, y: 100 }, { x: 500, y: 500 }], range: 30 }),
+      new SnapTargetsModifier({
+        targets: [
+          { x: 100, y: 100 },
+          { x: 500, y: 500 },
+        ],
+        range: 30,
+      }),
       new RestrictModifier({ bounds: { left: 10, top: 10, right: 1900, bottom: 1900 } }),
       new SnapGridModifier({ x: 10, y: 10 }),
     ]
@@ -340,9 +354,17 @@ describe('Dropzone Hit Testing', () => {
       const left = (i % 10) * 100
       const top = Math.floor(i / 10) * 100
       const rect: DOMRect = {
-        x: left, y: top, width: 90, height: 90,
-        top, right: left + 90, bottom: top + 90, left,
-        toJSON() { return this },
+        x: left,
+        y: top,
+        width: 90,
+        height: 90,
+        top,
+        right: left + 90,
+        bottom: top + 90,
+        left,
+        toJSON() {
+          return this
+        },
       } as DOMRect
       el.getBoundingClientRect = () => rect
       elements.push(el)

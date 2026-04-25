@@ -41,9 +41,7 @@ import { resizable } from './resize'
 import { gesturable } from './gesture'
 
 export function interactable(element: HTMLElement | string, options: InteractableOptions = {}) {
-  const el = typeof element === 'string'
-    ? document.querySelector<HTMLElement>(element)
-    : element
+  const el = typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element
 
   if (!el) throw new Error(`Element not found: ${element}`)
 
@@ -74,18 +72,18 @@ export function interactable(element: HTMLElement | string, options: Interactabl
       dragInstance?.destroy()
       resizeInstance?.destroy()
       gestureInstance?.destroy()
-    }
+    },
   }
 }
 
 export function interactAll(selector: string, options: InteractableOptions = {}) {
   const elements = document.querySelectorAll<HTMLElement>(selector)
-  const results = Array.from(elements).map(el => interactable(el, options))
+  const results = Array.from(elements).map((el) => interactable(el, options))
   return {
     instances: results,
     destroy() {
-      results.forEach(r => r.destroy())
-    }
+      results.forEach((r) => r.destroy())
+    },
   }
 }
 

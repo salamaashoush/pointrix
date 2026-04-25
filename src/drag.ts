@@ -350,7 +350,7 @@ export class Draggable extends Pointrix {
 
     // Start momentum animation if enabled (minVelocity default 10 px/s)
     const momOpt = this.dragOptions.momentum
-    const minV = typeof momOpt === 'object' ? momOpt.minVelocity ?? 10 : 10
+    const minV = typeof momOpt === 'object' ? (momOpt.minVelocity ?? 10) : 10
     if (momOpt && (Math.abs(this.momentum.vx) > minV || Math.abs(this.momentum.vy) > minV)) {
       this.startMomentum()
     } else {
@@ -412,8 +412,8 @@ export class Draggable extends Pointrix {
     this.momentum.active = true
     const momOpt = this.dragOptions.momentum
     // friction is 0..1 remaining-velocity-per-second (0.95 = 5% loss/sec)
-    const friction = typeof momOpt === 'object' ? momOpt.friction ?? 0.95 : 0.95
-    const minSpeed = typeof momOpt === 'object' ? momOpt.minSpeed ?? 0.1 : 0.1
+    const friction = typeof momOpt === 'object' ? (momOpt.friction ?? 0.95) : 0.95
+    const minSpeed = typeof momOpt === 'object' ? (momOpt.minSpeed ?? 0.1) : 0.1
 
     let lastTime = performance.now()
 
@@ -500,9 +500,7 @@ export class Draggable extends Pointrix {
     // Re-apply idle cursor if relevant option changed and we're not dragging
     if (('cursorChecker' in partial || 'styleCursor' in partial) && !this.interacting) {
       if (this.dragOptions.styleCursor !== false) {
-        this.element.style.cursor = this.dragOptions.cursorChecker
-          ? this.dragOptions.cursorChecker('idle')
-          : 'grab'
+        this.element.style.cursor = this.dragOptions.cursorChecker ? this.dragOptions.cursorChecker('idle') : 'grab'
       } else {
         this.element.style.cursor = ''
       }

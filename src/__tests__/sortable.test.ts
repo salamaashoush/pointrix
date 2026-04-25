@@ -2,16 +2,18 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { firePointerDown, firePointerMove, firePointerUp, flushRAF } from './helpers'
 import { Sortable, sortable } from '../sortable'
 
-function createListContainer(count: number, itemHeight = 50, gap = 0): {
+function createListContainer(
+  count: number,
+  itemHeight = 50,
+  gap = 0,
+): {
   container: HTMLElement
   items: HTMLElement[]
 } {
   const container = document.createElement('div')
   container.style.width = '300px'
   document.body.appendChild(container)
-  container.getBoundingClientRect = vi.fn().mockReturnValue(
-    new DOMRect(0, 0, 300, count * (itemHeight + gap) - gap)
-  )
+  container.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 300, count * (itemHeight + gap) - gap))
 
   const items: HTMLElement[] = []
   for (let i = 0; i < count; i++) {
@@ -21,15 +23,12 @@ function createListContainer(count: number, itemHeight = 50, gap = 0): {
     item.style.height = `${itemHeight}px`
     container.appendChild(item)
     const top = i * (itemHeight + gap)
-    item.getBoundingClientRect = vi.fn().mockReturnValue(
-      new DOMRect(0, top, 300, itemHeight)
-    )
+    item.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, top, 300, itemHeight))
     items.push(item)
   }
 
   return { container, items }
 }
-
 
 describe('Sortable', () => {
   let container: HTMLElement
@@ -326,9 +325,7 @@ describe('Sortable', () => {
       const originalSecond = items[1]
       instance.move(0, 2)
 
-      expect(onSortEnd).toHaveBeenCalledWith(
-        expect.objectContaining({ oldIndex: 0, newIndex: 2 })
-      )
+      expect(onSortEnd).toHaveBeenCalledWith(expect.objectContaining({ oldIndex: 0, newIndex: 2 }))
 
       const newChildren = Array.from(container.children) as HTMLElement[]
       expect(newChildren[0]).toBe(originalSecond)
@@ -378,15 +375,11 @@ describe('Sortable', () => {
         item.className = 'sort-item'
         item.style.height = '50px'
         container.appendChild(item)
-        item.getBoundingClientRect = vi.fn().mockReturnValue(
-          new DOMRect(0, i * 50, 300, 50)
-        )
+        item.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, i * 50, 300, 50))
         sortableItems.push(item)
       }
 
-      container.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(0, 0, 300, 150)
-      )
+      container.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 300, 150))
 
       instance = new Sortable(container, { items: '.sort-item' })
 
@@ -460,9 +453,7 @@ describe('Sortable', () => {
       newItem.textContent = 'New Item'
       newItem.style.height = '50px'
       container.appendChild(newItem)
-      newItem.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(0, 100, 300, 50)
-      )
+      newItem.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 100, 300, 50))
 
       instance.refresh()
 
@@ -478,9 +469,7 @@ describe('Sortable', () => {
       container = document.createElement('div')
       container.style.display = 'flex'
       document.body.appendChild(container)
-      container.getBoundingClientRect = vi.fn().mockReturnValue(
-        new DOMRect(0, 0, 400, 80)
-      )
+      container.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 400, 80))
 
       items = []
       for (let i = 0; i < 4; i++) {
@@ -488,9 +477,7 @@ describe('Sortable', () => {
         item.style.width = '80px'
         item.style.height = '80px'
         container.appendChild(item)
-        item.getBoundingClientRect = vi.fn().mockReturnValue(
-          new DOMRect(i * 100, 0, 80, 80)
-        )
+        item.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(i * 100, 0, 80, 80))
         items.push(item)
       }
 

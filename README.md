@@ -64,27 +64,27 @@ Every factory accepts an `HTMLElement` or a CSS selector string. Every instance 
 
 `PointrixOptions` is the base shape every interaction inherits (Draggable, Resizable, Gesturable).
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `threshold` | `number` | `3` | Pixels of movement before the interaction starts |
-| `preventScroll` | `boolean` | `true` | `preventDefault()` on pointermove to block touch scroll. When `false`, the library registers a passive pointermove listener (faster scroll on non-interacting regions). |
-| `holdDelay` | `number` | `0` | Pointer must be held this long (ms) before the interaction starts |
-| `holdDuration` | `number` | `600` | Time in ms before `onHold` fires (pointer stationary, no interaction yet) |
-| `doubleTapDelay` | `number` | `300` | Max ms between taps to register a double-tap |
-| `mouseButtons` | `number` | `0` (any) | Bitmask: `1` = left, `2` = right, `4` = middle |
-| `allowFrom` | `string` | — | CSS selector — only start when the pointer target matches |
-| `ignoreFrom` | `string` | — | CSS selector — never start when the pointer target matches |
-| `touchAction` | `string` | `'none'` | CSS `touch-action` applied to the element |
-| `styleCursor` | `boolean` | `true` | Whether to set cursor styles automatically |
-| `rectChecker` | `(el) => DOMRect` | — | Custom geometry resolver (see [Custom geometry](#custom-geometry-rectchecker-and-origin)) |
-| `origin` | `HTMLElement \| 'parent' \| {x, y}` | — | Translate pointer coords relative to this element/offset |
-| `onStart` | `(event) => void` | — | Interaction started |
-| `onMove` | `(event) => void` | — | Pointer moved during an active interaction |
-| `onEnd` | `(event) => void` | — | Interaction ended |
-| `onCancel` | `(event) => void` | — | Interaction was cancelled via `.cancel()` or `enabled=false` |
-| `onTap` | `(event) => void` | — | Pointer released without exceeding threshold |
-| `onDoubleTap` | `(event) => void` | — | Two taps within `doubleTapDelay` ms on the same target |
-| `onHold` | `(event) => void` | — | Pointer held stationary for `holdDuration` ms without starting an interaction |
+| Option           | Type                                | Default   | Description                                                                                                                                                             |
+| ---------------- | ----------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `threshold`      | `number`                            | `3`       | Pixels of movement before the interaction starts                                                                                                                        |
+| `preventScroll`  | `boolean`                           | `true`    | `preventDefault()` on pointermove to block touch scroll. When `false`, the library registers a passive pointermove listener (faster scroll on non-interacting regions). |
+| `holdDelay`      | `number`                            | `0`       | Pointer must be held this long (ms) before the interaction starts                                                                                                       |
+| `holdDuration`   | `number`                            | `600`     | Time in ms before `onHold` fires (pointer stationary, no interaction yet)                                                                                               |
+| `doubleTapDelay` | `number`                            | `300`     | Max ms between taps to register a double-tap                                                                                                                            |
+| `mouseButtons`   | `number`                            | `0` (any) | Bitmask: `1` = left, `2` = right, `4` = middle                                                                                                                          |
+| `allowFrom`      | `string`                            | —         | CSS selector — only start when the pointer target matches                                                                                                               |
+| `ignoreFrom`     | `string`                            | —         | CSS selector — never start when the pointer target matches                                                                                                              |
+| `touchAction`    | `string`                            | `'none'`  | CSS `touch-action` applied to the element                                                                                                                               |
+| `styleCursor`    | `boolean`                           | `true`    | Whether to set cursor styles automatically                                                                                                                              |
+| `rectChecker`    | `(el) => DOMRect`                   | —         | Custom geometry resolver (see [Custom geometry](#custom-geometry-rectchecker-and-origin))                                                                               |
+| `origin`         | `HTMLElement \| 'parent' \| {x, y}` | —         | Translate pointer coords relative to this element/offset                                                                                                                |
+| `onStart`        | `(event) => void`                   | —         | Interaction started                                                                                                                                                     |
+| `onMove`         | `(event) => void`                   | —         | Pointer moved during an active interaction                                                                                                                              |
+| `onEnd`          | `(event) => void`                   | —         | Interaction ended                                                                                                                                                       |
+| `onCancel`       | `(event) => void`                   | —         | Interaction was cancelled via `.cancel()` or `enabled=false`                                                                                                            |
+| `onTap`          | `(event) => void`                   | —         | Pointer released without exceeding threshold                                                                                                                            |
+| `onDoubleTap`    | `(event) => void`                   | —         | Two taps within `doubleTapDelay` ms on the same target                                                                                                                  |
+| `onHold`         | `(event) => void`                   | —         | Pointer held stationary for `holdDuration` ms without starting an interaction                                                                                           |
 
 Every instance exposes:
 
@@ -102,8 +102,8 @@ See [Imperative API](#imperative-api) for details.
 ```ts
 import { setMaxInteractions, getActiveInteractionCount } from 'pointrix'
 
-setMaxInteractions(2)           // Cap concurrent drags/resizes/gestures across the whole page.
-getActiveInteractionCount()     // Current active count.
+setMaxInteractions(2) // Cap concurrent drags/resizes/gestures across the whole page.
+getActiveInteractionCount() // Current active count.
 ```
 
 ---
@@ -118,25 +118,25 @@ import { draggable } from 'pointrix/drag'
 
 Extends `PointrixOptions` plus:
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `axis` | `'x' \| 'y' \| 'xy' \| 'auto'` | `'xy'` | Constrain movement. `'auto'` locks to whichever axis the user moves first (decided once per drag). |
-| `handle` | `string \| HTMLElement` | — | Only start drag when pointer is inside this element/selector |
-| `bounds` | `'parent' \| HTMLElement \| {left?, top?, right?, bottom?}` | — | Restrict movement within a region |
-| `grid` | `{x: number, y: number}` | — | Snap position to a grid |
-| `momentum` | `boolean \| {friction?, minSpeed?, minVelocity?}` | `false` | Physics-based momentum after release. `friction` is remaining-velocity-per-second (0.95 = 5% loss/s). `minVelocity` (default 10 px/s) is required at lift-off to engage momentum. |
-| `droppable` | `boolean` | `false` | Integrate with the [Dropzone](#dropzone) system |
-| `modifiers` | `Modifier[]` | — | Modifier chain applied each frame |
-| `cursorChecker` | `(action: 'idle' \| 'grab' \| 'grabbing') => string` | — | Custom cursor per drag state |
-| `aria` | `boolean` | `true` | Automatically apply ARIA attributes |
+| Option          | Type                                                        | Default | Description                                                                                                                                                                       |
+| --------------- | ----------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `axis`          | `'x' \| 'y' \| 'xy' \| 'auto'`                              | `'xy'`  | Constrain movement. `'auto'` locks to whichever axis the user moves first (decided once per drag).                                                                                |
+| `handle`        | `string \| HTMLElement`                                     | —       | Only start drag when pointer is inside this element/selector                                                                                                                      |
+| `bounds`        | `'parent' \| HTMLElement \| {left?, top?, right?, bottom?}` | —       | Restrict movement within a region                                                                                                                                                 |
+| `grid`          | `{x: number, y: number}`                                    | —       | Snap position to a grid                                                                                                                                                           |
+| `momentum`      | `boolean \| {friction?, minSpeed?, minVelocity?}`           | `false` | Physics-based momentum after release. `friction` is remaining-velocity-per-second (0.95 = 5% loss/s). `minVelocity` (default 10 px/s) is required at lift-off to engage momentum. |
+| `droppable`     | `boolean`                                                   | `false` | Integrate with the [Dropzone](#dropzone) system                                                                                                                                   |
+| `modifiers`     | `Modifier[]`                                                | —       | Modifier chain applied each frame                                                                                                                                                 |
+| `cursorChecker` | `(action: 'idle' \| 'grab' \| 'grabbing') => string`        | —       | Custom cursor per drag state                                                                                                                                                      |
+| `aria`          | `boolean`                                                   | `true`  | Automatically apply ARIA attributes                                                                                                                                               |
 
 ### Event type
 
 ```ts
 interface DragEvent extends InteractionEvent {
-  dx: number        // Pointer delta since last frame
+  dx: number // Pointer delta since last frame
   dy: number
-  totalX: number    // Pointer delta since drag start
+  totalX: number // Pointer delta since drag start
   totalY: number
   velocityX: number // px/s
   velocityY: number
@@ -147,8 +147,8 @@ interface DragEvent extends InteractionEvent {
 
 ```ts
 const d = draggable(el, options)
-d.setPosition(100, 200)      // Jump to a transform position
-d.getPosition()              // { x, y }
+d.setPosition(100, 200) // Jump to a transform position
+d.getPosition() // { x, y }
 d.updateOptions({ axis: 'y' })
 d.cancel()
 d.destroy()
@@ -162,12 +162,9 @@ import { snapGrid, inertia } from 'pointrix/modifiers'
 
 draggable('#card', {
   bounds: 'parent',
-  axis: 'auto',                      // Lock to first-moved axis
+  axis: 'auto', // Lock to first-moved axis
   momentum: { friction: 0.92 },
-  modifiers: [
-    snapGrid({ x: 20, y: 20 }),
-    inertia({ resistance: 8 }),
-  ],
+  modifiers: [snapGrid({ x: 20, y: 20 }), inertia({ resistance: 8 })],
   onDragEnd: (e) => console.log('Dropped at', e.totalX, e.totalY),
 })
 ```
@@ -184,18 +181,18 @@ import { resizable } from 'pointrix/resize'
 
 Extends `PointrixOptions` plus:
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `edges` | `{top?, right?, bottom?, left?}` | all `true` | Which edges/corners can be dragged |
-| `handleSize` | `number` | `10` | Pixel width of the resize handle area |
-| `minWidth` / `minHeight` | `number` | `50` | Minimum dimensions |
-| `maxWidth` / `maxHeight` | `number` | `Infinity` | Maximum dimensions |
-| `aspectRatio` | `number \| 'preserve'` | — | Lock aspect ratio (number or preserve current) |
-| `square` | `boolean` | `false` | Shorthand for `aspectRatio: 1` |
-| `invert` | `'none' \| 'negate' \| 'reposition'` | `'none'` | How to handle dragging past the opposite edge. `'reposition'` flips the element naturally. |
-| `grid` | `{width: number, height: number}` | — | Snap size to a grid |
-| `modifiers` | `Modifier[]` | — | Modifier chain |
-| `cursorChecker` | `(edge: string \| null) => string` | — | Custom cursor per edge |
+| Option                   | Type                                 | Default    | Description                                                                                |
+| ------------------------ | ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------ |
+| `edges`                  | `{top?, right?, bottom?, left?}`     | all `true` | Which edges/corners can be dragged                                                         |
+| `handleSize`             | `number`                             | `10`       | Pixel width of the resize handle area                                                      |
+| `minWidth` / `minHeight` | `number`                             | `50`       | Minimum dimensions                                                                         |
+| `maxWidth` / `maxHeight` | `number`                             | `Infinity` | Maximum dimensions                                                                         |
+| `aspectRatio`            | `number \| 'preserve'`               | —          | Lock aspect ratio (number or preserve current)                                             |
+| `square`                 | `boolean`                            | `false`    | Shorthand for `aspectRatio: 1`                                                             |
+| `invert`                 | `'none' \| 'negate' \| 'reposition'` | `'none'`   | How to handle dragging past the opposite edge. `'reposition'` flips the element naturally. |
+| `grid`                   | `{width: number, height: number}`    | —          | Snap size to a grid                                                                        |
+| `modifiers`              | `Modifier[]`                         | —          | Modifier chain                                                                             |
+| `cursorChecker`          | `(edge: string \| null) => string`   | —          | Custom cursor per edge                                                                     |
 
 ### Event type
 
@@ -214,7 +211,7 @@ interface ResizeEvent extends InteractionEvent {
 ```ts
 const r = resizable(el, options)
 r.setSize(300, 200)
-r.getSize()                  // { width, height }
+r.getSize() // { width, height }
 r.updateOptions({ maxWidth: 1000 })
 r.cancel()
 r.destroy()
@@ -245,21 +242,21 @@ Multi-touch pinch / rotate / pan recognition. Activates when the required number
 
 Extends `PointrixOptions` plus:
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `minPointers` | `number` | `2` | Pointer count required to activate |
+| Option        | Type     | Default | Description                        |
+| ------------- | -------- | ------- | ---------------------------------- |
+| `minPointers` | `number` | `2`     | Pointer count required to activate |
 
 ### Event type
 
 ```ts
 interface GestureEvent extends InteractionEvent {
-  scale: number         // Current / start distance ratio
-  rotation: number      // Degrees from start angle
-  distance: number      // Current pointer distance (px)
-  angle: number         // Current angle (degrees)
-  center: { x, y }
-  deltaScale: number    // Scale change since last frame
-  deltaAngle: number    // Angle change since last frame
+  scale: number // Current / start distance ratio
+  rotation: number // Degrees from start angle
+  distance: number // Current pointer distance (px)
+  angle: number // Current angle (degrees)
+  center: { x; y }
+  deltaScale: number // Scale change since last frame
+  deltaAngle: number // Angle change since last frame
 }
 ```
 
@@ -286,25 +283,25 @@ Define drop targets that respond to `draggable` elements created with `droppable
 
 ### Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `accept` | `string \| (el) => boolean` | — | Filter which draggables can drop here |
-| `overlap` | `'pointer' \| 'center' \| number` | `'pointer'` | How overlap is computed (`number` = minimum area ratio) |
-| `activeClass` | `string` | — | CSS class while a compatible drag is in progress |
-| `hoverClass` | `string` | — | CSS class while a draggable is hovering |
-| `rectChecker` | `(el) => DOMRect` | — | Custom geometry for the zone's own rect |
-| `aria` | `boolean` | `true` | Manage `aria-dropeffect` automatically |
+| Option        | Type                              | Default     | Description                                             |
+| ------------- | --------------------------------- | ----------- | ------------------------------------------------------- |
+| `accept`      | `string \| (el) => boolean`       | —           | Filter which draggables can drop here                   |
+| `overlap`     | `'pointer' \| 'center' \| number` | `'pointer'` | How overlap is computed (`number` = minimum area ratio) |
+| `activeClass` | `string`                          | —           | CSS class while a compatible drag is in progress        |
+| `hoverClass`  | `string`                          | —           | CSS class while a draggable is hovering                 |
+| `rectChecker` | `(el) => DOMRect`                 | —           | Custom geometry for the zone's own rect                 |
+| `aria`        | `boolean`                         | `true`      | Manage `aria-dropeffect` automatically                  |
 
 ### Events
 
-| Callback | When |
-|---|---|
-| `onActivate` | A compatible drag started somewhere on the page |
-| `onDeactivate` | That drag ended |
-| `onDragEnter` | Draggable entered this zone |
-| `onDragLeave` | Draggable left this zone |
-| `onDragOver` | Draggable is over this zone (fires each frame while inside) |
-| `onDrop` | Draggable was released over this zone |
+| Callback       | When                                                        |
+| -------------- | ----------------------------------------------------------- |
+| `onActivate`   | A compatible drag started somewhere on the page             |
+| `onDeactivate` | That drag ended                                             |
+| `onDragEnter`  | Draggable entered this zone                                 |
+| `onDragLeave`  | Draggable left this zone                                    |
+| `onDragOver`   | Draggable is over this zone (fires each frame while inside) |
+| `onDrop`       | Draggable was released over this zone                       |
 
 `DropEvent` contains `target` (zone element), `draggable`, `overlap` (number), and `dragEvent`.
 
@@ -332,19 +329,19 @@ Drag-to-reorder lists with animated item displacement. Supports cross-container 
 
 ### Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `items` | `string` | direct children | CSS selector for sortable items |
-| `axis` | `'x' \| 'y'` | `'y'` | Sort direction |
-| `handle` | `string` | — | CSS selector for a drag handle within each item |
-| `animationDuration` | `number` | `200` | Transition duration in ms for shifting items. Respects `prefers-reduced-motion` automatically. |
-| `dragClass` | `string` | `'sortable-dragging'` | CSS class on the item being dragged |
-| `hoverClass` | `string` | `'sortable-hover'` | CSS class on a container receiving a grouped item |
-| `dragZIndex` | `string` | `'9999'` | z-index applied to the item being dragged. Pass `''` to skip. |
-| `group` | `string` | — | Group name — sortables sharing a group can exchange items |
-| `id` | `(el) => string` | — | Map an item element to a stable string id. When set, sort events expose `oldId`, `newId`, and an `order: string[]` for easy state binding. |
-| `rectChecker` | `(el) => DOMRect` | — | Custom geometry for items and container (also inherited by each item's internal Draggable) |
-| `aria` | `boolean` | `true` | Manage ARIA attributes and live announcements |
+| Option              | Type              | Default               | Description                                                                                                                                |
+| ------------------- | ----------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `items`             | `string`          | direct children       | CSS selector for sortable items                                                                                                            |
+| `axis`              | `'x' \| 'y'`      | `'y'`                 | Sort direction                                                                                                                             |
+| `handle`            | `string`          | —                     | CSS selector for a drag handle within each item                                                                                            |
+| `animationDuration` | `number`          | `200`                 | Transition duration in ms for shifting items. Respects `prefers-reduced-motion` automatically.                                             |
+| `dragClass`         | `string`          | `'sortable-dragging'` | CSS class on the item being dragged                                                                                                        |
+| `hoverClass`        | `string`          | `'sortable-hover'`    | CSS class on a container receiving a grouped item                                                                                          |
+| `dragZIndex`        | `string`          | `'9999'`              | z-index applied to the item being dragged. Pass `''` to skip.                                                                              |
+| `group`             | `string`          | —                     | Group name — sortables sharing a group can exchange items                                                                                  |
+| `id`                | `(el) => string`  | —                     | Map an item element to a stable string id. When set, sort events expose `oldId`, `newId`, and an `order: string[]` for easy state binding. |
+| `rectChecker`       | `(el) => DOMRect` | —                     | Custom geometry for items and container (also inherited by each item's internal Draggable)                                                 |
+| `aria`              | `boolean`         | `true`                | Manage ARIA attributes and live announcements                                                                                              |
 
 ### Event types
 
@@ -354,9 +351,9 @@ interface SortEvent {
   oldIndex: number
   newIndex: number
   items: HTMLElement[]
-  oldId?: string          // when `id` option is set
-  newId?: string          // when `id` option is set
-  order?: string[]        // current order as ids (when `id` is set)
+  oldId?: string // when `id` option is set
+  newId?: string // when `id` option is set
+  order?: string[] // current order as ids (when `id` is set)
 }
 
 interface SortTransferEvent {
@@ -365,7 +362,7 @@ interface SortTransferEvent {
   to: Sortable
   oldIndex: number
   newIndex: number
-  itemId?: string         // when either side has `id` set
+  itemId?: string // when either side has `id` set
 }
 ```
 
@@ -373,9 +370,9 @@ interface SortTransferEvent {
 
 ```ts
 const s = sortable('#list', options)
-s.getOrder()                 // Current item elements in order
-s.move(fromIndex, toIndex)   // Programmatic reorder
-s.refresh()                  // Re-scan items (after DOM changes)
+s.getOrder() // Current item elements in order
+s.move(fromIndex, toIndex) // Programmatic reorder
+s.refresh() // Re-scan items (after DOM changes)
 s.updateOptions({ animationDuration: 0 })
 s.destroy()
 ```
@@ -386,16 +383,16 @@ s.destroy()
 sortable('#todo-list', {
   handle: '.drag-handle',
   id: (el) => el.dataset.id!,
-  onSortEnd: ({ order }) => saveOrder(order!),   // order is string[]
+  onSortEnd: ({ order }) => saveOrder(order!), // order is string[]
 })
 ```
 
 ### Example — cross-container groups (Kanban)
 
 ```ts
-sortable('#backlog',     { group: 'kanban', onRemove: (e) => console.log('removed', e.itemId) })
-sortable('#in-progress', { group: 'kanban', onAdd:    (e) => console.log('added',   e.itemId) })
-sortable('#done',        { group: 'kanban' })
+sortable('#backlog', { group: 'kanban', onRemove: (e) => console.log('removed', e.itemId) })
+sortable('#in-progress', { group: 'kanban', onAdd: (e) => console.log('added', e.itemId) })
+sortable('#done', { group: 'kanban' })
 ```
 
 ---
@@ -404,8 +401,17 @@ sortable('#done',        { group: 'kanban' })
 
 ```ts
 import {
-  restrict, snapGrid, snapTargets, magneticSnap, inertia, autoScroll,
-  rubberband, restrictSize, restrictEdges, snapSize, snapEdges,
+  restrict,
+  snapGrid,
+  snapTargets,
+  magneticSnap,
+  inertia,
+  autoScroll,
+  rubberband,
+  restrictSize,
+  restrictEdges,
+  snapSize,
+  snapEdges,
 } from 'pointrix/modifiers'
 ```
 
@@ -426,9 +432,13 @@ const halfSpeed: Modifier = {
     ctx.position.y *= 0.5
   },
   // Optional: run once at interaction start to cache expensive setup.
-  onStart(ctx) { /* … */ },
+  onStart(ctx) {
+    /* … */
+  },
   // Optional: fires at end — typical for snap-back / rubberband effects.
-  onEnd(ctx)   { /* … */ },
+  onEnd(ctx) {
+    /* … */
+  },
 }
 ```
 
@@ -525,7 +535,7 @@ draggable(svgChild, {
     const bbox = (el as SVGGraphicsElement).getBoundingClientRect()
     return bbox
   },
-  origin: canvasRoot,    // Pointer coords become relative to canvasRoot's top-left
+  origin: canvasRoot, // Pointer coords become relative to canvasRoot's top-left
   onDragMove: (e) => {
     // e.totalX/Y is now in canvas-local space.
   },
@@ -572,7 +582,7 @@ Kick off an interaction from a captured `PointerEvent` — bypasses movement-thr
 const d = draggable('#el')
 
 button.addEventListener('pointerdown', (e) => {
-  d.startFromEvent(e)     // Drag begins immediately
+  d.startFromEvent(e) // Drag begins immediately
 })
 ```
 
@@ -593,9 +603,9 @@ const ia = interactable('#widget', {
   gesture: true,
 })
 
-ia.drag     // Draggable | null
-ia.resize   // Resizable | null
-ia.gesture  // Gesturable | null
+ia.drag // Draggable | null
+ia.resize // Resizable | null
+ia.gesture // Gesturable | null
 ia.destroy()
 ```
 
@@ -609,8 +619,8 @@ Create `interactable` instances for every matching element, returns a single `.d
 import { interactAll } from 'pointrix'
 
 const r = interactAll('.card', { drag: true, resize: true })
-r.instances   // per-element results
-r.destroy()   // tear down everything
+r.instances // per-element results
+r.destroy() // tear down everything
 ```
 
 ---
@@ -674,14 +684,14 @@ function Item({ axis, onDragMove }: Props) {
 
 ### Available hooks
 
-| Hook | Instance type |
-|---|---|
-| `usePointrix` | `Pointrix` |
-| `useDraggable` | `Draggable` |
-| `useResizable` | `Resizable` |
-| `useGesturable` | `Gesturable` |
-| `useDropzone` | `Dropzone` |
-| `useSortable` | `Sortable` |
+| Hook              | Instance type               |
+| ----------------- | --------------------------- |
+| `usePointrix`     | `Pointrix`                  |
+| `useDraggable`    | `Draggable`                 |
+| `useResizable`    | `Resizable`                 |
+| `useGesturable`   | `Gesturable`                |
+| `useDropzone`     | `Dropzone`                  |
+| `useSortable`     | `Sortable`                  |
 | `useInteractable` | `{ drag, resize, gesture }` |
 
 ### React-driven sortable list
@@ -694,15 +704,17 @@ function TodoList({ items, setItems }: Props) {
     id: (el) => el.dataset.id!,
     onSortEnd: ({ order }) => {
       // `order` is a string[] of ids in the new order.
-      const map = new Map(items.map(i => [i.id, i]))
-      setItems(order!.map(id => map.get(id)!))
+      const map = new Map(items.map((i) => [i.id, i]))
+      setItems(order!.map((id) => map.get(id)!))
     },
   })
 
   return (
     <ul ref={ref}>
-      {items.map(item => (
-        <li key={item.id} data-id={item.id}>{item.label}</li>
+      {items.map((item) => (
+        <li key={item.id} data-id={item.id}>
+          {item.label}
+        </li>
       ))}
     </ul>
   )
@@ -780,13 +792,13 @@ Pass `aria: false` to any factory to disable ARIA management for that instance.
 
 ### Draggable ARIA
 
-| Attribute | Value |
-|---|---|
-| `tabindex` | `0` (only if not already set) |
-| `role` | `button` (only if not already set) |
-| `aria-roledescription` | `draggable` |
-| `aria-describedby` | `pointrix-instructions` |
-| `aria-grabbed` | toggled `true` / `false` during drag |
+| Attribute              | Value                                |
+| ---------------------- | ------------------------------------ |
+| `tabindex`             | `0` (only if not already set)        |
+| `role`                 | `button` (only if not already set)   |
+| `aria-roledescription` | `draggable`                          |
+| `aria-describedby`     | `pointrix-instructions`              |
+| `aria-grabbed`         | toggled `true` / `false` during drag |
 
 ### Sortable ARIA
 
@@ -832,17 +844,17 @@ Read the current set with `getMessages()`.
 
 Measured from the production `dist/` output (gzipped):
 
-| Import path | Raw | Gzip |
-|---|--:|--:|
-| `pointrix/nano` | 8.4 KB | **2.5 KB** |
-| `pointrix/drag` | 19.4 KB | **5.5 KB** |
-| `pointrix/resize` | ~ 15 KB | ~ 4.5 KB |
-| `pointrix/gesture` | ~ 11 KB | ~ 3 KB |
-| `pointrix/dropzone` | ~ 5 KB | ~ 1.5 KB |
-| `pointrix/sortable` | ~ 23 KB | ~ 6 KB |
-| `pointrix/modifiers` | ~ 9 KB | ~ 2.5 KB |
-| `pointrix/react` | 44.5 KB | **11.7 KB** |
-| `pointrix/vue` | 44.5 KB | **11.7 KB** |
+| Import path             |     Raw |        Gzip |
+| ----------------------- | ------: | ----------: |
+| `pointrix/nano`         |  8.4 KB |  **2.5 KB** |
+| `pointrix/drag`         | 19.4 KB |  **5.5 KB** |
+| `pointrix/resize`       | ~ 15 KB |    ~ 4.5 KB |
+| `pointrix/gesture`      | ~ 11 KB |      ~ 3 KB |
+| `pointrix/dropzone`     |  ~ 5 KB |    ~ 1.5 KB |
+| `pointrix/sortable`     | ~ 23 KB |      ~ 6 KB |
+| `pointrix/modifiers`    |  ~ 9 KB |    ~ 2.5 KB |
+| `pointrix/react`        | 44.5 KB | **11.7 KB** |
+| `pointrix/vue`          | 44.5 KB | **11.7 KB** |
 | `pointrix` (everything) | 55.9 KB | **14.4 KB** |
 
 For comparison: interact.js is ~100 KB gzipped.
@@ -878,16 +890,16 @@ Run with `bun run bench`. Runs in jsdom — measures computation, not event disp
 
 Representative numbers (pointrix vs interact.js, higher-is-better ratio):
 
-| Scenario | Speedup |
-|---|--:|
-| 1000 base-instance setup | **3.9×** |
-| 200 Draggables with options | **2.0×** |
-| 100-item Sortable setup | **2.7×** |
-| 200 instances × 100 option updates | **9.9×** |
-| React: mount 200 draggables | **1.9×** |
-| React: 200 rerenders with new axis | **8.1×** |
-| React: 100 items × 10 renders with inline callbacks | **6.0×** |
-| Hot-path position math | tie (both are just `Math.min`/`max`) |
+| Scenario                                            |                              Speedup |
+| --------------------------------------------------- | -----------------------------------: |
+| 1000 base-instance setup                            |                             **3.9×** |
+| 200 Draggables with options                         |                             **2.0×** |
+| 100-item Sortable setup                             |                             **2.7×** |
+| 200 instances × 100 option updates                  |                             **9.9×** |
+| React: mount 200 draggables                         |                             **1.9×** |
+| React: 200 rerenders with new axis                  |                             **8.1×** |
+| React: 100 items × 10 renders with inline callbacks |                             **6.0×** |
+| Hot-path position math                              | tie (both are just `Math.min`/`max`) |
 
 ### Real-browser (Playwright, Chromium)
 
@@ -895,13 +907,13 @@ Run with `bun run bench:browser`. Uses real `PointerEvent` dispatch inside headl
 
 Primary metric — **burst**: ms per event when dispatching as fast as possible (no RAF between). Captures the synchronous pointermove hot path.
 
-| Scenario | pointrix | interact.js | Speedup |
-|---|--:|--:|--:|
-| draggable × 50 | 0.0016 ms/ev | 0.0234 ms/ev | **14.2×** |
+| Scenario        |     pointrix |  interact.js |   Speedup |
+| --------------- | -----------: | -----------: | --------: |
+| draggable × 50  | 0.0016 ms/ev | 0.0234 ms/ev | **14.2×** |
 | draggable × 200 | 0.0017 ms/ev | 0.0240 ms/ev | **14.6×** |
 | draggable × 500 | 0.0016 ms/ev | 0.0212 ms/ev | **13.3×** |
-| sortable × 50 | 0.0018 ms/ev | 0.0238 ms/ev | **13.6×** |
-| sortable × 200 | 0.0016 ms/ev | 0.0243 ms/ev | **15.2×** |
+| sortable × 50   | 0.0018 ms/ev | 0.0238 ms/ev | **13.6×** |
+| sortable × 200  | 0.0016 ms/ev | 0.0243 ms/ev | **15.2×** |
 
 pointrix is O(1) in instance count on the per-event path — adding more instances doesn't slow any one pointermove.
 
